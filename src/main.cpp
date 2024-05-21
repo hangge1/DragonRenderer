@@ -18,8 +18,8 @@
 
 void CustomDraw(Renderer& renderer)
 {
-    int width = Application::GetInstance()->GetMainWindowWidth();
-    int height = Application::GetInstance()->GetMainWindowHeight();
+    int width = APP->GetMainWindowWidth();
+    int height = APP->GetMainWindowHeight();
 
     for (uint32_t i = 0; i < width; ++i) 
     {
@@ -37,7 +37,7 @@ int WINAPI wWinMain(HINSTANCE hInstance,
                     LPWSTR lpCmdLine,
                     int nCmdShow)
 {
-    if(!Application::GetInstance()->InitMainWindow(hInstance))
+    if(!APP->InitMainWindow(hInstance))
     {
         std::cout << "Application Init Failed!" << std::endl;
         return -1;
@@ -45,20 +45,20 @@ int WINAPI wWinMain(HINSTANCE hInstance,
 
     Renderer renderer;
     renderer.InitFrameBuffer(
-        Application::GetInstance()->GetMainWindowWidth(), 
-        Application::GetInstance()->GetMainWindowHeight(),
-        Application::GetInstance()->GetRenderBuffer());
+        APP->GetMainWindowWidth(), 
+        APP->GetMainWindowHeight(),
+        APP->GetRenderBuffer());
 
-    while(!Application::GetInstance()->HasMainWindowDestoryed())
+    while(!APP->HasMainWindowDestoryed())
     {
-        Application::GetInstance()->DispatchMessageLoop();
+        APP->DispatchMessageLoop();
 
         renderer.ClearFrameBuffer();
 
         //draw something
         CustomDraw(renderer);
 
-        Application::GetInstance()->Render();
+        APP->Render();
     }
 
     std::cout << "Application will exit!" << std::endl;

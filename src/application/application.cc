@@ -4,7 +4,14 @@
 
 #include "color.h"
 
+LRESULT CALLBACK Wndproc(HWND window_handler, UINT message_id, WPARAM message_wparam, LPARAM message_lparam) 
+{
+	APP->ProcessMessage(window_handler, message_id, message_wparam, message_lparam);
+	return(DefWindowProc(window_handler, message_id, message_wparam, message_lparam));
+}
+
 Application* Application::self_instance_ = nullptr;
+
 
 Application* Application::GetInstance() 
 {
@@ -16,11 +23,6 @@ Application* Application::GetInstance()
 	return self_instance_;
 }
 
-LRESULT CALLBACK Wndproc(HWND window_handler, UINT message_id, WPARAM message_wparam, LPARAM message_lparam) 
-{
-	Application::GetInstance()->ProcessMessage(window_handler, message_id, message_wparam, message_lparam);
-	return(DefWindowProc(window_handler, message_id, message_wparam, message_lparam));
-}
 
 bool Application::InitMainWindow(HINSTANCE program_instance, const CHAR* main_window_title,
 	LONG main_window_width, LONG main_window_height) 
@@ -44,6 +46,51 @@ bool Application::InitMainWindow(HINSTANCE program_instance, const CHAR* main_wi
 
 	return true;
 }
+
+
+void Application::ProcessMessage(HWND window_handler, UINT message_id, WPARAM message_wparam, LPARAM message_lparam) 
+{
+	switch (message_id)
+	{
+		case WM_CLOSE: 
+		{
+			DestroyWindow(window_handler);//此处销毁窗体,会自动发出WM_DESTROY
+		}
+		break;			
+		case WM_PAINT:
+		{
+			PAINTSTRUCT ps;
+			HDC hdc = BeginPaint(window_handler, &ps);
+			EndPaint(window_handler, &ps);
+		}
+		break;
+		case WM_DESTROY: 
+		{
+			has_main_window_destoryed_ = true;
+			PostQuitMessage(0);//发出线程终止请求
+		}
+		break;
+	}
+}
+
+
+void Application::DispatchMessageLoop() 
+{
+	MSG msg;
+	if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+	{
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+}
+
+
+void Application::Render()
+{
+	BitBlt(current_window_device_context_, 0, 0, main_window_width_, main_window_height_, 
+	canvas_device_contex_, 0, 0, SRCCOPY);
+}
+
 
 bool Application::CreateMainWindow()
 {
@@ -92,6 +139,7 @@ bool Application::CreateMainWindow()
 	return true;
 }
 
+
 ATOM Application::RegisterMainWindowClass()
 {
 	WNDCLASSEXW wndClass;
@@ -112,10 +160,11 @@ ATOM Application::RegisterMainWindowClass()
 	return RegisterClassExW(&wndClass);
 }
 
+
 void Application::InitDrawContext()
 {
 	current_window_device_context_ = GetDC(main_window_handler_);
-	canvas_context_ = CreateCompatibleDC(current_window_device_context_);
+	canvas_device_contex_ = CreateCompatibleDC(current_window_device_context_);
 
 	BITMAPINFO  temp_bmp_info{};
 	temp_bmp_info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
@@ -126,52 +175,10 @@ void Application::InitDrawContext()
 	temp_bmp_info.bmiHeader.biCompression = BI_RGB; //实际上存储方式为bgra
 
 	//创建与mhMem兼容的位图,其实实在mhMem指代的设备上划拨了一块内存，让mCanvasBuffer指向它
-	bitmap_ = CreateDIBSection(canvas_context_, &temp_bmp_info, DIB_RGB_COLORS, (void**)&canvas_buffer_, 0, 0);//在这里创建buffer的内存
+	bitmap_ = CreateDIBSection(canvas_device_contex_, &temp_bmp_info, DIB_RGB_COLORS, (void**)&canvas_buffer_, 0, 0);//在这里创建buffer的内存
 
 	//一个设备可以创建多个位图，本设备使用mhBmp作为激活位图，对mCanvasDC的内存拷出，其实就是拷出了mhBmp的数据
-	SelectObject(canvas_context_, bitmap_);
+	SelectObject(canvas_device_contex_, bitmap_);
 
 	memset(canvas_buffer_, 0, main_window_width_ * main_window_height_ * sizeof(Color)); //清空buffer为0
-}
-
-
-void Application::DispatchMessageLoop() 
-{
-	MSG msg;
-	if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-	{
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
-	}
-}
-
-void Application::ProcessMessage(HWND window_handler, UINT message_id, WPARAM message_wparam, LPARAM message_lparam) 
-{
-	switch (message_id)
-	{
-		case WM_CLOSE: 
-		{
-			DestroyWindow(window_handler);//此处销毁窗体,会自动发出WM_DESTROY
-		}
-		break;			
-		case WM_PAINT:
-		{
-			PAINTSTRUCT ps;
-			HDC hdc = BeginPaint(window_handler, &ps);
-			EndPaint(window_handler, &ps);
-		}
-		break;
-		case WM_DESTROY: 
-		{
-			has_main_window_destoryed_ = true;
-			PostQuitMessage(0);//发出线程终止请求
-		}
-		break;
-	}
-}
-
-void Application::Render()
-{
-	BitBlt(current_window_device_context_, 0, 0, main_window_width_, main_window_height_, 
-	canvas_context_, 0, 0, SRCCOPY);
 }

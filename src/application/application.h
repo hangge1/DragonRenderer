@@ -1,6 +1,8 @@
 #ifndef _APPLICATION_APPLICATION_H_
 #define _APPLICATION_APPLICATION_H_
 
+#define APP Application::GetInstance()
+
 #include <Windows.h>
 
 class Application 
@@ -52,7 +54,7 @@ private:
     bool has_main_window_destoryed_ = false;
 
     HDC current_window_device_context_ { nullptr };
-    HDC canvas_context_ { nullptr };
+    HDC canvas_device_contex_ { nullptr };
     HBITMAP bitmap_ { nullptr };
     void* canvas_buffer_ { nullptr };
 };
