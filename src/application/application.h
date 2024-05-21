@@ -1,5 +1,5 @@
-#ifndef _APPLICATION_H_
-#define _APPLICATION_H_
+#ifndef _APPLICATION_APPLICATION_H_
+#define _APPLICATION_APPLICATION_H_
 
 #include <Windows.h>
 
@@ -24,23 +24,37 @@ public:
 
 	void DispatchMessageLoop();
 
-    bool HasMainWindowDestoryed() const { return has_main_window_destoryed_;}
+    bool HasMainWindowDestoryed() const { return has_main_window_destoryed_; }
+
+    LONG GetMainWindowWidth() const { return main_window_width_; }
+    LONG GetMainWindowHeight() const { return main_window_height_; }
+
+    void* GetRenderBuffer() const { return canvas_buffer_;}
+
+    void Render();
 private:
     bool CreateMainWindow();
+
 	ATOM RegisterMainWindowClass();
 
+    void InitDrawContext();
 private:
     static Application* self_instance_;
 
-    LONG main_window_width_;
-    LONG main_window_height_;
-    const CHAR* main_window_title_;
+    LONG main_window_width_ {0};
+    LONG main_window_height_ {0};
+    const CHAR* main_window_title_ { nullptr };
     const WCHAR* main_window_class_name_ = L"DragonWindowClass";
 
-    HINSTANCE current_program_instance_;
-    HWND main_window_handler_;
+    HINSTANCE current_program_instance_ { nullptr };
+    HWND main_window_handler_ { nullptr };
 
     bool has_main_window_destoryed_ = false;
+
+    HDC current_window_device_context_ { nullptr };
+    HDC canvas_context_ { nullptr };
+    HBITMAP bitmap_ { nullptr };
+    void* canvas_buffer_ { nullptr };
 };
 
 #endif

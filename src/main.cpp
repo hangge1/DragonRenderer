@@ -13,8 +13,24 @@
 #include <iostream>
 
 #include "application.h"
+#include "renderer.h"
+#include "pixel.h"
 
+void CustomDraw(Renderer& renderer)
+{
+    int width = Application::GetInstance()->GetMainWindowWidth();
+    int height = Application::GetInstance()->GetMainWindowHeight();
 
+    for (uint32_t i = 0; i < width; ++i) 
+    {
+		for (uint32_t j = 0; j < height; ++j) 
+        {
+			uint32_t v = std::rand() % 255;
+			Pixel color(v, v, v, v);
+			renderer.DrawOnePoint(i, j, color);
+		}
+	}
+}
 
 int WINAPI wWinMain(HINSTANCE hInstance,
                     HINSTANCE hPrevInstance,
@@ -27,9 +43,22 @@ int WINAPI wWinMain(HINSTANCE hInstance,
         return -1;
     }
 
+    Renderer renderer;
+    renderer.InitFrameBuffer(
+        Application::GetInstance()->GetMainWindowWidth(), 
+        Application::GetInstance()->GetMainWindowHeight(),
+        Application::GetInstance()->GetRenderBuffer());
+
     while(!Application::GetInstance()->HasMainWindowDestoryed())
     {
         Application::GetInstance()->DispatchMessageLoop();
+
+        renderer.ClearFrameBuffer();
+
+        //draw something
+        CustomDraw(renderer);
+
+        Application::GetInstance()->Render();
     }
 
     std::cout << "Application will exit!" << std::endl;

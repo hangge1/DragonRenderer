@@ -2,6 +2,8 @@
 
 #include <Windows.h>
 
+#include "pixel.h"
+
 Application* Application::self_instance_ = nullptr;
 
 Application* Application::GetInstance() 
@@ -26,7 +28,6 @@ bool Application::InitMainWindow(HINSTANCE program_instance, const CHAR* main_wi
 	main_window_width_ = main_window_width;
 	main_window_height_ = main_window_height;
 	current_program_instance_ = program_instance;
-
 	main_window_title_ = main_window_title;
 
 	//初始化窗体类型，并且注册
@@ -38,27 +39,10 @@ bool Application::InitMainWindow(HINSTANCE program_instance, const CHAR* main_wi
 		return false;
 	}
 
+	//根据DC创建双缓冲CavasDC，利用位图进行绑定
+	InitDrawContext();
+
 	return true;
-}
-
-ATOM Application::RegisterMainWindowClass()
-{
-	WNDCLASSEXW wndClass;
-
-	wndClass.cbSize = sizeof(WNDCLASSEX);
-	wndClass.style = CS_HREDRAW | CS_VREDRAW;	//水平/垂直大小发生变化重绘窗口
-	wndClass.lpfnWndProc = Wndproc;
-	wndClass.cbClsExtra = 0;
-	wndClass.cbWndExtra = 0;
-	wndClass.hInstance = current_program_instance_;		//应用程序句柄
-	wndClass.hIcon = LoadIcon(NULL, IDI_APPLICATION);//应用程序图标,即任务栏的大图标
-	wndClass.hCursor = LoadCursor(NULL, IDC_ARROW);//鼠标图标
-	wndClass.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);//窗口背景色
-	wndClass.lpszMenuName = NULL;
-	wndClass.lpszClassName = main_window_class_name_;//窗口类名
-	wndClass.hIconSm = LoadIcon(NULL, IDI_WINLOGO);//窗口标题图标
-
-	return RegisterClassExW(&wndClass);
 }
 
 bool Application::CreateMainWindow()
@@ -108,6 +92,49 @@ bool Application::CreateMainWindow()
 	return true;
 }
 
+ATOM Application::RegisterMainWindowClass()
+{
+	WNDCLASSEXW wndClass;
+
+	wndClass.cbSize = sizeof(WNDCLASSEX);
+	wndClass.style = CS_HREDRAW | CS_VREDRAW;	//水平/垂直大小发生变化重绘窗口
+	wndClass.lpfnWndProc = Wndproc;
+	wndClass.cbClsExtra = 0;
+	wndClass.cbWndExtra = 0;
+	wndClass.hInstance = current_program_instance_;		//应用程序句柄
+	wndClass.hIcon = LoadIcon(NULL, IDI_APPLICATION);//应用程序图标,即任务栏的大图标
+	wndClass.hCursor = LoadCursor(NULL, IDC_ARROW);//鼠标图标
+	wndClass.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);//窗口背景色
+	wndClass.lpszMenuName = NULL;
+	wndClass.lpszClassName = main_window_class_name_;//窗口类名
+	wndClass.hIconSm = LoadIcon(NULL, IDI_WINLOGO);//窗口标题图标
+
+	return RegisterClassExW(&wndClass);
+}
+
+void Application::InitDrawContext()
+{
+	current_window_device_context_ = GetDC(main_window_handler_);
+	canvas_context_ = CreateCompatibleDC(current_window_device_context_);
+
+	BITMAPINFO  temp_bmp_info{};
+	temp_bmp_info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+	temp_bmp_info.bmiHeader.biWidth = main_window_width_;
+	temp_bmp_info.bmiHeader.biHeight = main_window_height_;
+	temp_bmp_info.bmiHeader.biPlanes = 1;
+	temp_bmp_info.bmiHeader.biBitCount = 32;
+	temp_bmp_info.bmiHeader.biCompression = BI_RGB; //实际上存储方式为bgra
+
+	//创建与mhMem兼容的位图,其实实在mhMem指代的设备上划拨了一块内存，让mCanvasBuffer指向它
+	bitmap_ = CreateDIBSection(canvas_context_, &temp_bmp_info, DIB_RGB_COLORS, (void**)&canvas_buffer_, 0, 0);//在这里创建buffer的内存
+
+	//一个设备可以创建多个位图，本设备使用mhBmp作为激活位图，对mCanvasDC的内存拷出，其实就是拷出了mhBmp的数据
+	SelectObject(canvas_context_, bitmap_);
+
+	memset(canvas_buffer_, 0, main_window_width_ * main_window_height_ * sizeof(Pixel)); //清空buffer为0
+}
+
+
 void Application::DispatchMessageLoop() 
 {
 	MSG msg;
@@ -125,8 +152,8 @@ void Application::ProcessMessage(HWND window_handler, UINT message_id, WPARAM me
 		case WM_CLOSE: 
 		{
 			DestroyWindow(window_handler);//此处销毁窗体,会自动发出WM_DESTROY
-			break;
 		}
+		break;			
 		case WM_PAINT:
 		{
 			PAINTSTRUCT ps;
@@ -138,7 +165,13 @@ void Application::ProcessMessage(HWND window_handler, UINT message_id, WPARAM me
 		{
 			has_main_window_destoryed_ = true;
 			PostQuitMessage(0);//发出线程终止请求
-			break;
 		}
+		break;
 	}
+}
+
+void Application::Render()
+{
+	BitBlt(current_window_device_context_, 0, 0, main_window_width_, main_window_height_, 
+	canvas_context_, 0, 0, SRCCOPY);
 }
