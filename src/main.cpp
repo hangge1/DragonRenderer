@@ -14,15 +14,14 @@
 
 #include "application.h"
 
-const unsigned int kMainWindowWidth = 800;
-const unsigned int kMainWindowHeight = 600;
+
 
 int WINAPI wWinMain(HINSTANCE hInstance,
                     HINSTANCE hPrevInstance,
                     LPWSTR lpCmdLine,
                     int nCmdShow)
 {
-    if(!Application::GetInstance()->InitMainWindow(hInstance, kMainWindowWidth, kMainWindowHeight))
+    if(!Application::GetInstance()->InitMainWindow(hInstance))
     {
         std::cout << "Application Init Failed!" << std::endl;
         return -1;

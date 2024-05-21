@@ -20,17 +20,20 @@ LRESULT CALLBACK Wndproc(HWND window_handler, UINT message_id, WPARAM message_wp
 	return(DefWindowProc(window_handler, message_id, message_wparam, message_lparam));
 }
 
-bool Application::InitMainWindow(HINSTANCE program_instance, 
-	unsigned int main_window_width, unsigned int main_window_height) 
+bool Application::InitMainWindow(HINSTANCE program_instance, const CHAR* main_window_title,
+	LONG main_window_width, LONG main_window_height) 
 {
 	main_window_width_ = main_window_width;
 	main_window_height_ = main_window_height;
+	current_program_instance_ = program_instance;
+
+	main_window_title_ = main_window_title;
 
 	//初始化窗体类型，并且注册
-	RegisterMainWindowClass(program_instance);
+	RegisterMainWindowClass();
 
 	//生成一个窗体，并且显示
-	if (!CreateMainWindow(program_instance)) 
+	if (!CreateMainWindow()) 
     {
 		return false;
 	}
@@ -38,7 +41,7 @@ bool Application::InitMainWindow(HINSTANCE program_instance,
 	return true;
 }
 
-ATOM Application::RegisterMainWindowClass(HINSTANCE program_instance)
+ATOM Application::RegisterMainWindowClass()
 {
 	WNDCLASSEXW wndClass;
 
@@ -47,7 +50,7 @@ ATOM Application::RegisterMainWindowClass(HINSTANCE program_instance)
 	wndClass.lpfnWndProc = Wndproc;
 	wndClass.cbClsExtra = 0;
 	wndClass.cbWndExtra = 0;
-	wndClass.hInstance = program_instance;		//应用程序句柄
+	wndClass.hInstance = current_program_instance_;		//应用程序句柄
 	wndClass.hIcon = LoadIcon(NULL, IDI_APPLICATION);//应用程序图标,即任务栏的大图标
 	wndClass.hCursor = LoadCursor(NULL, IDC_ARROW);//鼠标图标
 	wndClass.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);//窗口背景色
@@ -58,10 +61,8 @@ ATOM Application::RegisterMainWindowClass(HINSTANCE program_instance)
 	return RegisterClassExW(&wndClass);
 }
 
-bool Application::CreateMainWindow(HINSTANCE program_instance)
+bool Application::CreateMainWindow()
 {
-	current_program_instance_ = program_instance;
-
 	/*
 	* WS_POPUP: 不需要标题栏，则不需要边框
 	* WS_OVERLAPPEDWINDOW：拥有普通程序主窗口的所有特点，必须有标题且有边框
