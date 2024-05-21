@@ -3,19 +3,39 @@ A soft raster renderer that uses GDI to draw on windows
 
 
 
-编码规范尽可能遵循：Google C++代码规范
+### DragonRenderer构建说明：
 
-Git 提交记录规范说明：
+1、CMake version >= 3.20
+
+2、编译套件：目前仅测试  Visual Studio 17 2022
+
+3、编译指令
+
+```
+(1)、进入根目录，Crtl + R 输入cmd进入命令行
+(2)、构建项目 cmake -S . -B build 
+(3)、编译项目 cmake --build build --config Debug | Release
+(4)、运行: .\build\bin\Debug\DragonRenderer.exe | .\build\bin\Release\DragonRenderer.exe 
+```
+
+
+
+
+
+**编码规范：**遵循Google C++代码规范
+
+**Git 提交记录规范：**
 
 ```
 [<commit-type1>](<scope>):<subject>
-1、
-2、
-3、
+1、xxxxxx
+2、yyyyyy
+3、zzzzzz
+
 [<commit-type2>](<scope>):<subject>
-1、
-2、
-3、
+1、xxxxxx
+2、yyyyyy
+3、zzzzzz
 ...
 ```
 
@@ -42,13 +62,13 @@ Git 提交记录规范说明：
 
 
 
-**scope表示此次commit影响的范围，是可选项！**
+**scope表示此次commit影响的范围，可选项！**
 
 比如：1、某文件夹  2、界面层  3、模型层  4、某个库  等等
 
 
 
-**subject表示此次commit提交的目的，是一段简短的说明即可，是必选项！**
+**subject表示此次commit提交的目的，一段简短的概述，可选项！**
 
 
 
