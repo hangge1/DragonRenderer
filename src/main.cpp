@@ -14,7 +14,7 @@
 
 #include "application.h"
 #include "renderer.h"
-#include "pixel.h"
+#include "color.h"
 
 void CustomDraw(Renderer& renderer)
 {
@@ -26,8 +26,8 @@ void CustomDraw(Renderer& renderer)
 		for (uint32_t j = 0; j < height; ++j) 
         {
 			uint32_t v = std::rand() % 255;
-			Pixel color(v, v, v, v);
-			renderer.DrawOnePoint(i, j, color);
+			Color color(v, v, v, v);
+			renderer.DrawOnePixel(i, j, color);
 		}
 	}
 }

@@ -6,7 +6,7 @@
 
 #include "frame_buffer.h"
 
-#include "pixel.h"
+#include "color.h"
 
 class FrameBuffer
 {
@@ -16,15 +16,15 @@ public:
     FrameBuffer(const FrameBuffer&) = delete;
     FrameBuffer& operator=(const FrameBuffer&) = delete;
 
-    void InitFrame(LONG frame_width, LONG frame_height, Pixel* frame_buffer = nullptr);
+    void InitFrame(LONG frame_width, LONG frame_height, Color* frame_buffer = nullptr);
 
-    void FillPixels(const Pixel& will_fill_pixel);
+    void FillColor(const Color& will_fill_color);
 
-    void SetOnePixel(LONG x_pox, LONG y_pox, const Pixel& pixel);
+    void SetOnePixelColor(LONG x_pox, LONG y_pox, const Color& color);
 private:
     LONG frame_width_ {0};
     LONG frame_height_ {0};
-    Pixel* frame_buffer_ {nullptr};
+    Color* frame_buffer_ {nullptr};
     bool is_buffer_external {false};
 };
 

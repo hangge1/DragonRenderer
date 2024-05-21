@@ -3,7 +3,7 @@
 
 #include <Windows.h>
 
-#include "pixel.h"
+#include "color.h"
 #include "frame_buffer.h"
 
 class Renderer
@@ -18,7 +18,7 @@ public:
 
     void ClearFrameBuffer();
 
-    void DrawOnePoint(LONG x_pox, LONG y_pox, const Pixel& pixel_point);
+    void DrawOnePixel(LONG x_pox, LONG y_pox, const Color& pixel_color);
 private:
     FrameBuffer* current_frame_buffer_ {nullptr};
 };

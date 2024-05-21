@@ -2,7 +2,7 @@
 
 #include <Windows.h>
 
-#include "pixel.h"
+#include "color.h"
 
 Application* Application::self_instance_ = nullptr;
 
@@ -131,7 +131,7 @@ void Application::InitDrawContext()
 	//一个设备可以创建多个位图，本设备使用mhBmp作为激活位图，对mCanvasDC的内存拷出，其实就是拷出了mhBmp的数据
 	SelectObject(canvas_context_, bitmap_);
 
-	memset(canvas_buffer_, 0, main_window_width_ * main_window_height_ * sizeof(Pixel)); //清空buffer为0
+	memset(canvas_buffer_, 0, main_window_width_ * main_window_height_ * sizeof(Color)); //清空buffer为0
 }
 
 

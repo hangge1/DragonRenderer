@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-#include "pixel.h"
+#include "color.h"
 
 FrameBuffer::~FrameBuffer()
 {
@@ -17,16 +17,16 @@ FrameBuffer::~FrameBuffer()
     is_buffer_external = false;
 }
 
-void FrameBuffer::InitFrame(LONG frame_width, LONG frame_height, Pixel* frame_buffer)
+void FrameBuffer::InitFrame(LONG frame_width, LONG frame_height, Color* frame_buffer)
 {
     frame_width_ = frame_width;
     frame_height_ = frame_height;
 
-    Pixel* temp_frame_buffer {nullptr};
+    Color* temp_frame_buffer {nullptr};
     if(nullptr == frame_buffer)
     {
         is_buffer_external = false;
-        temp_frame_buffer = new Pixel[frame_width * frame_height];
+        temp_frame_buffer = new Color[frame_width * frame_height];
     }
     else
     {
@@ -37,15 +37,15 @@ void FrameBuffer::InitFrame(LONG frame_width, LONG frame_height, Pixel* frame_bu
     frame_buffer_ = temp_frame_buffer;
 }
 
-void FrameBuffer::FillPixels(const Pixel& will_fill_pixel)
+void FrameBuffer::FillColor(const Color& will_fill_color)
 {
     if(nullptr != frame_buffer_)
     {
-        std::fill_n(frame_buffer_, frame_width_ * frame_height_, will_fill_pixel);
+        std::fill_n(frame_buffer_, frame_width_ * frame_height_, will_fill_color);
     }
 }
 
-void FrameBuffer::SetOnePixel(LONG x_pox, LONG y_pox, const Pixel& pixel)
+void FrameBuffer::SetOnePixelColor(LONG x_pox, LONG y_pox, const Color& color)
 {
     if(nullptr == frame_buffer_ || 
         x_pox < 0 || x_pox >= frame_width_ || 
@@ -54,5 +54,5 @@ void FrameBuffer::SetOnePixel(LONG x_pox, LONG y_pox, const Pixel& pixel)
         return;
     }
 
-    frame_buffer_[frame_width_ * y_pox + x_pox] = pixel;
+    frame_buffer_[frame_width_ * y_pox + x_pox] = color;
 }

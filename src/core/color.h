@@ -1,13 +1,13 @@
 
-#ifndef _CORE_PIXEL_H_
-#define _CORE_PIXEL_H_
+#ifndef _CORE_COLOR_H_
+#define _CORE_COLOR_H_
 
 using byte = unsigned char;
 
-class Pixel
+class Color
 {
 public:
-    Pixel(byte red = 255, byte green = 255, byte blue = 255, byte alpha = 255):
+    Color(byte red = 255, byte green = 255, byte blue = 255, byte alpha = 255):
         red_(red),
         green_(green),
         blue_(blue),
