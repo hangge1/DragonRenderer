@@ -20,8 +20,6 @@ A soft raster renderer that uses GDI to draw on windows
 
 
 
-
-
 **编码规范：** 遵循Google C++代码规范
 
 **Git 提交记录规范格式说明：**

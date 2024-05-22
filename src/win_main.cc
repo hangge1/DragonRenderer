@@ -12,8 +12,10 @@
 #include "application.h"
 #include "renderer.h"
 #include "color.h"
+#include "pixel.h"
 
-void CustomDraw(Renderer& renderer)
+//渲染随机像素值，形成类似老式电视机的那种雪花图
+void RenderRandomPixel(Renderer& renderer)
 {
     int width = APP->GetMainWindowWidth();
     int height = APP->GetMainWindowHeight();
@@ -24,9 +26,25 @@ void CustomDraw(Renderer& renderer)
         {
 			uint32_t v = std::rand() % 255;
 			Color color(v, v, v, v);
-			renderer.DrawOnePixel(i, j, color);
+			renderer.DrawPixel(i, j, color);
 		}
 	}
+}
+
+//渲染一条白色直线
+void RenderOneLine(Renderer& renderer)
+{
+    Pixel start {300, 300};
+    Pixel end {500, 600};
+
+    renderer.DrawLine(start, end);
+}
+
+void CustomDraw(Renderer& renderer)
+{
+    //RenderRandomPixel(renderer);
+
+    RenderOneLine(renderer);
 }
 
 int WINAPI wWinMain(HINSTANCE hInstance,

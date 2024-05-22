@@ -5,6 +5,7 @@
 
 #include "color.h"
 #include "frame_buffer.h"
+#include "pixel.h"
 
 class Renderer
 {
@@ -18,7 +19,9 @@ public:
 
     void ClearFrameBuffer();
 
-    void DrawOnePixel(LONG x_pox, LONG y_pox, const Color& pixel_color);
+    void DrawPixel(LONG x_pox, LONG y_pox, const Color& pixel_color);
+
+    void DrawLine(const Pixel& start, const Pixel& end);
 private:
     FrameBuffer* current_frame_buffer_ {nullptr};
 };

@@ -2,7 +2,7 @@
 #ifndef _CORE_PIXEL_H_
 #define _CORE_PIXEL_H_
 
-#include <iostream>
+#include <cstdint>
 
 #include "color.h"
 

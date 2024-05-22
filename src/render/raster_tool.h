@@ -14,6 +14,7 @@ public:
     RasterTool(const RasterTool&) = delete;
     RasterTool& operator=(const RasterTool&) = delete;
 
+    static std::vector<Pixel> SimpleRasterizeLine(const Pixel& p1, const Pixel& p2);
     static std::vector<Pixel> RasterizeLine(const Pixel& p1, const Pixel& p2);
 };
 

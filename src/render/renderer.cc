@@ -1,8 +1,12 @@
 
 #include "renderer.h"
 
+#include <iostream>
+#include <vector>
+
 #include "color.h"
 #include "frame_buffer.h"
+#include "raster_tool.h"
 
 Renderer::~Renderer()
 {
@@ -31,7 +35,18 @@ void Renderer::ClearFrameBuffer()
     }
 }
 
-void Renderer::DrawOnePixel(LONG x_pos, LONG y_pos, const Color& pixel_color)
+void Renderer::DrawPixel(LONG x_pos, LONG y_pos, const Color& pixel_color)
 {
     current_frame_buffer_->SetOnePixelColor(x_pos, y_pos, pixel_color);
+}
+
+void Renderer::DrawLine(const Pixel& start, const Pixel& end)
+{
+    auto raster_line = RasterTool::RasterizeLine(start, end);
+    //auto raster_line = RasterTool::SimpleRasterizeLine(start, end);
+    for(const auto& p : raster_line)
+    {
+        //std::cout << "(" << p.x << "," << p.y << ")" << std::endl;
+        DrawPixel(p.x, p.y, p.color);
+    }
 }
