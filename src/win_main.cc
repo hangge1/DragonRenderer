@@ -5,9 +5,6 @@
  *      Application Exe Main Entry Point File
 */
 
-#pragma comment(linker, "/subsystem:console /entry:wWinMainCRTStartup" )
-
-
 #include <Windows.h>
 
 #include <iostream>
