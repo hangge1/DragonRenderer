@@ -35,7 +35,7 @@ void RenderRandomPixel(Renderer& renderer)
 void RenderOneLine(Renderer& renderer)
 {
     Pixel start {300, 300};
-    Pixel end {500, 600};
+    Pixel end {400, 400};
 
     renderer.DrawLine(start, end);
 }

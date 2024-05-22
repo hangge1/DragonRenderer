@@ -1,6 +1,7 @@
 
 #include "raster_tool.h"
 
+#include <iostream>
 #include <vector>
 
 #include "pixel.h"
@@ -29,29 +30,113 @@ std::vector<Pixel> RasterTool::SimpleRasterizeLine(const Pixel& p1, const Pixel&
         return result;
     }
 
-    //dx != 0 && dy != 0
-    double k = (p2.y - p1.y) / (double)(p2.x - p1.x);
-    double b = p1.y - k * p1.x;
+    Pixel start {p1};
+    Pixel end {p2};
 
-    for (int x = p1.x; x <= p2.x; x++)
+    bool flip_x = false;
+    if(dx < 0)
     {
-        result.emplace_back(Pixel{x, (int)(k * x + b)});
-    }      
+        start.x *= -1;
+        end.x *= -1;
+        flip_x = true;
+    }
+
+    bool flip_y = false;
+    if(dy < 0)
+    {
+        start.y *= -1;
+        end.y *= -1;
+        flip_y = true;
+    }
+
+    //dx != 0 && dy != 0
+    double k = (end.y - start.y) / (double)(end.x - start.x);
+    double b = start.y - k * start.x;
+
+    bool swap_xy = false;
+    if(k - 1.0 > 1e-6)
+    {
+        swap_xy = true;
+    }
+
+    if(swap_xy)
+    {
+        for (int y = start.y; y <= end.y; y++)
+        {
+            Pixel need_insert_pixel {(y-b) / k, y};
+            if(flip_x)
+            {
+                need_insert_pixel.x *= -1;
+            }
+            if(flip_y)
+            {
+                need_insert_pixel.y *= -1;
+            }
+
+            result.emplace_back(need_insert_pixel);
+        } 
+    }
+    else
+    {
+        for (int x = start.x; x <= end.x; x++)
+        {
+            Pixel need_insert_pixel {x, (int)(k * x + b)};
+            if(flip_x)
+            {
+                need_insert_pixel.x *= -1;
+            }
+            if(flip_y)
+            {
+                need_insert_pixel.y *= -1;
+            }
+
+            result.emplace_back(need_insert_pixel);
+        } 
+    }
+    
 
     return result;
 }
 
 std::vector<Pixel> RasterTool::RasterizeLine(const Pixel& p1, const Pixel& p2)
 {
-    //TODO
-
     Pixel start = p1;
     Pixel end = p2;
-    
+
     //先假设 p1->p2 第一象限，斜率0 < k < 1
     //暂不考虑颜色
     int dy = end.y - start.y;
     int dx = end.x - start.x;
+
+    bool flip_x = false;
+    if(dx < 0)
+    {
+        start.x *= -1;
+        end.x *= -1;
+        flip_x = true;
+    }
+
+
+    bool flip_y = false;
+    if(dy < 0)
+    {
+        start.y *= -1;
+        end.y *= -1;
+        flip_y = true;
+    }
+
+    dy = end.y - start.y;
+    dx = end.x - start.x;
+
+    bool swap_xy = false;
+    if(dy > dx)
+    {
+        std::swap(dx, dy);
+        std::swap(start.x, start.y);
+        std::swap(end.x, end.y);
+        swap_xy = true;
+    }
+
     int pi = dy * 2 - dx;
 
     int dealtp_NE = 2 * (dy - dx);
@@ -59,11 +144,31 @@ std::vector<Pixel> RasterTool::RasterizeLine(const Pixel& p1, const Pixel& p2)
 
     int xi = start.x;
     int yi = start.y;
+
     std::vector<Pixel> result;
 
-    for (int i = start.x; i <= end.x; i++)
+    int delta = dx;
+
+    for (int i = 0; i <= delta; i++)
     {
-        result.emplace_back(Pixel{i, yi});
+        //std::cout << "[" << i << "] = (" << xi << "," << yi << ")" << std::endl;
+        Pixel current_pixel {xi, yi};
+
+        if(swap_xy)
+        {
+            std::swap(current_pixel.x, current_pixel.y);
+        }
+
+        if(flip_x)
+        {
+            current_pixel.x *= -1;
+        }
+        if(flip_y)
+        {
+            current_pixel.y *= -1;
+        }
+
+        result.emplace_back(current_pixel);
         if(pi > 0)
         {
             yi++;
@@ -73,7 +178,9 @@ std::vector<Pixel> RasterTool::RasterizeLine(const Pixel& p1, const Pixel& p2)
         {
             pi += dealtp_E;
         }
-    }
 
+        xi++;
+    }
+ 
     return result;
 }
