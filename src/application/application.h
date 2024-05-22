@@ -14,7 +14,7 @@ public:
     static Application* GetInstance();
 public:
 	Application() = default;
-	~Application() = default;
+	~Application();
 
     //注册、创建、显示窗口
     bool InitMainWindow(HINSTANCE program_instance, 

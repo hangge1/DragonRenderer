@@ -12,6 +12,23 @@ LRESULT CALLBACK Wndproc(HWND window_handler, UINT message_id, WPARAM message_wp
 
 Application* Application::self_instance_ = nullptr;
 
+Application::~Application()
+{
+	if(nullptr != bitmap_)
+	{
+		DeleteObject(bitmap_);
+	}
+
+	if(nullptr != canvas_device_contex_)
+	{
+		DeleteDC(canvas_device_contex_);
+	}
+
+	if(nullptr != current_window_device_context_ && nullptr != main_window_handler_)
+	{
+		ReleaseDC(main_window_handler_, current_window_device_context_);
+	}
+}
 
 Application* Application::GetInstance() 
 {

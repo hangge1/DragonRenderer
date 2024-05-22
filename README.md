@@ -22,9 +22,9 @@ A soft raster renderer that uses GDI to draw on windows
 
 
 
-**编码规范：**遵循Google C++代码规范
+**编码规范：** 遵循Google C++代码规范
 
-**Git 提交记录规范：**
+**Git 提交记录规范格式说明：**
 
 ```
 [<commit-type1>](<scope>):<subject>
@@ -39,7 +39,7 @@ A soft raster renderer that uses GDI to draw on windows
 ...
 ```
 
-**commit-type表示提交类型，必选项，分类如下：**
+**commit-type表示提交类型（必选），分类如下：**
 
 - feature
     新功能
@@ -62,13 +62,13 @@ A soft raster renderer that uses GDI to draw on windows
 
 
 
-**scope表示此次commit影响的范围，可选项！**
+**scope表示此次commit影响的范围（可选）！**
 
 比如：1、某文件夹  2、界面层  3、模型层  4、某个库  等等
 
 
 
-**subject表示此次commit提交的目的，一段简短的概述，可选项！**
+**subject表示此次commit提交的目的，一段简短的概述（可选）！**
 
 
 
