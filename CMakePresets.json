@@ -69,16 +69,19 @@
             "name": "x64-Windows-Test-Debug",
             "configurePreset": "Debug",
             "configuration": "Debug"
+            
         },
         {
             "name": "x64-Windows-Test-Release",
             "configurePreset": "Debug",
-            "configuration": "Release"
+            "configuration": "Release",
+			"output": {"outputOnFailure": true, "quiet": true}
         },
         {
             "name": "x64-Windows-Test-RelWithDebInfo",
             "configurePreset": "RelWithDebInfo",
-            "configuration": "RelWithDebInfo"
+            "configuration": "RelWithDebInfo",
+			"output": {"outputOnFailure": true, "quiet": true}
         }
     ]
 }

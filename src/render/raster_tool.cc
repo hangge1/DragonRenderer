@@ -63,7 +63,7 @@ std::vector<Pixel> RasterTool::SimpleRasterizeLine(const Pixel& p1, const Pixel&
     {
         for (int y = start.y; y <= end.y; y++)
         {
-            Pixel need_insert_pixel {(y-b) / k, y};
+            Pixel need_insert_pixel {(int32_t)((y-b) / k), y};
             if(flip_x)
             {
                 need_insert_pixel.x *= -1;
