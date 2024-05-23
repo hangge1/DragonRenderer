@@ -31,3 +31,10 @@
 1、尝试添加vs2022构建套件的CMakePreset文件，方便使用vscode调试的正常开展（ok）
 
 2、添加DrawPixel接口，只传入Pixel即可渲染（ok）
+
+3、添加ctest针对直线光栅化的单元测试（ok）
+
+4、Brensenham补充完善，添加对颜色属性的差值（ok）
+
+
+

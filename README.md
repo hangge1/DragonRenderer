@@ -5,6 +5,8 @@ A soft raster renderer that uses GDI to draw on windows
 
 ### DragonRenderer构建说明：
 
+**方法1：手动命令行构建**
+
 1、CMake version >= 3.20
 
 2、编译套件：目前仅测试  Visual Studio 17 2022
@@ -18,6 +20,9 @@ A soft raster renderer that uses GDI to draw on windows
     生成配置 cmake -S . -B build -D CMAKE_BUILD_TYPE=Debug
     编译 cmake --build build --config Debug
     运行: .\build\Debug\bin\DragonRenderer.exe
+    单元测试: 
+    cd ./build
+    test -C Debug -VV
     ```
 
 - release版本
@@ -27,7 +32,20 @@ A soft raster renderer that uses GDI to draw on windows
     生成配置 cmake -S . -B build -D CMAKE_BUILD_TYPE=Delease 
     编译 cmake --build build --config Release
     运行: .\build\Release\bin\DragonRenderer.exe
+    单元测试: 
+    cd ./build
+    ctest -C Release -VV
     ```
+
+
+
+**方法2：利用vscode的cmake插件，利用CMakePresets预设进行构建**
+
+确保前提条件：安装visual stdio 2022 以及c++编译套件、cmake >= 3.20
+
+如下图：
+
+![image-20240523221510925](./README.assets/image-20240523221510925.png)
 
 
 

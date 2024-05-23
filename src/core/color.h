@@ -4,22 +4,21 @@
 
 using byte = unsigned char;
 
-class Color
+struct Color
 {
 public:
-    Color(byte red = 255, byte green = 255, byte blue = 255, byte alpha = 255):
-        red_(red),
-        green_(green),
-        blue_(blue),
-        alpha_(alpha)
+    Color(byte r = 255, byte g = 255, byte b = 255, byte alp = 255):
+        red(r),
+        green(g),
+        blue(b),
+        alpha(alp)
     {
     }
-
-private:
-    byte red_;
-    byte green_;
-    byte blue_;
-    byte alpha_;
+    
+    byte blue; //这个定义的顺序不能变,因为bitmap那边的要求就是bgra
+    byte green;
+    byte red;
+    byte alpha;
 };
 
 #endif

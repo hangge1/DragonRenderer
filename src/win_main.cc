@@ -40,11 +40,21 @@ void RenderOneLine(Renderer& renderer)
     renderer.DrawLine(start, end);
 }
 
+//渲染一条由红到绿的直线
+void RenderOneColorLine(Renderer& renderer)
+{
+    Pixel start {300, 300, Color(255, 0, 0, 255)};
+    Pixel end {400, 400, Color(0, 255, 0, 255)};
+
+    renderer.DrawLine(start, end);
+}
+
+
 void CustomDraw(Renderer& renderer)
 {
     //RenderRandomPixel(renderer);
-
-    RenderOneLine(renderer);
+    //RenderOneLine(renderer);
+    RenderOneColorLine(renderer);
 }
 
 int WINAPI wWinMain(HINSTANCE hInstance,

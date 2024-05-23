@@ -116,7 +116,6 @@ std::vector<Pixel> RasterTool::RasterizeLine(const Pixel& p1, const Pixel& p2)
         flip_x = true;
     }
 
-
     bool flip_y = false;
     if(dy < 0)
     {
@@ -149,6 +148,7 @@ std::vector<Pixel> RasterTool::RasterizeLine(const Pixel& p1, const Pixel& p2)
 
     int delta = dx;
 
+    std::cout << "\n\n\n";
     for (int i = 0; i <= delta; i++)
     {
         //std::cout << "[" << i << "] = (" << xi << "," << yi << ")" << std::endl;
@@ -163,10 +163,18 @@ std::vector<Pixel> RasterTool::RasterizeLine(const Pixel& p1, const Pixel& p2)
         {
             current_pixel.x *= -1;
         }
+
         if(flip_y)
         {
             current_pixel.y *= -1;
         }
+
+        //颜色插值
+
+        InterpolateLine(p1, p2, current_pixel);
+
+        std::cout << "(" << (int)current_pixel.color.red << "," 
+            << (int)current_pixel.color.green << "," << (int)current_pixel.color.blue << ")" << std::endl;
 
         result.emplace_back(current_pixel);
         if(pi > 0)
@@ -183,4 +191,26 @@ std::vector<Pixel> RasterTool::RasterizeLine(const Pixel& p1, const Pixel& p2)
     }
  
     return result;
+}
+
+void RasterTool::InterpolateLine(const Pixel& start, const Pixel& end, Pixel& target)
+{
+    double weight = 1.0f;
+    if(start.y != end.y)
+    {
+        weight = static_cast<double>(target.y - start.y) / (end.y - start.y);
+    }
+    else
+    {
+        weight = static_cast<double>(target.x - start.x) / (end.x - start.x);
+    }
+
+    target.color.red = static_cast<byte>(weight * static_cast<double>(end.color.red) 
+        + (1.0 - weight) * static_cast<double>(start.color.red));
+    target.color.green = static_cast<byte>(weight * static_cast<double>(end.color.green) 
+        + (1.0 - weight) * static_cast<double>(start.color.green));
+    target.color.blue = static_cast<byte>(weight * static_cast<double>(end.color.blue) 
+        + (1.0 - weight) * static_cast<double>(start.color.blue));
+    target.color.alpha = static_cast<byte>(weight * static_cast<double>(end.color.alpha) 
+        + (1.0 - weight) * static_cast<double>(start.color.alpha));
 }
