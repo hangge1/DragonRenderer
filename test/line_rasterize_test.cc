@@ -108,6 +108,6 @@ int main(int argc, char** argv)
         }
     }
     
-    std::cout << "RasterizeLineTest Test Pass" << std::endl;
+    std::cout << "line_rasterize_test Test Pass" << std::endl;
     return 0;
 }

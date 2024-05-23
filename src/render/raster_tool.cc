@@ -151,8 +151,8 @@ std::vector<Pixel> RasterTool::RasterizeLine(const Pixel& p1, const Pixel& p2)
     std::cout << "\n\n\n";
     for (int i = 0; i <= delta; i++)
     {
-        //std::cout << "[" << i << "] = (" << xi << "," << yi << ")" << std::endl;
-        Pixel current_pixel {xi, yi};
+
+        Pixel current_pixel {xi, yi};        //std::cout << "[" << i << "] = (" << xi << "," << yi << ")" << std::endl;
 
         if(swap_xy)
         {
@@ -173,8 +173,8 @@ std::vector<Pixel> RasterTool::RasterizeLine(const Pixel& p1, const Pixel& p2)
 
         InterpolateLine(p1, p2, current_pixel);
 
-        std::cout << "(" << (int)current_pixel.color.red << "," 
-            << (int)current_pixel.color.green << "," << (int)current_pixel.color.blue << ")" << std::endl;
+        //std::cout << "(" << (int)current_pixel.color.red << "," 
+        //    << (int)current_pixel.color.green << "," << (int)current_pixel.color.blue << ")" << std::endl;
 
         result.emplace_back(current_pixel);
         if(pi > 0)

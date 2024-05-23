@@ -34,6 +34,8 @@ project(DragonRenderer
     LANGUAGES CXX
 )
 
+add_subdirectory(thirdparts)
+
 add_subdirectory(src)
 
 add_subdirectory(test)
