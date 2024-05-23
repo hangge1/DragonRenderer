@@ -40,13 +40,16 @@ void Renderer::DrawPixel(LONG x_pos, LONG y_pos, const Color& pixel_color)
     current_frame_buffer_->SetOnePixelColor(x_pos, y_pos, pixel_color);
 }
 
+void Renderer::DrawPixel(const Pixel& point)
+{
+    current_frame_buffer_->SetOnePixelColor(point.x, point.y, point.color);
+}
+
 void Renderer::DrawLine(const Pixel& start, const Pixel& end)
 {
     auto raster_line = RasterTool::RasterizeLine(start, end);
-    //auto raster_line = RasterTool::SimpleRasterizeLine(start, end);
     for(const auto& p : raster_line)
     {
-        //std::cout << "(" << p.x << "," << p.y << ")" << std::endl;
-        DrawPixel(p.x, p.y, p.color);
+        DrawPixel(p);
     }
 }

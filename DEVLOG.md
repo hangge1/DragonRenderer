@@ -8,9 +8,9 @@
 
 2024-5-22
 
-1、添加直线光栅化Brensenham算法并测试
+1、添加直线光栅化Brensenham算法并测试（ok）
 
-2、增加光栅化直线的单元测试工程 test/line_rasterize_test.cc
+2、增加光栅化直线的单元测试工程 test/line_rasterize_test.cc（todo）
 
 注意：
 
@@ -22,7 +22,12 @@
 >
 > TODO： 后续有空还想给这两个算法做时间基准测试
 
-TODO: 因为引入新的Pixel类，看看以前的绘制一个点有没有接口可以优化的
+ 因为引入新的Pixel类，看看以前的绘制一个点有没有接口可以优化的
 
 
 
+2024-5-23
+
+1、尝试添加vs2022构建套件的CMakePreset文件，方便使用vscode调试的正常开展（ok）
+
+2、添加DrawPixel接口，只传入Pixel即可渲染（ok）

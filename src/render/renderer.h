@@ -21,6 +21,8 @@ public:
 
     void DrawPixel(LONG x_pox, LONG y_pox, const Color& pixel_color);
 
+    void DrawPixel(const Pixel& point);
+
     void DrawLine(const Pixel& start, const Pixel& end);
 private:
     FrameBuffer* current_frame_buffer_ {nullptr};

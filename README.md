@@ -9,14 +9,25 @@ A soft raster renderer that uses GDI to draw on windows
 
 2、编译套件：目前仅测试  Visual Studio 17 2022
 
-3、编译指令
+3、构建指令
 
-```
-(1)、进入根目录，Crtl + R 输入cmd进入命令行
-(2)、构建项目 cmake -S . -B build 
-(3)、编译项目 cmake --build build --config Debug | Release
-(4)、运行: .\build\bin\Debug\DragonRenderer.exe | .\build\bin\Release\DragonRenderer.exe 
-```
+- debug版本
+
+    ```
+    进入根目录 Crtl + R 输入cmd进入命令行
+    生成配置 cmake -S . -B build -D CMAKE_BUILD_TYPE=Debug
+    编译 cmake --build build --config Debug
+    运行: .\build\Debug\bin\DragonRenderer.exe
+    ```
+
+- release版本
+
+    ```
+    进入根目录 Crtl + R 输入cmd进入命令行
+    生成配置 cmake -S . -B build -D CMAKE_BUILD_TYPE=Delease 
+    编译 cmake --build build --config Release
+    运行: .\build\Release\bin\DragonRenderer.exe
+    ```
 
 
 
