@@ -10,7 +10,7 @@
 
 1、添加直线光栅化Brensenham算法并测试（ok）
 
-2、增加光栅化直线的单元测试工程 test/line_rasterize_test.cc（todo）
+2、增加光栅化直线的单元测试工程 test/line_rasterize_test.cc（ok）
 
 注意：
 
@@ -40,5 +40,13 @@
 
 
 
+2024-5-24
 
+1、给glm的测试多补充一些案例，熟悉下基本使用（TODO）
+
+2、准备改造单元测试，引入gtest，没有断言测试起来太麻烦了（TODO）
+
+3、添加三角形光栅化的接口（TODO）
+
+4、添加三角形中心坐标公式插值的接口（TODO）
 
