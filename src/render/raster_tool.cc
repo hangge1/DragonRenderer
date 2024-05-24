@@ -6,6 +6,8 @@
 
 #include "pixel.h"
 
+#include "glm/glm.hpp"
+
 std::vector<Pixel> RasterTool::SimpleRasterizeLine(const Pixel& p1, const Pixel& p2)
 {
     int dx = p2.x - p1.x;
@@ -73,6 +75,7 @@ std::vector<Pixel> RasterTool::SimpleRasterizeLine(const Pixel& p1, const Pixel&
                 need_insert_pixel.y *= -1;
             }
 
+            InterpolateLine(p1, p2, need_insert_pixel);
             result.emplace_back(need_insert_pixel);
         } 
     }
@@ -90,6 +93,7 @@ std::vector<Pixel> RasterTool::SimpleRasterizeLine(const Pixel& p1, const Pixel&
                 need_insert_pixel.y *= -1;
             }
 
+            InterpolateLine(p1, p2, need_insert_pixel);
             result.emplace_back(need_insert_pixel);
         } 
     }
@@ -213,4 +217,67 @@ void RasterTool::InterpolateLine(const Pixel& start, const Pixel& end, Pixel& ta
         + (1.0 - weight) * static_cast<double>(start.color.blue));
     target.color.alpha = static_cast<byte>(weight * static_cast<double>(end.color.alpha) 
         + (1.0 - weight) * static_cast<double>(start.color.alpha));
+}
+
+// 计算二维向量的叉乘
+float crossProduct(const glm::vec2& a, const glm::vec2& b) 
+{
+    return a.x * b.y - a.y * b.x;
+}
+
+
+bool IsPointInTriangle(const Pixel& p1, const Pixel& p2, const Pixel& p3, const Pixel& target)
+{
+    glm::vec2 v1(p1.x - target.x, p1.y - target.y);
+    glm::vec2 v2(p2.x - target.x, p2.y - target.y);
+    glm::vec2 v3(p3.x - target.x, p3.y - target.y);
+
+    auto cross1 = crossProduct(v1,v2);
+    auto cross2 = crossProduct(v2,v3);
+    auto cross3 = crossProduct(v3,v1);
+
+    if(cross1 > 0 && cross2 > 0 && cross3 > 0)
+    {
+        return true;
+    }
+
+    if(cross1 < 0 && cross2 < 0 && cross3 < 0)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+std::vector<Pixel> RasterTool::RasterizeTriangle(const Pixel& p1, const Pixel& p2, const Pixel& p3)
+{
+    int min_x = std::min(std::min(p1.x, p2.x), p3.x);
+    int min_y = std::min(std::min(p1.y, p2.y), p3.y);
+    int max_x = std::max(std::max(p1.x, p2.x), p3.x);
+    int max_y = std::max(std::max(p1.y, p2.y), p3.y);
+
+    //std::cout << "minx = " << min_x << " maxx = " << max_x
+    //          << "miny = " << min_y << " maxy = " << max_y << std::endl;
+
+    std::vector<Pixel> result;
+    for (int x = min_x; x <= max_x; x++)
+    {
+        for (int y = min_y; y <= max_y; y++)
+        {
+            if(IsPointInTriangle(p1, p2, p3, {x, y}))
+            {
+                Pixel temp {x, y}; //全白
+                result.emplace_back(temp);
+            }
+        }    
+    }
+
+    //std::cout << "sum count : " << result.size() << std::endl;
+    
+    return result;
+}
+
+void RasterTool::InterpolateTriangle(const Pixel& p1, const Pixel& p2, const Pixel& p3, Pixel& target)
+{
+    //TODO:
 }

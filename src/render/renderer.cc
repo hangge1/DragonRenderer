@@ -47,9 +47,20 @@ void Renderer::DrawPixel(const Pixel& point)
 
 void Renderer::DrawLine(const Pixel& start, const Pixel& end)
 {
+    //auto raster_line = RasterTool::SimpleRasterizeLine(start, end);
     auto raster_line = RasterTool::RasterizeLine(start, end);
     for(const auto& p : raster_line)
     {
         DrawPixel(p);
     }
+}
+
+void Renderer::DrawTriangle(const Pixel& p1, const Pixel& p2, const Pixel& p3)
+{
+    auto raster_triangle = RasterTool::RasterizeTriangle(p1, p2, p3);
+    for(const auto& p : raster_triangle)
+    {
+        DrawPixel(p);
+    }
+    
 }

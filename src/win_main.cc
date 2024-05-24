@@ -49,12 +49,23 @@ void RenderOneColorLine(Renderer& renderer)
     renderer.DrawLine(start, end);
 }
 
+//渲染白色的三角形
+void RenderOneTriangle(Renderer& renderer)
+{
+    Pixel p1 {300, 300};
+    Pixel p2 {500, 300};
+    Pixel p3 {400, 500};
+
+    renderer.DrawTriangle(p1, p2, p3);
+}
+
 
 void CustomDraw(Renderer& renderer)
 {
     //RenderRandomPixel(renderer);
     //RenderOneLine(renderer);
-    RenderOneColorLine(renderer);
+    //RenderOneColorLine(renderer);
+    RenderOneTriangle(renderer);
 }
 
 int WINAPI wWinMain(HINSTANCE hInstance,

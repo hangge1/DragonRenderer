@@ -16,8 +16,10 @@ public:
 
     static std::vector<Pixel> SimpleRasterizeLine(const Pixel& p1, const Pixel& p2);
     static std::vector<Pixel> RasterizeLine(const Pixel& p1, const Pixel& p2);
-
     static void InterpolateLine(const Pixel& start, const Pixel& end, Pixel& target);
+
+    static std::vector<Pixel> RasterizeTriangle(const Pixel& p1, const Pixel& p2, const Pixel& p3);
+    static void InterpolateTriangle(const Pixel& p1, const Pixel& p2, const Pixel& p3, Pixel& target);
 };
 
 

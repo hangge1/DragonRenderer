@@ -24,6 +24,8 @@ public:
     void DrawPixel(const Pixel& point);
 
     void DrawLine(const Pixel& start, const Pixel& end);
+
+    void DrawTriangle(const Pixel& p1, const Pixel& p2, const Pixel& p3);
 private:
     FrameBuffer* current_frame_buffer_ {nullptr};
 };
