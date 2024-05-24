@@ -2,11 +2,9 @@
 #ifndef _CORE_PIXEL_H_
 #define _CORE_PIXEL_H_
 
-#include <cstdint>
-
-#include "color.h"
-
 #include "glm/glm.hpp"
+
+using Color = glm::u8vec4;
 
 struct Pixel
 {

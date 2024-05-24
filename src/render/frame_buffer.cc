@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-#include "color.h"
+#include "pixel.h"
 
 FrameBuffer::~FrameBuffer()
 {

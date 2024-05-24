@@ -6,7 +6,7 @@
 
 #include "frame_buffer.h"
 
-#include "color.h"
+#include "pixel.h"
 
 class FrameBuffer
 {

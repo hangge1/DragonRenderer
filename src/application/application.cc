@@ -2,8 +2,6 @@
 
 #include <Windows.h>
 
-#include "color.h"
-
 LRESULT CALLBACK Wndproc(HWND window_handler, UINT message_id, WPARAM message_wparam, LPARAM message_lparam) 
 {
 	APP->ProcessMessage(window_handler, message_id, message_wparam, message_lparam);
@@ -197,5 +195,5 @@ void Application::InitDrawContext()
 	//一个设备可以创建多个位图，本设备使用mhBmp作为激活位图，对mCanvasDC的内存拷出，其实就是拷出了mhBmp的数据
 	SelectObject(canvas_device_contex_, bitmap_);
 
-	memset(canvas_buffer_, 0, main_window_width_ * main_window_height_ * sizeof(Color)); //清空buffer为0
+	memset(canvas_buffer_, 0, main_window_width_ * main_window_height_ * 4); //清空buffer为0
 }

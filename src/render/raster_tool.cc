@@ -212,14 +212,19 @@ void RasterTool::InterpolateLine(const Pixel& start, const Pixel& end, Pixel& ta
         weight = static_cast<float>(vec_start2target.x) / vec_start2end.x;
     }
 
-    target.color.red = static_cast<byte>(weight * static_cast<float>(end.color.red) 
-        + (1.0 - weight) * static_cast<float>(start.color.red));
-    target.color.green = static_cast<byte>(weight * static_cast<float>(end.color.green) 
-        + (1.0 - weight) * static_cast<float>(start.color.green));
-    target.color.blue = static_cast<byte>(weight * static_cast<float>(end.color.blue) 
-        + (1.0 - weight) * static_cast<float>(start.color.blue));
-    target.color.alpha = static_cast<byte>(weight * static_cast<float>(end.color.alpha) 
-        + (1.0 - weight) * static_cast<float>(start.color.alpha));
+    // target.color.r = static_cast<byte>(weight * static_cast<float>(end.color.r) 
+    //     + (1.0 - weight) * static_cast<float>(start.color.red));
+    // target.color.green = static_cast<byte>(weight * static_cast<float>(end.color.green) 
+    //     + (1.0 - weight) * static_cast<float>(start.color.green));
+    // target.color.blue = static_cast<byte>(weight * static_cast<float>(end.color.blue) 
+    //     + (1.0 - weight) * static_cast<float>(start.color.blue));
+    // target.color.alpha = static_cast<byte>(weight * static_cast<float>(end.color.alpha) 
+    //     + (1.0 - weight) * static_cast<float>(start.color.alpha));
+
+    target.color.r = weight * end.color.r + (1.0f - weight) * start.color.r;
+    target.color.g = weight * end.color.g + (1.0f - weight) * start.color.g;
+    target.color.b = weight * end.color.b + (1.0f - weight) * start.color.b;
+    target.color.a = weight * end.color.a + (1.0f - weight) * start.color.a;
 }
 
 // 计算二维向量的叉乘
@@ -299,10 +304,10 @@ void RasterTool::InterpolateTriangle(const Pixel& p1, const Pixel& p2, const Pix
     float coff3 = 1.0f - coff2 - coff1; //s * s_p12;
 
     Color target_color;
-    target_color.red = coff1 * p1.color.red + coff2 * p2.color.red + coff3 * p3.color.red;
-    target_color.green = coff1 * p1.color.green + coff2 * p2.color.green + coff3 * p3.color.green;
-    target_color.blue = coff1 * p1.color.blue + coff2 * p2.color.blue + coff3 * p3.color.blue;
-    target_color.alpha = coff1 * p1.color.alpha + coff2 * p2.color.alpha + coff3 * p3.color.alpha;
+    target_color.r = coff1 * p1.color.r + coff2 * p2.color.r + coff3 * p3.color.r;
+    target_color.g = coff1 * p1.color.g + coff2 * p2.color.g + coff3 * p3.color.g;
+    target_color.b = coff1 * p1.color.b + coff2 * p2.color.b + coff3 * p3.color.b;
+    target_color.a = coff1 * p1.color.a + coff2 * p2.color.a + coff3 * p3.color.a;
 
     target.color = target_color;
 }

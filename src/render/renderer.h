@@ -3,7 +3,6 @@
 
 #include <Windows.h>
 
-#include "color.h"
 #include "frame_buffer.h"
 #include "pixel.h"
 
@@ -19,13 +18,13 @@ public:
 
     void ClearFrameBuffer();
 
-    void DrawPixel(LONG x_pox, LONG y_pox, const Color& pixel_color);
+    void DrawPixel(LONG x_pox, LONG y_pox, Color& pixel_color);
 
-    void DrawPixel(const Pixel& point);
+    void DrawPixel(Pixel& point);
 
-    void DrawLine(const Pixel& start, const Pixel& end);
+    void DrawLine(Pixel& start, Pixel& end);
 
-    void DrawTriangle(const Pixel& p1, const Pixel& p2, const Pixel& p3);
+    void DrawTriangle(Pixel& p1, Pixel& p2, Pixel& p3);
 private:
     FrameBuffer* current_frame_buffer_ {nullptr};
 };
