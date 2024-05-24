@@ -267,6 +267,7 @@ std::vector<Pixel> RasterTool::RasterizeTriangle(const Pixel& p1, const Pixel& p
             if(IsPointInTriangle(p1, p2, p3, {x, y}))
             {
                 Pixel temp {x, y}; //全白
+                InterpolateTriangle(p1, p2, p3, temp);
                 result.emplace_back(temp);
             }
         }    
@@ -279,5 +280,31 @@ std::vector<Pixel> RasterTool::RasterizeTriangle(const Pixel& p1, const Pixel& p
 
 void RasterTool::InterpolateTriangle(const Pixel& p1, const Pixel& p2, const Pixel& p3, Pixel& target)
 {
-    //TODO:
+    glm::vec2 v1(p1.x, p1.y);
+    glm::vec2 v2(p2.x, p2.y);
+    glm::vec2 v3(p3.x, p3.y);
+    glm::vec2 vp(target.x, target.y);
+
+    glm::vec2 pp1 = v1 - vp;
+    glm::vec2 pp2 = v2 - vp;
+    glm::vec2 pp3 = v3 - vp;
+
+    float s_p12 = std::abs(crossProduct(pp1, pp2));
+    float s_p23 = std::abs(crossProduct(pp2, pp3));
+    float s_p31 = std::abs(crossProduct(pp3, pp1));
+
+    float s = 1.0f / std::abs(crossProduct(v1 - v2, v1 - v3));
+
+    //f(p) = coff1 * f(p1) + coff2 * f(p2) + coff3 * f(p3);
+    float coff1 = s * s_p23;
+    float coff2 = s * s_p31;
+    float coff3 = 1.0f - coff2 - coff1; //s * s_p12;
+
+    Color target_color;
+    target_color.red = coff1 * p1.color.red + coff2 * p2.color.red + coff3 * p3.color.red;
+    target_color.green = coff1 * p1.color.green + coff2 * p2.color.green + coff3 * p3.color.green;
+    target_color.blue = coff1 * p1.color.blue + coff2 * p2.color.blue + coff3 * p3.color.blue;
+    target_color.alpha = coff1 * p1.color.alpha + coff2 * p2.color.alpha + coff3 * p3.color.alpha;
+
+    target.color = target_color;
 }

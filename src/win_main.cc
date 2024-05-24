@@ -52,9 +52,9 @@ void RenderOneColorLine(Renderer& renderer)
 //渲染白色的三角形
 void RenderOneTriangle(Renderer& renderer)
 {
-    Pixel p1 {300, 300};
-    Pixel p2 {500, 300};
-    Pixel p3 {400, 500};
+    Pixel p1 {300, 300, Color(255, 0, 0)};
+    Pixel p2 {500, 300, Color(0, 255, 0)};
+    Pixel p3 {400, 500, Color(0, 0, 255)};
 
     renderer.DrawTriangle(p1, p2, p3);
 }
