@@ -1,3 +1,5 @@
+# test/CMakeLists.txt
+
 # =======================================================================================
 # line_rasterize_test.cc
 
@@ -23,9 +25,7 @@ test_k_less_1_line_rasterize(-10 -10 -20 -15)
 # glm_test.cc
 
 add_executable(glm_test "glm_test.cc")
-target_include_directories(glm_test PRIVATE ${CMAKE_SOURCE_DIR}/thirdparts)
-target_link_libraries(glm_test glm)
-
+target_link_libraries(glm_test thirdpart_lib_glm)
 
 add_test(NAME test_thirdpart_lib_glm COMMAND glm_test) 
 set_tests_properties(test_thirdpart_lib_glm PROPERTIES PASS_REGULAR_EXPRESSION "thirdparts library glm_test Pass")

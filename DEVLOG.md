@@ -52,5 +52,8 @@
 
 5、朴素直线光栅化解耦，添加插值（ok）
 
-6、将glm作为接口库使用，依赖他的目标取消include_directories属性设置（TODO）
+6、将glm作为接口库使用，依赖他的目标取消include_directories属性设置（ok）
 
+7、利用glm优化现有的数据结构和接口（TODO）
+
+8、将通用的Color、Pixel等文件也抽象成接口库（Failed，原因不明，先不试了）
