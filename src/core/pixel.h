@@ -6,10 +6,18 @@
 
 #include "color.h"
 
+#include "glm/glm.hpp"
+
 struct Pixel
 {
-    int32_t x;
-    int32_t y;
+    Pixel(int x = 0, int y = 0, Color r = Color())
+        : pos(x, y), 
+          color(r)
+    {
+
+    }
+
+    glm::ivec2 pos;
     Color color;
 };
 

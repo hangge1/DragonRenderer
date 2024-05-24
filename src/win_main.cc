@@ -34,8 +34,8 @@ void RenderRandomPixel(Renderer& renderer)
 //渲染一条白色直线
 void RenderOneLine(Renderer& renderer)
 {
-    Pixel start {300, 300};
-    Pixel end {400, 400};
+    Pixel start(300, 300);
+    Pixel end(400, 400);
 
     renderer.DrawLine(start, end);
 }
@@ -43,8 +43,8 @@ void RenderOneLine(Renderer& renderer)
 //渲染一条由红到绿的直线
 void RenderOneColorLine(Renderer& renderer)
 {
-    Pixel start {300, 300, Color(255, 0, 0, 255)};
-    Pixel end {400, 400, Color(0, 255, 0, 255)};
+    Pixel start(300, 300, Color(255, 0, 0, 255));
+    Pixel end(400, 400, Color(0, 255, 0, 255));
 
     renderer.DrawLine(start, end);
 }
@@ -52,9 +52,9 @@ void RenderOneColorLine(Renderer& renderer)
 //渲染白色的三角形
 void RenderOneTriangle(Renderer& renderer)
 {
-    Pixel p1 {300, 300, Color(255, 0, 0)};
-    Pixel p2 {500, 300, Color(0, 255, 0)};
-    Pixel p3 {400, 500, Color(0, 0, 255)};
+    Pixel p1(300, 300, Color(255, 0, 0));
+    Pixel p2(500, 300, Color(0, 255, 0));
+    Pixel p3(400, 500, Color(0, 0, 255));
 
     renderer.DrawTriangle(p1, p2, p3);
 }

@@ -42,7 +42,7 @@ void Renderer::DrawPixel(LONG x_pos, LONG y_pos, const Color& pixel_color)
 
 void Renderer::DrawPixel(const Pixel& point)
 {
-    current_frame_buffer_->SetOnePixelColor(point.x, point.y, point.color);
+    current_frame_buffer_->SetOnePixelColor(point.pos.x, point.pos.y, point.color);
 }
 
 void Renderer::DrawLine(const Pixel& start, const Pixel& end)

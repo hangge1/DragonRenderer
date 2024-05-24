@@ -17,7 +17,7 @@ bool Str2Int(const char* str, int& num)
 std::string StrPixel(const Pixel& pixel)
 {
     std::stringstream ss;
-    ss << "(" << pixel.x << "," << pixel.y << ")";
+    ss << "(" << pixel.pos.x << "," << pixel.pos.y << ")";
     return ss.str();
 }
 
@@ -63,22 +63,22 @@ int main(int argc, char** argv)
     Pixel p1;
     Pixel p2;
 
-    if(!Str2Int(argv[1], p1.x))
+    if(!Str2Int(argv[1], p1.pos.x))
     {
         std::cout << "p1.x convert to int failed" << std::endl;
         return -2;
     }
-    if(!Str2Int(argv[2], p1.y))
+    if(!Str2Int(argv[2], p1.pos.y))
     {
         std::cout << "p1.y convert to int failed" << std::endl;
         return -2;
     }
-    if(!Str2Int(argv[3], p2.x))
+    if(!Str2Int(argv[3], p2.pos.x))
     {
         std::cout << "p2.x convert to int failed" << std::endl;
         return -2;
     }
-    if(!Str2Int(argv[4], p2.y))
+    if(!Str2Int(argv[4], p2.pos.y))
     {
         std::cout << "p2.y convert to int failed" << std::endl;
         return -2;
@@ -100,7 +100,7 @@ int main(int argc, char** argv)
         auto& p = line[i];
         auto& bren_p = brensenham_line[i];
 
-        if(p.x != bren_p.x || p.y != bren_p.y)
+        if(p.pos != bren_p.pos)
         {
             std::cout << "point is not completely at same position" << std::endl;
             PrintLine(brensenham_line, line);

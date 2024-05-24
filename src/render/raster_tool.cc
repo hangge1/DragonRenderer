@@ -10,50 +10,50 @@
 
 std::vector<Pixel> RasterTool::SimpleRasterizeLine(const Pixel& p1, const Pixel& p2)
 {
-    int dx = p2.x - p1.x;
-    int dy = p2.y - p1.y;
+    auto vec_p1p2 = p2.pos - p1.pos;
 
     std::vector<Pixel> result;
-    if(0 == dx)
+    if(0 == vec_p1p2.x)
     {
-        for (int y = p1.y; y <= p2.y; y++)
+        for (int y = p1.pos.y; y <= p2.pos.y; y++)
         {
-            result.emplace_back(Pixel{p1.x, y});
+            result.emplace_back(Pixel(p1.pos.x, y));
         }
         return result;
     }
     
-    if(0 == dy)
+    if(0 == vec_p1p2.y)
     {
-        for (int x = p1.x; x <= p2.x; x++)
+        for (int x = p1.pos.x; x <= p2.pos.x; x++)
         {
-            result.emplace_back(Pixel{x, p1.y});
+            result.emplace_back(Pixel(x, p1.pos.y));
         }
         return result;
     }
 
-    Pixel start {p1};
-    Pixel end {p2};
+    Pixel start { p1 };
+    Pixel end { p2 };
 
     bool flip_x = false;
-    if(dx < 0)
+    if(vec_p1p2.x < 0)
     {
-        start.x *= -1;
-        end.x *= -1;
+        start.pos.x *= -1;
+        end.pos.x *= -1;
         flip_x = true;
     }
 
     bool flip_y = false;
-    if(dy < 0)
+    if(vec_p1p2.y < 0)
     {
-        start.y *= -1;
-        end.y *= -1;
+        start.pos.y *= -1;
+        end.pos.y *= -1;
         flip_y = true;
     }
 
     //dx != 0 && dy != 0
-    double k = (end.y - start.y) / (double)(end.x - start.x);
-    double b = start.y - k * start.x;
+    auto vec_start2end = end.pos - start.pos;
+    float k = vec_start2end.y / (float)vec_start2end.x;
+    float b = start.pos.y - k * start.pos.x;
 
     bool swap_xy = false;
     if(k - 1.0 > 1e-6)
@@ -63,16 +63,16 @@ std::vector<Pixel> RasterTool::SimpleRasterizeLine(const Pixel& p1, const Pixel&
 
     if(swap_xy)
     {
-        for (int y = start.y; y <= end.y; y++)
+        for (int y = start.pos.y; y <= end.pos.y; y++)
         {
-            Pixel need_insert_pixel {(int32_t)((y-b) / k), y};
+            Pixel need_insert_pixel((y-b) / k, y);
             if(flip_x)
             {
-                need_insert_pixel.x *= -1;
+                need_insert_pixel.pos.x *= -1;
             }
             if(flip_y)
             {
-                need_insert_pixel.y *= -1;
+                need_insert_pixel.pos.y *= -1;
             }
 
             InterpolateLine(p1, p2, need_insert_pixel);
@@ -81,16 +81,16 @@ std::vector<Pixel> RasterTool::SimpleRasterizeLine(const Pixel& p1, const Pixel&
     }
     else
     {
-        for (int x = start.x; x <= end.x; x++)
+        for (int x = start.pos.x; x <= end.pos.x; x++)
         {
-            Pixel need_insert_pixel {x, (int)(k * x + b)};
+            Pixel need_insert_pixel(x, k * x + b);
             if(flip_x)
             {
-                need_insert_pixel.x *= -1;
+                need_insert_pixel.pos.x *= -1;
             }
             if(flip_y)
             {
-                need_insert_pixel.y *= -1;
+                need_insert_pixel.pos.y *= -1;
             }
 
             InterpolateLine(p1, p2, need_insert_pixel);
@@ -98,7 +98,6 @@ std::vector<Pixel> RasterTool::SimpleRasterizeLine(const Pixel& p1, const Pixel&
         } 
     }
     
-
     return result;
 }
 
@@ -109,76 +108,76 @@ std::vector<Pixel> RasterTool::RasterizeLine(const Pixel& p1, const Pixel& p2)
 
     //先假设 p1->p2 第一象限，斜率0 < k < 1
     //暂不考虑颜色
-    int dy = end.y - start.y;
-    int dx = end.x - start.x;
+    // int dy = end.pos.y - start.pos.y;
+    // int dx = end.pos.x - start.pos.x;
+
+    auto vec_start2end = end.pos - start.pos;
 
     bool flip_x = false;
-    if(dx < 0)
+    if(vec_start2end.x < 0)
     {
-        start.x *= -1;
-        end.x *= -1;
+        start.pos.x *= -1;
+        end.pos.x *= -1;
         flip_x = true;
     }
 
     bool flip_y = false;
-    if(dy < 0)
+    if(vec_start2end.y < 0)
     {
-        start.y *= -1;
-        end.y *= -1;
+        start.pos.y *= -1;
+        end.pos.y *= -1;
         flip_y = true;
     }
 
-    dy = end.y - start.y;
-    dx = end.x - start.x;
+    // dy = end.pos.y - start.pos.y;
+    // dx = end.pos.x - start.pos.x;
+
+    vec_start2end = end.pos - start.pos;
 
     bool swap_xy = false;
-    if(dy > dx)
+    if(vec_start2end.y > vec_start2end.x)
     {
-        std::swap(dx, dy);
-        std::swap(start.x, start.y);
-        std::swap(end.x, end.y);
+        std::swap(vec_start2end.x, vec_start2end.y);
+        std::swap(start.pos.x, start.pos.y);
+        std::swap(end.pos.x, end.pos.y);
         swap_xy = true;
     }
 
-    int pi = dy * 2 - dx;
+    int pi = vec_start2end.y * 2 - vec_start2end.x;
 
-    int dealtp_NE = 2 * (dy - dx);
-    int dealtp_E = 2 * dy;
+    int dealtp_NE = 2 * (vec_start2end.y - vec_start2end.x);
+    int dealtp_E = 2 * vec_start2end.y;
 
-    int xi = start.x;
-    int yi = start.y;
+    int xi = start.pos.x;
+    int yi = start.pos.y;
 
     std::vector<Pixel> result;
 
-    int delta = dx;
+    int delta = vec_start2end.x;
 
     std::cout << "\n\n\n";
     for (int i = 0; i <= delta; i++)
     {
-
-        Pixel current_pixel {xi, yi};        //std::cout << "[" << i << "] = (" << xi << "," << yi << ")" << std::endl;
+        Pixel current_pixel(xi, yi); 
 
         if(swap_xy)
         {
-            std::swap(current_pixel.x, current_pixel.y);
+            std::swap(current_pixel.pos.x, current_pixel.pos.y);
         }
 
         if(flip_x)
         {
-            current_pixel.x *= -1;
+            current_pixel.pos.x *= -1;
         }
 
         if(flip_y)
         {
-            current_pixel.y *= -1;
+            current_pixel.pos.y *= -1;
         }
 
         //颜色插值
 
         InterpolateLine(p1, p2, current_pixel);
-
-        //std::cout << "(" << (int)current_pixel.color.red << "," 
-        //    << (int)current_pixel.color.green << "," << (int)current_pixel.color.blue << ")" << std::endl;
 
         result.emplace_back(current_pixel);
         if(pi > 0)
@@ -199,24 +198,28 @@ std::vector<Pixel> RasterTool::RasterizeLine(const Pixel& p1, const Pixel& p2)
 
 void RasterTool::InterpolateLine(const Pixel& start, const Pixel& end, Pixel& target)
 {
-    double weight = 1.0f;
-    if(start.y != end.y)
+    float weight = 1.0f;
+
+    auto vec_start2target = target.pos - start.pos;
+    auto vec_start2end = end.pos - start.pos;
+
+    if(start.pos.y != end.pos.y)
     {
-        weight = static_cast<double>(target.y - start.y) / (end.y - start.y);
+        weight = static_cast<float>(vec_start2target.y) / vec_start2end.y;
     }
     else
     {
-        weight = static_cast<double>(target.x - start.x) / (end.x - start.x);
+        weight = static_cast<float>(vec_start2target.x) / vec_start2end.x;
     }
 
-    target.color.red = static_cast<byte>(weight * static_cast<double>(end.color.red) 
-        + (1.0 - weight) * static_cast<double>(start.color.red));
-    target.color.green = static_cast<byte>(weight * static_cast<double>(end.color.green) 
-        + (1.0 - weight) * static_cast<double>(start.color.green));
-    target.color.blue = static_cast<byte>(weight * static_cast<double>(end.color.blue) 
-        + (1.0 - weight) * static_cast<double>(start.color.blue));
-    target.color.alpha = static_cast<byte>(weight * static_cast<double>(end.color.alpha) 
-        + (1.0 - weight) * static_cast<double>(start.color.alpha));
+    target.color.red = static_cast<byte>(weight * static_cast<float>(end.color.red) 
+        + (1.0 - weight) * static_cast<float>(start.color.red));
+    target.color.green = static_cast<byte>(weight * static_cast<float>(end.color.green) 
+        + (1.0 - weight) * static_cast<float>(start.color.green));
+    target.color.blue = static_cast<byte>(weight * static_cast<float>(end.color.blue) 
+        + (1.0 - weight) * static_cast<float>(start.color.blue));
+    target.color.alpha = static_cast<byte>(weight * static_cast<float>(end.color.alpha) 
+        + (1.0 - weight) * static_cast<float>(start.color.alpha));
 }
 
 // 计算二维向量的叉乘
@@ -228,13 +231,13 @@ float crossProduct(const glm::vec2& a, const glm::vec2& b)
 
 bool IsPointInTriangle(const Pixel& p1, const Pixel& p2, const Pixel& p3, const Pixel& target)
 {
-    glm::vec2 v1(p1.x - target.x, p1.y - target.y);
-    glm::vec2 v2(p2.x - target.x, p2.y - target.y);
-    glm::vec2 v3(p3.x - target.x, p3.y - target.y);
+    auto v1 = target.pos - p1.pos;
+    auto v2 = target.pos - p2.pos;
+    auto v3 = target.pos - p3.pos;
 
-    auto cross1 = crossProduct(v1,v2);
-    auto cross2 = crossProduct(v2,v3);
-    auto cross3 = crossProduct(v3,v1);
+    auto cross1 = crossProduct(v1, v2);
+    auto cross2 = crossProduct(v2, v3);
+    auto cross3 = crossProduct(v3, v1);
 
     if(cross1 > 0 && cross2 > 0 && cross3 > 0)
     {
@@ -251,10 +254,10 @@ bool IsPointInTriangle(const Pixel& p1, const Pixel& p2, const Pixel& p3, const 
 
 std::vector<Pixel> RasterTool::RasterizeTriangle(const Pixel& p1, const Pixel& p2, const Pixel& p3)
 {
-    int min_x = std::min(std::min(p1.x, p2.x), p3.x);
-    int min_y = std::min(std::min(p1.y, p2.y), p3.y);
-    int max_x = std::max(std::max(p1.x, p2.x), p3.x);
-    int max_y = std::max(std::max(p1.y, p2.y), p3.y);
+    int min_x = std::min( std::min( p1.pos.x, p2.pos.x ), p3.pos.x );
+    int min_y = std::min( std::min( p1.pos.y, p2.pos.y ), p3.pos.y );
+    int max_x = std::max( std::max( p1.pos.x, p2.pos.x ), p3.pos.x );
+    int max_y = std::max( std::max( p1.pos.y, p2.pos.y ), p3.pos.y );
 
     //std::cout << "minx = " << min_x << " maxx = " << max_x
     //          << "miny = " << min_y << " maxy = " << max_y << std::endl;
@@ -264,9 +267,9 @@ std::vector<Pixel> RasterTool::RasterizeTriangle(const Pixel& p1, const Pixel& p
     {
         for (int y = min_y; y <= max_y; y++)
         {
-            if(IsPointInTriangle(p1, p2, p3, {x, y}))
+            if(IsPointInTriangle( p1, p2, p3, Pixel(x, y) ))
             {
-                Pixel temp {x, y}; //全白
+                Pixel temp(x, y); //全白
                 InterpolateTriangle(p1, p2, p3, temp);
                 result.emplace_back(temp);
             }
@@ -280,20 +283,15 @@ std::vector<Pixel> RasterTool::RasterizeTriangle(const Pixel& p1, const Pixel& p
 
 void RasterTool::InterpolateTriangle(const Pixel& p1, const Pixel& p2, const Pixel& p3, Pixel& target)
 {
-    glm::vec2 v1(p1.x, p1.y);
-    glm::vec2 v2(p2.x, p2.y);
-    glm::vec2 v3(p3.x, p3.y);
-    glm::vec2 vp(target.x, target.y);
+    auto pp1 = p1.pos - target.pos;
+    auto pp2 = p2.pos - target.pos;
+    auto pp3 = p3.pos - target.pos;
 
-    glm::vec2 pp1 = v1 - vp;
-    glm::vec2 pp2 = v2 - vp;
-    glm::vec2 pp3 = v3 - vp;
+    float s_p12 = std::abs( crossProduct(pp1, pp2) );
+    float s_p23 = std::abs( crossProduct(pp2, pp3) );
+    float s_p31 = std::abs( crossProduct(pp3, pp1) );
 
-    float s_p12 = std::abs(crossProduct(pp1, pp2));
-    float s_p23 = std::abs(crossProduct(pp2, pp3));
-    float s_p31 = std::abs(crossProduct(pp3, pp1));
-
-    float s = 1.0f / std::abs(crossProduct(v1 - v2, v1 - v3));
+    float s = 1.0f / std::abs( crossProduct(p2.pos - p1.pos, p3.pos - p1.pos) );
 
     //f(p) = coff1 * f(p1) + coff2 * f(p2) + coff3 * f(p3);
     float coff1 = s * s_p23;
