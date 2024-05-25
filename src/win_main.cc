@@ -12,6 +12,7 @@
 #include "application.h"
 #include "renderer.h"
 #include "pixel.h"
+#include "image.h"
 
 //渲染随机像素值，形成类似老式电视机的那种雪花图
 void RenderRandomPixel(Renderer& renderer)
@@ -69,13 +70,24 @@ void RenderOneColorTriangle(Renderer& renderer)
 }
 
 
+Image* lufei_image = Image::createImage(ASSETS_PATH "/texture/lufei.jpg");
+
+//渲染图片
+void RenderPicture(Renderer& renderer)
+{
+    renderer.DrawPicture(*lufei_image, false);
+}
+
+
 void CustomDraw(Renderer& renderer)
 {
     //RenderRandomPixel(renderer);
     //RenderOneLine(renderer);
     //RenderOneColorLine(renderer);
     //RenderOneTriangle(renderer);
-    RenderOneColorTriangle(renderer);
+    //RenderOneColorTriangle(renderer);
+
+    RenderPicture(renderer);
 }
 
 int WINAPI wWinMain(HINSTANCE hInstance,
@@ -108,6 +120,8 @@ int WINAPI wWinMain(HINSTANCE hInstance,
     }
 
     std::cout << "Application will exit!" << std::endl;
+
+    Image::destroyImage(lufei_image);
 
     return 0;
 }

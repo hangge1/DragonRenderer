@@ -107,9 +107,6 @@ std::vector<Pixel> RasterTool::RasterizeLine(const Pixel& p1, const Pixel& p2)
     Pixel end = p2;
 
     //先假设 p1->p2 第一象限，斜率0 < k < 1
-    //暂不考虑颜色
-    // int dy = end.pos.y - start.pos.y;
-    // int dx = end.pos.x - start.pos.x;
 
     auto vec_start2end = end.pos - start.pos;
 
@@ -128,9 +125,6 @@ std::vector<Pixel> RasterTool::RasterizeLine(const Pixel& p1, const Pixel& p2)
         end.pos.y *= -1;
         flip_y = true;
     }
-
-    // dy = end.pos.y - start.pos.y;
-    // dx = end.pos.x - start.pos.x;
 
     vec_start2end = end.pos - start.pos;
 
@@ -211,15 +205,6 @@ void RasterTool::InterpolateLine(const Pixel& start, const Pixel& end, Pixel& ta
     {
         weight = static_cast<float>(vec_start2target.x) / vec_start2end.x;
     }
-
-    // target.color.r = static_cast<byte>(weight * static_cast<float>(end.color.r) 
-    //     + (1.0 - weight) * static_cast<float>(start.color.red));
-    // target.color.green = static_cast<byte>(weight * static_cast<float>(end.color.green) 
-    //     + (1.0 - weight) * static_cast<float>(start.color.green));
-    // target.color.blue = static_cast<byte>(weight * static_cast<float>(end.color.blue) 
-    //     + (1.0 - weight) * static_cast<float>(start.color.blue));
-    // target.color.alpha = static_cast<byte>(weight * static_cast<float>(end.color.alpha) 
-    //     + (1.0 - weight) * static_cast<float>(start.color.alpha));
 
     target.color.r = weight * end.color.r + (1.0f - weight) * start.color.r;
     target.color.g = weight * end.color.g + (1.0f - weight) * start.color.g;
