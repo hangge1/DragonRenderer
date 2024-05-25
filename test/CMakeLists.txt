@@ -30,3 +30,13 @@ target_link_libraries(glm_test thirdpart_lib_glm)
 add_test(NAME test_thirdpart_lib_glm COMMAND glm_test) 
 set_tests_properties(test_thirdpart_lib_glm PROPERTIES PASS_REGULAR_EXPRESSION "thirdparts library glm_test Pass")
 # =======================================================================================
+
+# =======================================================================================
+# stb_image_test.cc
+
+add_executable(stb_image_test "stb_image_test.cc")
+target_link_libraries(stb_image_test thirdpart_lib_stb_image assets_lib)
+
+add_test(NAME test_thirdpart_lib_stb_image COMMAND stb_image_test) 
+set_tests_properties(test_thirdpart_lib_stb_image PROPERTIES PASS_REGULAR_EXPRESSION "thirdparts library stb_image Pass")
+# =======================================================================================

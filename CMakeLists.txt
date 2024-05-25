@@ -39,6 +39,12 @@ project(DragonRenderer
     LANGUAGES CXX
 )
 
+
+# 资产添加接口库，方便依赖方通过一个宏获取资产文件夹的路径
+add_library(assets_lib INTERFACE)
+target_compile_definitions(assets_lib INTERFACE ASSETS_PATH=\"${CMAKE_SOURCE_DIR}/assets\")
+
+
 add_subdirectory(thirdparts)
 
 add_subdirectory(src)
