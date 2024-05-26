@@ -1,3 +1,4 @@
+
 #ifndef _APPLICATION_APPLICATION_H_
 #define _APPLICATION_APPLICATION_H_
 
@@ -36,6 +37,8 @@ public:
     void Render();
 private:
     bool CreateMainWindow();
+
+    void MoveWindow2DesktopCenter();
 
 	ATOM RegisterMainWindowClass();
 

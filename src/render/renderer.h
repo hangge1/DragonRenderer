@@ -19,15 +19,15 @@ public:
 
     void ClearFrameBuffer();
 
-    void DrawPixel(LONG x_pox, LONG y_pox, Color& pixel_color, bool isExChangeRedBlue = true);
+    void DrawPixel(LONG x_pox, LONG y_pox, Color& pixel_color);
 
-    void DrawPixel(Pixel& point, bool isExChangeRedBlue = true);
+    void DrawPixel(Pixel& point);
 
-    void DrawLine(Pixel& start, Pixel& end, bool isExChangeRedBlue = true);
+    void DrawLine(Pixel& start, Pixel& end);
 
-    void DrawTriangle(Pixel& p1, Pixel& p2, Pixel& p3, bool isExChangeRedBlue = true);
+    void DrawTriangle(Pixel& p1, Pixel& p2, Pixel& p3);
 
-    void DrawPicture(const Image& image, bool isExChangeRedBlue = true);
+    void DrawPicture(const Image& image);
 private:
     FrameBuffer* current_frame_buffer_ {nullptr};
 };

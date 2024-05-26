@@ -1,8 +1,7 @@
-/**
- * Author: 航火火
- * Path: main.cpp
- * Description: 
- *      Application Exe Main Entry Point File
+/*
+    Author: 航火火
+    Path: main.cpp
+    Description:  Application Exe Main Entry Point File
 */
 
 #include <Windows.h>
@@ -71,11 +70,13 @@ void RenderOneColorTriangle(Renderer& renderer)
 
 
 Image* lufei_image = Image::createImage(ASSETS_PATH "/texture/lufei.jpg");
+Image* chair_image = Image::createImage(ASSETS_PATH "/texture/chair.png");
 
 //渲染图片
 void RenderPicture(Renderer& renderer)
 {
-    renderer.DrawPicture(*lufei_image, false);
+    renderer.DrawPicture(*lufei_image);
+    renderer.DrawPicture(*chair_image);
 }
 
 

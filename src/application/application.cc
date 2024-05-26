@@ -56,6 +56,8 @@ bool Application::InitMainWindow(HINSTANCE program_instance, const CHAR* main_wi
 		return false;
 	}
 
+
+
 	//根据DC创建双缓冲CavasDC，利用位图进行绑定
 	InitDrawContext();
 
@@ -147,6 +149,8 @@ bool Application::CreateMainWindow()
 		return false;
 	}
 
+	MoveWindow2DesktopCenter();
+
 	ShowWindow(main_window_handler_, true);
 
 	UpdateWindow(main_window_handler_);
@@ -154,6 +158,23 @@ bool Application::CreateMainWindow()
 	return true;
 }
 
+void Application::MoveWindow2DesktopCenter()
+{
+	RECT rectWindow;
+	// 获取窗口的尺寸
+    GetWindowRect(main_window_handler_, &rectWindow);
+    
+	RECT rectScreen;
+    // 获取屏幕的尺寸
+    GetClientRect(GetDesktopWindow(), &rectScreen);
+
+    // 计算居中位置
+    int posX = (rectScreen.right - rectWindow.right + rectWindow.left) / 2;
+    int posY = (rectScreen.bottom - rectWindow.bottom + rectWindow.top) / 2;
+
+    // 移动窗口到新位置
+    SetWindowPos(main_window_handler_, HWND_TOP, posX, posY, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+}
 
 ATOM Application::RegisterMainWindowClass()
 {

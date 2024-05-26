@@ -74,3 +74,15 @@
 
 
 
+2024-5-26
+
+1、准备改造单元测试，引入gtest（TODO）
+
+2、引入混合，利用alpha绘制半透明的效果（TODO）
+
+3、引入纹理采样（TODO）
+
+4、增加主窗体默认居中显示（TODO）
+
+5、FrameBuffer类调整red和blue的顺序（ok）
+

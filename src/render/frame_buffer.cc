@@ -54,5 +54,5 @@ void FrameBuffer::SetOnePixelColor(LONG x_pox, LONG y_pox, const Color& color)
         return;
     }
 
-    frame_buffer_[frame_width_ * y_pox + x_pox] = color;
+    frame_buffer_[frame_width_ * y_pox + x_pox] = Color(color.b, color.g, color.r, color.a);
 }
