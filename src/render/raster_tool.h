@@ -20,6 +20,10 @@ public:
 
     static std::vector<Pixel> RasterizeTriangle(const Pixel& p1, const Pixel& p2, const Pixel& p3);
     static void InterpolateTriangle(const Pixel& p1, const Pixel& p2, const Pixel& p3, Pixel& target);
+
+
+private:
+    static Color lerp_color(const Color& c1, const Color& c2, float weight);
 };
 
 

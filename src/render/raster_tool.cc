@@ -288,11 +288,11 @@ void RasterTool::InterpolateTriangle(const Pixel& p1, const Pixel& p2, const Pix
     float coff2 = s * s_p31;
     float coff3 = 1.0f - coff2 - coff1; //s * s_p12;
 
-    Color target_color;
-    target_color.r = coff1 * p1.color.r + coff2 * p2.color.r + coff3 * p3.color.r;
-    target_color.g = coff1 * p1.color.g + coff2 * p2.color.g + coff3 * p3.color.g;
-    target_color.b = coff1 * p1.color.b + coff2 * p2.color.b + coff3 * p3.color.b;
-    target_color.a = coff1 * p1.color.a + coff2 * p2.color.a + coff3 * p3.color.a;
+    target.color = p1.color * coff1 + p2.color * coff2 + p3.color * coff3;
+    target.uv = p1.uv * coff1 + p2.uv * coff2 + p3.uv * coff3;
+}
 
-    target.color = target_color;
+Color RasterTool::lerp_color(const Color &c1, const Color &c2, float weight)
+{
+    return c1 * weight + c2 * (1.0f - weight);
 }

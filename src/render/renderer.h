@@ -33,11 +33,15 @@ public:
 
     inline void SetColorBlend(bool start_color_blend) { start_color_blend_ = start_color_blend; }
 
+    void SetTexture(Image* texture) { texture_ = texture; }
 private:
     Color BlendColor(LONG x, LONG y, const Color& src_color);
+
+    Color NearestUvSample(const glm::vec2& uv);
 private:
     FrameBuffer* current_frame_buffer_ { nullptr };
     bool start_color_blend_  { false };
+    Image* texture_  { nullptr };
 };
 
 

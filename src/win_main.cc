@@ -110,6 +110,18 @@ void RenderBlendPicture2(Renderer& renderer)
     renderer.DrawPictureOnBlend(*chair_image, 200);
 }
 
+//纹理采样
+void RenderTriangleByTexture(Renderer& renderer)
+{
+    renderer.SetTexture(lufei_image);
+
+    Pixel p1(300, 300, Color(255, 0, 0, 255), 0.0f, 0.0f);
+    Pixel p2(500, 300, Color(0, 255, 0, 255), 1.0f, 0.0f);
+    Pixel p3(400, 500, Color(0, 0, 255, 255), 0.5f, 1.0f);
+
+    renderer.DrawTriangle(p1, p2, p3);
+}
+
 
 
 void CustomDraw(Renderer& renderer)
@@ -122,7 +134,8 @@ void CustomDraw(Renderer& renderer)
 
     //RenderPicture(renderer);
     //RenderBlendPicture(renderer);
-    RenderBlendPicture2(renderer);
+    //RenderBlendPicture2(renderer);
+    RenderTriangleByTexture(renderer);
 }
 
 int WINAPI wWinMain(HINSTANCE hInstance,

@@ -59,11 +59,22 @@ void Renderer::DrawLine(Pixel& start, Pixel& end)
 void Renderer::DrawTriangle(Pixel& p1, Pixel& p2, Pixel& p3)
 {
     auto raster_triangle = RasterTool::RasterizeTriangle(p1, p2, p3);
-    for(auto& p : raster_triangle)
+
+    if(texture_)
     {
-        DrawPixel(p);
+        for(auto& p : raster_triangle)
+        {
+            p.color = NearestUvSample(p.uv);
+            DrawPixel(p);
+        }
     }
-    
+    else
+    {
+        for(auto& p : raster_triangle)
+        {
+            DrawPixel(p);
+        }
+    }   
 }
 
 void Renderer::DrawPicture(const Image& image)
@@ -149,4 +160,17 @@ Color Renderer::BlendColor(LONG x, LONG y, const Color& src_color)
     }
 
     return src_color;
+}
+
+Color Renderer::NearestUvSample(const glm::vec2 &uv)
+{
+    if(nullptr == texture_ || nullptr == current_frame_buffer_)
+    {
+        return Color();
+    }
+
+    int x = uv.x * (texture_->get_width() - 1);
+    int y = uv.y * (texture_->get_height() - 1);
+
+    return texture_->get_data()[y * texture_->get_width() + x];
 }
