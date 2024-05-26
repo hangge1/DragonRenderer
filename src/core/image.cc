@@ -36,6 +36,8 @@ Image* Image::createImage(const std::string& path)
 
 	//由于我们是BGRA的格式，图片是RGBA的格式，所以得交换下R&B
 	unsigned char* bits = stbi_load(path.c_str(), &width, &height, &picType, STBI_rgb_alpha);
+
+	//数据层面直接操作，产生bgra序列的数据结构
 	for (int i = 0; i < width * height * 4; i += 4)
 	{
         std::swap(bits[i], bits[i+2]);

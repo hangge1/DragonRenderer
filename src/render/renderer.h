@@ -28,8 +28,16 @@ public:
     void DrawTriangle(Pixel& p1, Pixel& p2, Pixel& p3);
 
     void DrawPicture(const Image& image);
+
+    void DrawPictureOnBlend(const Image& image, unsigned char src_alpha);
+
+    inline void SetColorBlend(bool start_color_blend) { start_color_blend_ = start_color_blend; }
+
 private:
-    FrameBuffer* current_frame_buffer_ {nullptr};
+    Color BlendColor(LONG x, LONG y, const Color& src_color);
+private:
+    FrameBuffer* current_frame_buffer_ { nullptr };
+    bool start_color_blend_  { false };
 };
 
 

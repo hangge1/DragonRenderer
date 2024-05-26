@@ -45,7 +45,7 @@ void FrameBuffer::FillColor(const Color& will_fill_color)
     }
 }
 
-void FrameBuffer::SetOnePixelColor(LONG x_pox, LONG y_pox, const Color& color)
+void FrameBuffer::SetOnePixelColor(LONG x_pox, LONG y_pox, Color& color)
 {
     if(nullptr == frame_buffer_ || 
         x_pox < 0 || x_pox >= frame_width_ || 
@@ -54,5 +54,18 @@ void FrameBuffer::SetOnePixelColor(LONG x_pox, LONG y_pox, const Color& color)
         return;
     }
 
-    frame_buffer_[frame_width_ * y_pox + x_pox] = Color(color.b, color.g, color.r, color.a);
+    frame_buffer_[frame_width_ * y_pox + x_pox] = color;
+}
+
+Color* FrameBuffer::GetFrameColor(LONG x_pox, LONG y_pox)
+{
+    // TODO: 在此处插入 return 语句
+    if(nullptr == frame_buffer_ || 
+        x_pox < 0 || x_pox >= frame_width_ || 
+        y_pox < 0 || y_pox >= frame_height_)
+    {
+        return nullptr;
+    }
+
+    return frame_buffer_ + (frame_width_ * y_pox + x_pox);
 }

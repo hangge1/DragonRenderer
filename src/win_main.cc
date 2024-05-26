@@ -70,14 +70,46 @@ void RenderOneColorTriangle(Renderer& renderer)
 
 
 Image* lufei_image = Image::createImage(ASSETS_PATH "/texture/lufei.jpg");
-Image* chair_image = Image::createImage(ASSETS_PATH "/texture/chair.png");
+//Image* chair_image = Image::createImage(ASSETS_PATH "/texture/chair.png");
+Image* chair_image = Image::createImage(ASSETS_PATH "/texture/chair_blend.png");
 
 //渲染图片
 void RenderPicture(Renderer& renderer)
 {
     renderer.DrawPicture(*lufei_image);
-    renderer.DrawPicture(*chair_image);
 }
+
+//渲染混合，方法1
+void RenderBlendPicture(Renderer& renderer)
+{
+    renderer.DrawPicture(*lufei_image);
+
+    renderer.SetColorBlend(true);
+
+    int width = chair_image->get_width();
+    int height = chair_image->get_height();
+    for (int i = 0; i < width; i++)
+    {
+        for (int j = 0; j < height; j++)
+        {
+            chair_image->get_data()[j * width + i].a = 200;
+        }
+    }
+    
+
+    renderer.DrawPicture(*chair_image);
+
+    renderer.SetColorBlend(false);
+
+}
+
+//渲染混合，方法2
+void RenderBlendPicture2(Renderer& renderer)
+{
+    renderer.DrawPicture(*lufei_image);
+    renderer.DrawPictureOnBlend(*chair_image, 200);
+}
+
 
 
 void CustomDraw(Renderer& renderer)
@@ -88,7 +120,9 @@ void CustomDraw(Renderer& renderer)
     //RenderOneTriangle(renderer);
     //RenderOneColorTriangle(renderer);
 
-    RenderPicture(renderer);
+    //RenderPicture(renderer);
+    //RenderBlendPicture(renderer);
+    RenderBlendPicture2(renderer);
 }
 
 int WINAPI wWinMain(HINSTANCE hInstance,

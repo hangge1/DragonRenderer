@@ -86,3 +86,7 @@
 
 5、FrameBuffer类调整red和blue的顺序（ok）
 
+6、解决这个颜色序列化不是bgra的问题，规定所有的数据都得按照bgra存放（ok）
+
+
+
