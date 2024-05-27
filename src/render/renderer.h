@@ -32,15 +32,19 @@ public:
     void DrawPictureOnBlend(const Image& image, unsigned char src_alpha);
 
     inline void SetColorBlend(bool start_color_blend) { start_color_blend_ = start_color_blend; }
+    
+    inline void SetBilinearSample(bool start_bilinear_sample) { start_bilinear_sample_ = start_bilinear_sample; }
 
     void SetTexture(Image* texture) { texture_ = texture; }
 private:
     Color BlendColor(LONG x, LONG y, const Color& src_color);
 
     Color NearestUvSample(const glm::vec2& uv);
+    Color BilinearUvSample(const glm::vec2& uv);
 private:
     FrameBuffer* current_frame_buffer_ { nullptr };
     bool start_color_blend_  { false };
+    bool start_bilinear_sample_  { false };
     Image* texture_  { nullptr };
 };
 

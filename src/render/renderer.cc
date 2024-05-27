@@ -62,11 +62,23 @@ void Renderer::DrawTriangle(Pixel& p1, Pixel& p2, Pixel& p3)
 
     if(texture_)
     {
-        for(auto& p : raster_triangle)
+        if(start_bilinear_sample_)
         {
-            p.color = NearestUvSample(p.uv);
-            DrawPixel(p);
+            for(auto& p : raster_triangle)
+            {
+                p.color = BilinearUvSample(p.uv);
+                DrawPixel(p);
+            }
         }
+        else
+        {
+            for(auto& p : raster_triangle)
+            {
+                p.color = NearestUvSample(p.uv);
+                DrawPixel(p);
+            }
+        }
+        
     }
     else
     {
@@ -173,4 +185,43 @@ Color Renderer::NearestUvSample(const glm::vec2 &uv)
     int y = uv.y * (texture_->get_height() - 1);
 
     return texture_->get_data()[y * texture_->get_width() + x];
+}
+
+Color Renderer::BilinearUvSample(const glm::vec2 &uv)
+{
+    if(nullptr == texture_ || nullptr == current_frame_buffer_)
+    {
+        return Color();
+    }
+
+    float x = uv.x * (texture_->get_width() - 1);
+    float y = uv.y * (texture_->get_height() - 1);
+
+    int x0 = std::floor(x);
+    int x1 = std::ceil(x);
+    int y0 = std::floor(y);
+    int y1 = std::ceil(y);
+
+    if(x0 == texture_->get_width() - 1)
+    {
+        x0--;
+        x1 = x0 + 1;
+    }
+
+    if(y0 == texture_->get_height() - 1)
+    {
+        y0--;
+        y1 = y0 + 1;
+    }
+
+    float weight = x - x0;
+    Color x_y0 = texture_->get_data()[y0 * texture_->get_width() + x1] * weight + 
+                 texture_->get_data()[y0 * texture_->get_width() + x0] * (1.0f - weight);
+
+    Color x_y1 = texture_->get_data()[y1 * texture_->get_width() + x1] * weight + 
+                 texture_->get_data()[y1 * texture_->get_width() + x0] * (1.0f - weight);
+
+    weight = y - y0;
+
+    return x_y1 * weight + x_y0 * (1 - weight);
 }

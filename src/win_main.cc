@@ -70,6 +70,7 @@ void RenderOneColorTriangle(Renderer& renderer)
 
 
 Image* lufei_image = Image::createImage(ASSETS_PATH "/texture/lufei.jpg");
+Image* goku_image = Image::createImage(ASSETS_PATH "/texture/goku.jpg");
 //Image* chair_image = Image::createImage(ASSETS_PATH "/texture/chair.png");
 Image* chair_image = Image::createImage(ASSETS_PATH "/texture/chair_blend.png");
 
@@ -110,8 +111,8 @@ void RenderBlendPicture2(Renderer& renderer)
     renderer.DrawPictureOnBlend(*chair_image, 200);
 }
 
-//纹理采样
-void RenderTriangleByTexture(Renderer& renderer)
+//最邻近纹理采样
+void RenderTriangleByNearestSampleTexture(Renderer& renderer)
 {
     renderer.SetTexture(lufei_image);
 
@@ -122,6 +123,26 @@ void RenderTriangleByTexture(Renderer& renderer)
     renderer.DrawTriangle(p1, p2, p3);
 }
 
+//双线性插值采样
+void RenderTriangleByBilinearSampleTexture(Renderer& renderer)
+{
+    renderer.SetTexture(goku_image);
+    renderer.SetBilinearSample(true);
+
+    Pixel p1(0, 0, Color(255, 0, 0, 255), 0.0f, 0.0f);
+    Pixel p2(400, 0, Color(0, 255, 0, 255), 1.0f, 0.0f);
+    Pixel p3(200, 600, Color(0, 0, 255, 255), 0.5f, 1.0f);
+
+    renderer.DrawTriangle(p1, p2, p3);
+
+    renderer.SetBilinearSample(false);
+
+    Pixel p4(400, 0, Color(255, 0, 0, 255), 0.0f, 0.0f);
+    Pixel p5(800, 0, Color(0, 255, 0, 255), 1.0f, 0.0f);
+    Pixel p6(600, 600, Color(0, 0, 255, 255), 0.5f, 1.0f);
+
+    renderer.DrawTriangle(p4, p5, p6);
+}
 
 
 void CustomDraw(Renderer& renderer)
@@ -135,7 +156,9 @@ void CustomDraw(Renderer& renderer)
     //RenderPicture(renderer);
     //RenderBlendPicture(renderer);
     //RenderBlendPicture2(renderer);
-    RenderTriangleByTexture(renderer);
+    //RenderTriangleByNearestSampleTexture(renderer);
+
+    RenderTriangleByBilinearSampleTexture(renderer);
 }
 
 int WINAPI wWinMain(HINSTANCE hInstance,
