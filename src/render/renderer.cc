@@ -174,12 +174,14 @@ Color Renderer::BlendColor(LONG x, LONG y, const Color& src_color)
     return src_color;
 }
 
-Color Renderer::NearestUvSample(const glm::vec2 &uv)
+Color Renderer::NearestUvSample(glm::vec2 &uv)
 {
     if(nullptr == texture_ || nullptr == current_frame_buffer_)
     {
         return Color();
     }
+
+    CheckUv(uv.x, uv.y);
 
     int x = uv.x * (texture_->get_width() - 1);
     int y = uv.y * (texture_->get_height() - 1);
@@ -187,12 +189,14 @@ Color Renderer::NearestUvSample(const glm::vec2 &uv)
     return texture_->get_data()[y * texture_->get_width() + x];
 }
 
-Color Renderer::BilinearUvSample(const glm::vec2 &uv)
+Color Renderer::BilinearUvSample(glm::vec2 &uv)
 {
     if(nullptr == texture_ || nullptr == current_frame_buffer_)
     {
         return Color();
     }
+
+    CheckUv(uv.x, uv.y);
 
     float x = uv.x * (texture_->get_width() - 1);
     float y = uv.y * (texture_->get_height() - 1);
@@ -224,4 +228,30 @@ Color Renderer::BilinearUvSample(const glm::vec2 &uv)
     weight = y - y0;
 
     return x_y1 * weight + x_y0 * (1 - weight);
+}
+
+void Renderer::CheckUv(float &ux, float &uy)
+{
+    if(ux < 0.0f || ux > 1.0f)
+    {
+        ux = Fraction(Fraction(ux) + 1.0f);
+        if(texture_uv_wrap_ == WrapMirror)
+        {
+            ux = 1.0f - ux;
+        }
+    }
+
+     if(uy < 0.0f || uy > 1.0f)
+    {
+        uy = Fraction(Fraction(uy) + 1.0f);
+        if(texture_uv_wrap_ == WrapMirror)
+        {
+            uy = 1.0f - uy;
+        }
+    }
+}
+
+float Renderer::Fraction(float num)
+{
+    return num - (int)num;
 }

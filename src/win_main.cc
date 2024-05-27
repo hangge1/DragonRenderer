@@ -144,6 +144,45 @@ void RenderTriangleByBilinearSampleTexture(Renderer& renderer)
     renderer.DrawTriangle(p4, p5, p6);
 }
 
+//Repeat Wrap测试
+void RenderTextureRepeatWrap(Renderer& renderer)
+{
+    renderer.SetTexture(goku_image);
+    renderer.SetBilinearSample(true);
+    renderer.SetTextureUvWrap(WrapRepeat);
+
+    Pixel p1(0, 0, Color(255, 0, 0, 255), 0.0f, 0.0f);
+    Pixel p2(400, 0, Color(0, 255, 0, 255), 1.0f, 0.0f);
+    Pixel p3(200, 600, Color(0, 0, 255, 255), 0.5f, 1.0f);
+
+    renderer.DrawTriangle(p1, p2, p3);
+
+    Pixel p4(400, 0, Color(255, 0, 0, 255), 1.0f, 0.0f);
+    Pixel p5(800, 0, Color(0, 255, 0, 255), 2.0f, 0.0f);
+    Pixel p6(600, 600, Color(0, 0, 255, 255), 1.5f, 1.0f);
+
+    renderer.DrawTriangle(p4, p5, p6);
+}
+
+//Mirror Wrap测试
+void RenderTextureMirrorWrap(Renderer& renderer)
+{
+    renderer.SetTexture(goku_image);
+    renderer.SetBilinearSample(true);
+    renderer.SetTextureUvWrap(WrapMirror);
+
+    Pixel p1(0, 0, Color(255, 0, 0, 255), 0.0f, 0.0f);
+    Pixel p2(400, 0, Color(0, 255, 0, 255), 1.0f, 0.0f);
+    Pixel p3(200, 600, Color(0, 0, 255, 255), 0.5f, 1.0f);
+
+    renderer.DrawTriangle(p1, p2, p3);
+
+    Pixel p4(400, 0, Color(255, 0, 0, 255), 1.0f, 0.0f);
+    Pixel p5(800, 0, Color(0, 255, 0, 255), 2.0f, 0.0f);
+    Pixel p6(600, 600, Color(0, 0, 255, 255), 1.5f, 1.0f);
+
+    renderer.DrawTriangle(p4, p5, p6);
+}
 
 void CustomDraw(Renderer& renderer)
 {
@@ -158,7 +197,10 @@ void CustomDraw(Renderer& renderer)
     //RenderBlendPicture2(renderer);
     //RenderTriangleByNearestSampleTexture(renderer);
 
-    RenderTriangleByBilinearSampleTexture(renderer);
+    //RenderTriangleByBilinearSampleTexture(renderer);
+
+    RenderTextureRepeatWrap(renderer);
+    //RenderTextureMirrorWrap(renderer);
 }
 
 int WINAPI wWinMain(HINSTANCE hInstance,

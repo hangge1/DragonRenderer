@@ -94,4 +94,4 @@
 
 1、引入纹理采样的双线性插值（ok）
 
-2、引入Wrap的Repeat和Mirror方式（TODO）
+2、引入Wrap的Repeat和Mirror方式（ok）
