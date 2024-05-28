@@ -12,6 +12,7 @@
 #include "renderer.h"
 #include "pixel.h"
 #include "image.h"
+#include "glm/ext.hpp"
 
 //渲染随机像素值，形成类似老式电视机的那种雪花图
 void RenderRandomPixel(Renderer& renderer)
@@ -96,7 +97,6 @@ void RenderBlendPicture(Renderer& renderer)
             chair_image->get_data()[j * width + i].a = 200;
         }
     }
-    
 
     renderer.DrawPicture(*chair_image);
 
@@ -184,6 +184,157 @@ void RenderTextureMirrorWrap(Renderer& renderer)
     renderer.DrawTriangle(p4, p5, p6);
 }
 
+//Mvp 变换矩阵测试(默认的能显示)
+void RenderTransform1(Renderer& renderer)
+{
+    glm::vec4 p1(-5.0f, 0.0f, -5.0f, 1.0f);
+    glm::vec4 p2(5.0f, 0.0f, -5.0f, 1.0f);
+    glm::vec4 p3(0.0f, 5.0f, 5.0f, 1.0f);
+
+    glm::mat4 identity = glm::identity<glm::mat4>();
+    glm::mat4 model_matrix = glm::translate(identity, glm::vec3(0.0f, 0.0f, 0.0f));
+
+    glm::mat4 camera_model_matrix = glm::translate(identity, glm::vec3(0.0f, 0.0f, 5.0f));
+    glm::mat4 view_matrix = glm::inverse(camera_model_matrix);
+
+    glm::mat4 project_matrix = glm::ortho(-10.0f, 10.0f, -3.0f, 10.0f, 15.0f, -30.0f);
+
+    int screen_width = APP->GetMainWindowWidth();
+    int screen_height = APP->GetMainWindowHeight();
+    glm::mat4 screen_matrix = {
+        screen_width / 2, 0.0f, 0.0f, screen_width / 2,
+        0.0f, screen_height / 2, 0.0f, screen_height / 2,
+        0.0f, 0.0f, 0.5f, 0.5f, 
+        0.0f, 0.0f, 0.0f, 1.0f
+    };
+
+    screen_matrix = glm::transpose(screen_matrix);
+
+    glm::vec4 clip_p1 = project_matrix * view_matrix * model_matrix * p1;
+    glm::vec4 clip_p2 = project_matrix * view_matrix * model_matrix * p2;
+    glm::vec4 clip_p3 = project_matrix * view_matrix * model_matrix * p3;
+
+    clip_p1 /= clip_p1.w;
+    clip_p2 /= clip_p2.w;
+    clip_p3 /= clip_p3.w;
+
+    clip_p1 = screen_matrix * clip_p1;
+    clip_p2 = screen_matrix * clip_p2;
+    clip_p3 = screen_matrix * clip_p3;
+
+    renderer.SetTexture(goku_image);
+    renderer.SetBilinearSample(true);
+
+    Pixel pos1(clip_p1.x, clip_p1.y, Color(255, 0, 0, 255), 0.0f, 0.0f);
+    Pixel pos2(clip_p2.x, clip_p2.y, Color(0, 255, 0, 255), 1.0f, 0.0f);
+    Pixel pos3(clip_p3.x, clip_p3.y, Color(0, 0, 255, 255), 0.5f, 1.0f);
+
+    renderer.DrawTriangle(pos1, pos2, pos3);
+}
+
+//Mvp 变换矩阵测试(物体绕y轴旋转)
+void RenderTransform2(Renderer& renderer)
+{
+    glm::vec4 p1(-5.0f, 0.0f, -5.0f, 1.0f);
+    glm::vec4 p2(5.0f, 0.0f, -5.0f, 1.0f);
+    glm::vec4 p3(0.0f, 5.0f, 5.0f, 1.0f);
+
+    static float angle = 10;
+    angle++;
+    float rangle = glm::radians(angle);
+
+    glm::mat4 identity = glm::identity<glm::mat4>();
+    glm::mat4 model_matrix = glm::rotate(identity, rangle, glm::vec3(0.0f, 1.0f, 0.0f));//glm::translate(identity, glm::vec3(0.0f, 0.0f, 0.0f));
+    glm::mat4 view_matrix = glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+    glm::mat4 project_matrix = glm::ortho(-10.0f, 10.0f, -3.0f, 10.0f, 15.0f, -30.0f);
+
+    int screen_width = APP->GetMainWindowWidth();
+    int screen_height = APP->GetMainWindowHeight();
+    glm::mat4 screen_matrix = {
+        screen_width / 2, 0.0f, 0.0f, screen_width / 2,
+        0.0f, screen_height / 2, 0.0f, screen_height / 2,
+        0.0f, 0.0f, 0.5f, 0.5f, 
+        0.0f, 0.0f, 0.0f, 1.0f
+    };
+
+    screen_matrix = glm::transpose(screen_matrix);
+
+    glm::vec4 clip_p1 = project_matrix * view_matrix * model_matrix * p1;
+    glm::vec4 clip_p2 = project_matrix * view_matrix * model_matrix * p2;
+    glm::vec4 clip_p3 = project_matrix * view_matrix * model_matrix * p3;
+
+    clip_p1 /= clip_p1.w;
+    clip_p2 /= clip_p2.w;
+    clip_p3 /= clip_p3.w;
+
+    clip_p1 = screen_matrix * clip_p1;
+    clip_p2 = screen_matrix * clip_p2;
+    clip_p3 = screen_matrix * clip_p3;
+
+    renderer.SetTexture(goku_image);
+    renderer.SetBilinearSample(true);
+
+    Pixel pos1(clip_p1.x, clip_p1.y, Color(255, 0, 0, 255), 0.0f, 0.0f);
+    Pixel pos2(clip_p2.x, clip_p2.y, Color(0, 255, 0, 255), 1.0f, 0.0f);
+    Pixel pos3(clip_p3.x, clip_p3.y, Color(0, 0, 255, 255), 0.5f, 1.0f);
+
+    renderer.DrawTriangle(pos1, pos2, pos3);
+}
+
+//Mvp 变换矩阵测试(相机绕y轴旋转)
+void RenderTransform3(Renderer& renderer)
+{
+    glm::vec4 p1(-5.0f, 0.0f, -5.0f, 1.0f);
+    glm::vec4 p2(5.0f, 0.0f, -5.0f, 1.0f);
+    glm::vec4 p3(0.0f, 5.0f, 5.0f, 1.0f);
+
+    static float angle = 10;
+    angle++;
+    float rangle = glm::radians(angle);
+
+    glm::mat4 identity = glm::identity<glm::mat4>();
+    glm::vec4 cameraPos = glm::rotate(identity, rangle, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+
+    glm::mat4 model_matrix = glm::translate(identity, glm::vec3(0.0f, 0.0f, 0.0f));
+    
+    glm::mat4 view_matrix = glm::lookAt(glm::vec3(cameraPos.x, cameraPos.y, cameraPos.z), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    
+    glm::mat4 project_matrix = glm::ortho(-10.0f, 10.0f, -3.0f, 10.0f, 15.0f, -30.0f);
+
+    int screen_width = APP->GetMainWindowWidth();
+    int screen_height = APP->GetMainWindowHeight();
+    glm::mat4 screen_matrix = {
+        screen_width / 2, 0.0f, 0.0f, screen_width / 2,
+        0.0f, screen_height / 2, 0.0f, screen_height / 2,
+        0.0f, 0.0f, 0.5f, 0.5f, 
+        0.0f, 0.0f, 0.0f, 1.0f
+    };
+
+    screen_matrix = glm::transpose(screen_matrix);
+
+    glm::vec4 clip_p1 = project_matrix * view_matrix * model_matrix * p1;
+    glm::vec4 clip_p2 = project_matrix * view_matrix * model_matrix * p2;
+    glm::vec4 clip_p3 = project_matrix * view_matrix * model_matrix * p3;
+
+    clip_p1 /= clip_p1.w;
+    clip_p2 /= clip_p2.w;
+    clip_p3 /= clip_p3.w;
+
+    clip_p1 = screen_matrix * clip_p1;
+    clip_p2 = screen_matrix * clip_p2;
+    clip_p3 = screen_matrix * clip_p3;
+
+    renderer.SetTexture(goku_image);
+    renderer.SetBilinearSample(true);
+
+    Pixel pos1(clip_p1.x, clip_p1.y, Color(255, 0, 0, 255), 0.0f, 0.0f);
+    Pixel pos2(clip_p2.x, clip_p2.y, Color(0, 255, 0, 255), 1.0f, 0.0f);
+    Pixel pos3(clip_p3.x, clip_p3.y, Color(0, 0, 255, 255), 0.5f, 1.0f);
+
+    renderer.DrawTriangle(pos1, pos2, pos3);
+}
+
 void CustomDraw(Renderer& renderer)
 {
     //RenderRandomPixel(renderer);
@@ -199,8 +350,12 @@ void CustomDraw(Renderer& renderer)
 
     //RenderTriangleByBilinearSampleTexture(renderer);
 
-    RenderTextureRepeatWrap(renderer);
+    //RenderTextureRepeatWrap(renderer);
     //RenderTextureMirrorWrap(renderer);
+
+    //RenderTransform1(renderer);
+    //RenderTransform2(renderer);
+    RenderTransform3(renderer);
 }
 
 int WINAPI wWinMain(HINSTANCE hInstance,
@@ -231,10 +386,14 @@ int WINAPI wWinMain(HINSTANCE hInstance,
 
         APP->Render();
     }
-
-    std::cout << "Application will exit!" << std::endl;
+    
+    std::cout << "destroyImage..." << std::endl;
 
     Image::destroyImage(lufei_image);
+    Image::destroyImage(goku_image);
+    Image::destroyImage(chair_image);
+
+    std::cout << "Application will exit!" << std::endl;
 
     return 0;
 }
