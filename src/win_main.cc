@@ -335,6 +335,16 @@ void RenderTransform3(Renderer& renderer)
     renderer.DrawTriangle(pos1, pos2, pos3);
 }
 
+void RenderByBindVAO(Renderer& renderer)
+{
+    static uint32_t vbo = renderer.GenBuffer();
+    renderer.DeleteBuffer(vbo);
+
+    
+    static uint32_t vao = renderer.GenVertexArray();
+    renderer.DeleteVertexArray(vao);
+}
+
 void CustomDraw(Renderer& renderer)
 {
     //RenderRandomPixel(renderer);
@@ -355,7 +365,8 @@ void CustomDraw(Renderer& renderer)
 
     //RenderTransform1(renderer);
     //RenderTransform2(renderer);
-    RenderTransform3(renderer);
+    //RenderTransform3(renderer);
+    RenderByBindVAO(renderer);
 }
 
 int WINAPI wWinMain(HINSTANCE hInstance,

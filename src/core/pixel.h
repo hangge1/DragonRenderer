@@ -62,4 +62,14 @@ struct Pixel
     glm::vec2 uv;
 };
 
+//仿OpenGL数据结构
+struct BindingDescription {
+	uint32_t	vbo_id{ 0 };
+	size_t		item_size{ 0 };
+	size_t		stride{ 0 };
+	size_t		offset{ 0 };
+};
+
+
+
 #endif

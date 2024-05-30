@@ -8,6 +8,8 @@
 #include "frame_buffer.h"
 #include "raster_tool.h"
 #include "image.h"
+#include "buffer_object.h"
+#include "vertex_array_object.h"
 
 Renderer::~Renderer()
 {
@@ -145,7 +147,51 @@ void Renderer::DrawPictureOnBlend(const Image& image, unsigned char src_alpha)
     SetColorBlend(false);
 }
 
-Color Renderer::BlendColor(LONG x, LONG y, const Color& src_color)
+uint32_t Renderer::GenBuffer()
+{
+    buffer_num_++;
+
+    buffer_map_[buffer_num_] = new BufferObject();
+
+    return buffer_num_;
+}
+
+void Renderer::DeleteBuffer(uint32_t vbo)
+{
+    auto it = buffer_map_.find(vbo);
+    if(it == buffer_map_.end())
+    {
+        return;
+    }
+
+    delete it->second;
+
+    buffer_map_.erase(vbo);
+}
+
+uint32_t Renderer::GenVertexArray()
+{
+    vao_num_++;
+
+    vao_map_[vao_num_] = new VertexArrayObject();
+
+    return vao_num_;
+}
+
+void Renderer::DeleteVertexArray(uint32_t vao)
+{
+    auto it = vao_map_.find(vao);
+    if(it == vao_map_.end())
+    {
+        return;
+    }
+
+    delete it->second;
+
+    vao_map_.erase(vao);
+}
+
+Color Renderer::BlendColor(LONG x, LONG y, const Color &src_color)
 {
     if(nullptr == current_frame_buffer_)
     {
@@ -234,16 +280,16 @@ void Renderer::CheckUv(float &ux, float &uy)
 {
     if(ux < 0.0f || ux > 1.0f)
     {
-        ux = Fraction(Fraction(ux) + 1.0f);
+        ux = Fracpart(Fracpart(ux) + 1.0f);
         if(texture_uv_wrap_ == WrapMirror)
         {
             ux = 1.0f - ux;
         }
     }
 
-     if(uy < 0.0f || uy > 1.0f)
+    if(uy < 0.0f || uy > 1.0f)
     {
-        uy = Fraction(Fraction(uy) + 1.0f);
+        uy = Fracpart(Fracpart(uy) + 1.0f);
         if(texture_uv_wrap_ == WrapMirror)
         {
             uy = 1.0f - uy;
@@ -251,7 +297,7 @@ void Renderer::CheckUv(float &ux, float &uy)
     }
 }
 
-float Renderer::Fraction(float num)
+float Renderer::Fracpart(float num)
 {
     return num - (int)num;
 }
