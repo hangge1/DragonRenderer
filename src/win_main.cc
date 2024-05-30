@@ -337,12 +337,63 @@ void RenderTransform3(Renderer& renderer)
 
 void RenderByBindVAO(Renderer& renderer)
 {
-    static uint32_t vbo = renderer.GenBuffer();
-    renderer.DeleteBuffer(vbo);
+    // static uint32_t vbo = renderer.GenBuffer();
+    // renderer.DeleteBuffer(vbo);
 
-    
-    static uint32_t vao = renderer.GenVertexArray();
-    renderer.DeleteVertexArray(vao);
+    // static uint32_t vao = renderer.GenVertexArray();
+    // renderer.DeleteVertexArray(vao);
+
+
+    float positions[] = {
+		-0.5f, -0.5f, 0.0f,
+		-0.5f, 0.5f, 0.0f,
+		0.5f, -0.5f, 0.0f,
+	};
+
+	float colors[] = {
+		1.0f, 0.0f, 0.0f, 1.0f,
+		0.0f, 1.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f, 1.0f,
+	};
+
+	float uvs[] = {
+		0.0f, 0.0f,
+		0.0f, 1.0f,
+		1.0f, 0.0f,
+	};
+
+	uint32_t indices[] = { 0, 1, 2 };
+
+	//生成indices对应ebo
+	static auto ebo = renderer.GenBuffer();
+	renderer.BindBuffer(ELEMENT_ARRAY_BUFFER, ebo);
+	renderer.BufferData(ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * 3, indices);
+	renderer.BindBuffer(ELEMENT_ARRAY_BUFFER, 0);
+
+	//生成vao并且绑定
+	static auto vao = renderer.GenVertexArray();
+	renderer.BindVertexArray(vao);
+	
+	//生成每个vbo，绑定后，设置属性ID及读取参数
+	static auto positionVbo = renderer.GenBuffer();
+	renderer.BindBuffer(ARRAY_BUFFER, positionVbo);
+	renderer.BufferData(ARRAY_BUFFER, sizeof(float) * 9, positions);
+	renderer.VertexAttributePointer(0, 3, 3 * sizeof(float), 0);
+
+	static auto colorVbo = renderer.GenBuffer();
+	renderer.BindBuffer(ARRAY_BUFFER, colorVbo);
+	renderer.BufferData(ARRAY_BUFFER, sizeof(float) * 12, colors);
+	renderer.VertexAttributePointer(1, 3, 4 * sizeof(float), 0);
+
+	static auto uvVbo = renderer.GenBuffer();
+	renderer.BindBuffer(ARRAY_BUFFER, uvVbo);
+	renderer.BufferData(ARRAY_BUFFER, sizeof(float) * 6, uvs);
+	renderer.VertexAttributePointer(2, 2, 2 * sizeof(float), 0);
+
+	renderer.BindBuffer(ARRAY_BUFFER, 0);
+	renderer.BindVertexArray(0);
+
+	renderer.PrintVao(vao);
 }
 
 void CustomDraw(Renderer& renderer)

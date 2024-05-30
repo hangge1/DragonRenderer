@@ -52,9 +52,19 @@ public:
     // 仿OpenGL接口
     uint32_t GenBuffer();
     void DeleteBuffer(uint32_t vbo);
+    void BindBuffer(const uint32_t& buffer_type, const uint32_t& buffer_id);
+	void BufferData(const uint32_t& buffer_type, size_t data_size, void* data);
+
     uint32_t GenVertexArray();
     void DeleteVertexArray(uint32_t vao);
+    void BindVertexArray(const uint32_t& vao_id);
+	void VertexAttributePointer(
+		const uint32_t& binding,
+		const uint32_t& item_size,
+		const uint32_t& stride,
+		const uint32_t& offset);
 
+    void PrintVao(const uint32_t& vao) const;
 private:
     Color BlendColor(LONG x, LONG y, const Color &src_color);
 
@@ -79,6 +89,11 @@ private:
     // VAO相关
     uint32_t vao_num_{ 0 };
     std::map<uint32_t, VertexArrayObject *> vao_map_;
+
+    //状态
+    uint32_t current_vbo_{ 0 };
+	uint32_t current_ebo_{ 0 };
+	uint32_t current_vao_{ 0 };
 };
 
 #endif

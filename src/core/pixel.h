@@ -70,6 +70,7 @@ struct BindingDescription {
 	size_t		offset{ 0 };
 };
 
-
+#define ARRAY_BUFFER 0
+#define ELEMENT_ARRAY_BUFFER 1
 
 #endif

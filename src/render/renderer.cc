@@ -169,6 +169,43 @@ void Renderer::DeleteBuffer(uint32_t vbo)
     buffer_map_.erase(vbo);
 }
 
+void Renderer::BindBuffer(const uint32_t &buffer_type, const uint32_t &buffer_id)
+{
+    if (buffer_type == ARRAY_BUFFER) 
+    {
+		current_vbo_ = buffer_id;
+	}
+	else if (buffer_type == ELEMENT_ARRAY_BUFFER) 
+    {
+		current_ebo_ = buffer_id;
+	}
+}
+
+void Renderer::BufferData(const uint32_t &buffer_type, size_t data_size, void *data)
+{
+    uint32_t buffer_id = 0;
+	if (buffer_type == ARRAY_BUFFER) 
+    {
+		buffer_id = current_vbo_;
+	}
+	else if (buffer_type == ELEMENT_ARRAY_BUFFER) 
+    {
+		buffer_id = current_ebo_;
+	}
+	else {
+		assert(false);
+	}
+
+	auto iter = buffer_map_.find(buffer_id);
+	if (iter == buffer_map_.end()) 
+    {
+		assert(false);
+	}
+
+	BufferObject* bufferObject = iter->second;
+	bufferObject->SetBuffer(data, data_size);
+}
+
 uint32_t Renderer::GenVertexArray()
 {
     vao_num_++;
@@ -189,6 +226,32 @@ void Renderer::DeleteVertexArray(uint32_t vao)
     delete it->second;
 
     vao_map_.erase(vao);
+}
+
+void Renderer::BindVertexArray(const uint32_t &vao_id)
+{
+    current_vao_ = vao_id;
+}
+
+void Renderer::VertexAttributePointer(const uint32_t &binding, const uint32_t &item_size, const uint32_t &stride, const uint32_t &offset)
+{
+    auto iter = vao_map_.find(current_vao_);
+	if (iter == vao_map_.end()) 
+    {
+		assert(false);
+	}
+
+	auto vao = iter->second;
+	vao->Bind(binding, current_vbo_, item_size, stride, offset);
+}
+
+void Renderer::PrintVao(const uint32_t& vao) const
+{
+    auto it = vao_map_.find(vao);
+    if(it != vao_map_.end())
+    {
+        it->second->Print();
+    }
 }
 
 Color Renderer::BlendColor(LONG x, LONG y, const Color &src_color)

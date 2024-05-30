@@ -122,7 +122,7 @@
 
 1、仿照OpenGL的接口，引入VBO和VAO数据结构（ok）
 
-2、Render类添加bind相关对象的接口（TODO）
+2、Render类添加bind相关对象的接口（ok）
 
-3、提供Singer VBO的数据测试（TODO）
+3、提供Singer VBO的数据测试接口（ok）
 

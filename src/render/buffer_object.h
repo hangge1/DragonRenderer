@@ -8,11 +8,11 @@ class BufferObject
 {
 public:
     BufferObject() = default;
-    ~BufferObject() = default;
+    ~BufferObject();
     BufferObject(const BufferObject&) = delete;
     BufferObject& operator=(const BufferObject&) = delete;
 
-    void SetBuffer(uint8_t* buffer, size_t buffer_size);
+    void SetBuffer(void* buffer, size_t buffer_size);
     uint8_t* GetBuffer() const;
 private:
     uint8_t* buffer_ { nullptr };
