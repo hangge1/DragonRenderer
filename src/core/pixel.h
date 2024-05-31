@@ -6,6 +6,12 @@
 
 //using Color = glm::u8vec4;
 
+#define ARRAY_BUFFER 0
+#define ELEMENT_ARRAY_BUFFER 1
+
+#define DRAW_LINES 0
+#define DRAW_TRIANGLES 1
+
 struct Color
 {
     Color(): r(255), g(255), b(255), a(255)
@@ -46,7 +52,6 @@ struct Color
 };
 
 
-
 struct Pixel
 {
     Pixel(int x = 0, int y = 0, Color r = Color(), float u = 0.0f, float v = 0.0f)
@@ -62,6 +67,7 @@ struct Pixel
     glm::vec2 uv;
 };
 
+
 //仿OpenGL数据结构
 struct BindingDescription {
 	uint32_t	vbo_id{ 0 };
@@ -70,7 +76,18 @@ struct BindingDescription {
 	size_t		offset{ 0 };
 };
 
-#define ARRAY_BUFFER 0
-#define ELEMENT_ARRAY_BUFFER 1
+struct VsOutput 
+{
+	glm::vec4 position { 0.0f, 0.0f, 0.0f, 1.0f };
+	glm::vec4 color; //此处颜色改为0.0-1.0之间表达0-255的量
+	glm::vec2 uv;
+};
+
+struct FsOutput 
+{
+	glm::ivec2 pixelPos;
+	float depth;
+	Color color;//此处使用0-255来进行颜色显示
+};
 
 #endif

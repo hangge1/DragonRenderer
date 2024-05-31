@@ -13,6 +13,7 @@
 #include "pixel.h"
 #include "image.h"
 #include "glm/ext.hpp"
+#include "shader/default_shader.h"
 
 //渲染随机像素值，形成类似老式电视机的那种雪花图
 void RenderRandomPixel(Renderer& renderer)
@@ -246,7 +247,6 @@ void RenderTransform2(Renderer& renderer)
     glm::mat4 identity = glm::identity<glm::mat4>();
     glm::mat4 model_matrix = glm::rotate(identity, rangle, glm::vec3(0.0f, 1.0f, 0.0f));//glm::translate(identity, glm::vec3(0.0f, 0.0f, 0.0f));
     glm::mat4 view_matrix = glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
     glm::mat4 project_matrix = glm::ortho(-10.0f, 10.0f, -3.0f, 10.0f, 15.0f, -30.0f);
 
     int screen_width = APP->GetMainWindowWidth();
@@ -335,16 +335,27 @@ void RenderTransform3(Renderer& renderer)
     renderer.DrawTriangle(pos1, pos2, pos3);
 }
 
-void RenderByBindVAO(Renderer& renderer)
+DefaultShader* shader;
+glm::mat4 model_matrix;
+glm::mat4 view_matrix;
+glm::mat4 perspective_matrix;
+
+uint32_t vao;
+uint32_t ebo;
+
+float angle = 0.0f;
+
+void InitData(Renderer& renderer)
 {
-    // static uint32_t vbo = renderer.GenBuffer();
-    // renderer.DeleteBuffer(vbo);
+    shader = new DefaultShader();
+    
+    model_matrix = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3{ 0.0f, 1.0f, 0.0f });
+	view_matrix = glm::lookAtRH(glm::vec3(0.0f, 0.0f, 3.0f), 
+        glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    perspective_matrix = glm::perspective(30.0f, 
+        (float)APP->GetMainWindowWidth() / (float)APP->GetMainWindowHeight(), 0.1f, 60.0f);
 
-    // static uint32_t vao = renderer.GenVertexArray();
-    // renderer.DeleteVertexArray(vao);
-
-
-    float positions[] = {
+	float positions[] = {
 		-0.5f, -0.5f, 0.0f,
 		-0.5f, 0.5f, 0.0f,
 		0.5f, -0.5f, 0.0f,
@@ -365,13 +376,13 @@ void RenderByBindVAO(Renderer& renderer)
 	uint32_t indices[] = { 0, 1, 2 };
 
 	//生成indices对应ebo
-	static auto ebo = renderer.GenBuffer();
+	ebo = renderer.GenBuffer();
 	renderer.BindBuffer(ELEMENT_ARRAY_BUFFER, ebo);
 	renderer.BufferData(ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * 3, indices);
 	renderer.BindBuffer(ELEMENT_ARRAY_BUFFER, 0);
 
 	//生成vao并且绑定
-	static auto vao = renderer.GenVertexArray();
+	vao = renderer.GenVertexArray();
 	renderer.BindVertexArray(vao);
 	
 	//生成每个vbo，绑定后，设置属性ID及读取参数
@@ -383,7 +394,7 @@ void RenderByBindVAO(Renderer& renderer)
 	static auto colorVbo = renderer.GenBuffer();
 	renderer.BindBuffer(ARRAY_BUFFER, colorVbo);
 	renderer.BufferData(ARRAY_BUFFER, sizeof(float) * 12, colors);
-	renderer.VertexAttributePointer(1, 3, 4 * sizeof(float), 0);
+	renderer.VertexAttributePointer(1, 4, 4 * sizeof(float), 0);
 
 	static auto uvVbo = renderer.GenBuffer();
 	renderer.BindBuffer(ARRAY_BUFFER, uvVbo);
@@ -394,6 +405,22 @@ void RenderByBindVAO(Renderer& renderer)
 	renderer.BindVertexArray(0);
 
 	renderer.PrintVao(vao);
+}
+
+void RenderByPipeline(Renderer& renderer)
+{
+    angle += 1.0f;
+    model_matrix = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3{ 0.0f, 1.0f, 0.0f });
+
+
+    shader->model_matrix = model_matrix;
+    shader->view_matrix = view_matrix;
+    shader->project_matrix = perspective_matrix;
+
+    renderer.UseProgram(shader);
+    renderer.BindVertexArray(vao);
+    renderer.BindBuffer(ELEMENT_ARRAY_BUFFER, ebo);
+    renderer.DrawElement(DRAW_TRIANGLES, 0, 3);
 }
 
 void CustomDraw(Renderer& renderer)
@@ -417,7 +444,7 @@ void CustomDraw(Renderer& renderer)
     //RenderTransform1(renderer);
     //RenderTransform2(renderer);
     //RenderTransform3(renderer);
-    RenderByBindVAO(renderer);
+    RenderByPipeline(renderer);
 }
 
 int WINAPI wWinMain(HINSTANCE hInstance,
@@ -436,6 +463,8 @@ int WINAPI wWinMain(HINSTANCE hInstance,
         APP->GetMainWindowWidth(), 
         APP->GetMainWindowHeight(),
         APP->GetRenderBuffer());
+
+    InitData(renderer);
 
     while(!APP->HasMainWindowDestoryed())
     {

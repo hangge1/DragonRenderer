@@ -17,6 +17,17 @@ Renderer::~Renderer()
     {
         delete current_frame_buffer_;
     }
+
+    for (auto iter : buffer_map_) 
+    {
+		delete iter.second;
+	}
+	buffer_map_.clear();
+
+	for (auto iter : vao_map_) {
+		delete iter.second;
+	}
+	vao_map_.clear();
 }
 
 void Renderer::InitFrameBuffer(LONG frame_width, LONG frame_height, void* buffer)
@@ -28,6 +39,18 @@ void Renderer::InitFrameBuffer(LONG frame_width, LONG frame_height, void* buffer
 
     current_frame_buffer_ = new FrameBuffer();
     current_frame_buffer_->InitFrame(frame_width, frame_height, (Color*)buffer);
+
+
+    int screen_width = frame_width;
+    int screen_height = frame_height;
+    screen_matrix_ = {
+        screen_width / 2, 0.0f, 0.0f, screen_width / 2,
+        0.0f, screen_height / 2, 0.0f, screen_height / 2,
+        0.0f, 0.0f, 0.5f, 0.5f, 
+        0.0f, 0.0f, 0.0f, 1.0f
+    };
+
+    screen_matrix_ = glm::transpose(screen_matrix_);
 }
 
 void Renderer::ClearFrameBuffer()
@@ -245,6 +268,84 @@ void Renderer::VertexAttributePointer(const uint32_t &binding, const uint32_t &i
 	vao->Bind(binding, current_vbo_, item_size, stride, offset);
 }
 
+void Renderer::UseProgram(Shader* shader)
+{
+    current_shader_ = shader;
+}
+
+void Renderer::DrawElement(const uint32_t& drawMode, const uint32_t& first, const uint32_t& count)
+{
+    if(current_vao_ == 0 || nullptr == current_shader_ || count == 0)
+    {
+        return;
+    }
+
+    //获取vao
+    auto vao_iter = vao_map_.find(current_vao_);
+    if(vao_iter == vao_map_.end())
+    {
+        std::cout << "Error: current vao is invalid!" << std::endl;
+        return;
+    }
+
+    VertexArrayObject* vao = vao_iter->second;
+    auto& binding_map = vao->GetBindingMap();
+
+    //获取ebo
+    auto ebo_iter = buffer_map_.find(current_ebo_);
+    if(ebo_iter == buffer_map_.end())
+    {
+        std::cout << "Error: current ebo is invalid!" << std::endl;
+        return;
+    }
+
+    const BufferObject* ebo = ebo_iter->second;
+
+    //VertexShader处理
+    //按照ebo的index顺序，处理顶点，依次通过顶点着色器
+    std::vector<VsOutput> vs_outputs {};
+	VertexShaderApply(vs_outputs, vao, ebo, first, count);
+
+    if(vs_outputs.empty())
+    {
+        return;
+    }
+
+    //NDC处理：坐标转换为NDC
+    for (auto& output : vs_outputs) 
+    {
+		PerspectiveDivision(output);
+	}
+
+
+    //屏幕映射
+    //转化坐标到屏幕空间
+    for (auto& output : vs_outputs) 
+    {
+		ScreenMapping(output);
+	}
+
+
+    //光栅化
+    //离散出所有Fragment
+    std::vector<VsOutput> raster_outputs = RasterTool::Rasterize(drawMode, vs_outputs);
+
+    if(raster_outputs.empty()) 
+    {
+        return;
+    }
+
+    //FragmentShader
+    //颜色输出处理
+    FsOutput fs_output;
+	uint32_t pixel_pos = 0;
+	for (uint32_t i = 0; i < raster_outputs.size(); ++i) 
+    {
+		current_shader_->fragmentShader(raster_outputs[i], fs_output);
+		current_frame_buffer_->SetOnePixelColor(fs_output.pixelPos.x, fs_output.pixelPos.y, fs_output.color);
+	}
+}
+
 void Renderer::PrintVao(const uint32_t& vao) const
 {
     auto it = vao_map_.find(vao);
@@ -363,4 +464,38 @@ void Renderer::CheckUv(float &ux, float &uy)
 float Renderer::Fracpart(float num)
 {
     return num - (int)num;
+}
+
+ void Renderer::VertexShaderApply(
+		std::vector<VsOutput>& vsOutputs,
+		const VertexArrayObject* vao,
+		const BufferObject* ebo,
+		const uint32_t first,
+		const uint32_t count)
+{
+    auto binding_map = vao->GetBindingMap();
+	uint8_t* indicesData = ebo->GetBuffer();
+
+	uint32_t index = 0;
+	for (uint32_t i = first; i < first + count; ++i) {
+		//获取Ebo中第i个index
+		size_t indicesOffset = i * sizeof(uint32_t);
+		memcpy(&index, indicesData + indicesOffset, sizeof(uint32_t));
+
+		VsOutput output = current_shader_->vertexShader(binding_map, buffer_map_, index);
+		vsOutputs.push_back(output);
+	}
+}
+
+void Renderer::PerspectiveDivision(VsOutput& vs_output)
+{
+    float coff = 1.0f / vs_output.position.w;
+
+	vs_output.position *= coff;
+	vs_output.position.w = 1.0f;
+}
+
+void Renderer::ScreenMapping(VsOutput& vs_output)
+{
+    vs_output.position = screen_matrix_ * vs_output.position;
 }

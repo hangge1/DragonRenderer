@@ -22,6 +22,9 @@ public:
 
     void SetOnePixelColor(LONG x_pox, LONG y_pox, Color& color);
     Color* GetFrameColor(LONG x_pox, LONG y_pox);
+
+    LONG GetWidth() const { return frame_width_; }
+    LONG GetHeight() const { return frame_height_; }
 private:
     LONG frame_width_ {0};
     LONG frame_height_ {0};

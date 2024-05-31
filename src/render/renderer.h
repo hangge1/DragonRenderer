@@ -4,12 +4,14 @@
 #include <Windows.h>
 
 #include <map>
+#include <vector>
 
 #include "frame_buffer.h"
 #include "pixel.h"
 #include "image.h"
 #include "buffer_object.h"
 #include "vertex_array_object.h"
+#include "shader.h"
 
 enum TextureUvWrap
 {
@@ -49,7 +51,7 @@ public:
 
     void SetTexture(Image *texture) { texture_ = texture; }
 
-    // 仿OpenGL接口
+    // =============================仿OpenGL接口================================
     uint32_t GenBuffer();
     void DeleteBuffer(uint32_t vbo);
     void BindBuffer(const uint32_t& buffer_type, const uint32_t& buffer_id);
@@ -64,6 +66,10 @@ public:
 		const uint32_t& stride,
 		const uint32_t& offset);
 
+    void UseProgram(Shader* shader);
+    void DrawElement(const uint32_t& drawMode, const uint32_t& first, const uint32_t& count);
+
+
     void PrintVao(const uint32_t& vao) const;
 private:
     Color BlendColor(LONG x, LONG y, const Color &src_color);
@@ -74,12 +80,24 @@ private:
     void CheckUv(float &ux, float &uy);
     float Fracpart(float num);
 
+
+    void VertexShaderApply(
+		std::vector<VsOutput>& vsOutputs,
+		const VertexArrayObject* vao,
+		const BufferObject* ebo,
+		const uint32_t first,
+		const uint32_t count);
+
+    void PerspectiveDivision(VsOutput& vs_output);
+    void ScreenMapping(VsOutput& vs_output);
 private:
     FrameBuffer *current_frame_buffer_{nullptr};
     bool start_color_blend_{false};
     bool start_bilinear_sample_{false};
     TextureUvWrap texture_uv_wrap_{WrapRepeat};
     Image *texture_{nullptr};
+
+
 
     // 仿OpenGL数据结构
     // VBO相关/EBO也存在内部
@@ -94,6 +112,9 @@ private:
     uint32_t current_vbo_{ 0 };
 	uint32_t current_ebo_{ 0 };
 	uint32_t current_vao_{ 0 };
+
+    Shader* current_shader_{ nullptr };
+	glm::mat4 screen_matrix_;
 };
 
 #endif

@@ -126,3 +126,35 @@
 
 3、提供Singer VBO的数据测试接口（ok）
 
+
+
+2024-5-31
+
+1、添加Pipeline相关的数据结构（ok）
+
+2、添加绘制接口（ok）
+
+3、封装Shader抽象类，提供vertexshader和fragmentshader接口（ok）
+
+4、提供默认Shader类（ok）
+
+5、测试能够显示三角形（ok）
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
