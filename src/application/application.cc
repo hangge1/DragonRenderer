@@ -91,14 +91,22 @@ void Application::ProcessMessage(HWND window_handler, UINT message_id, WPARAM me
 }
 
 
-void Application::DispatchMessageLoop() 
+bool Application::DispatchMessageLoop() 
 {
+	if(APP->HasMainWindowDestoryed())
+	{
+		return false;
+	}
+
+	Render();
 	MSG msg;
 	if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 	{
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
+
+	return true;
 }
 
 

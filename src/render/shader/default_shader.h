@@ -6,7 +6,7 @@
 #include <map>
 
 #include "glm/glm.hpp"
-#include "pixel.h"
+#include "pipeline_data.h"
 
 class DefaultShader: public Shader 
 {

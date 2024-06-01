@@ -4,7 +4,7 @@
 #include <iostream>
 #include <vector>
 
-#include "pixel.h"
+#include "pipeline_data.h"
 #include "frame_buffer.h"
 #include "raster_tool.h"
 #include "image.h"
@@ -53,121 +53,12 @@ void Renderer::InitFrameBuffer(LONG frame_width, LONG frame_height, void* buffer
     screen_matrix_ = glm::transpose(screen_matrix_);
 }
 
-void Renderer::ClearFrameBuffer()
+void Renderer::Clear()
 {
     if(nullptr != current_frame_buffer_)
     {
         current_frame_buffer_->FillColor(Color(0, 0, 0, 0));
     }
-}
-
-void Renderer::DrawPixel(LONG x_pos, LONG y_pos, Color& pixel_color)
-{
-    current_frame_buffer_->SetOnePixelColor(x_pos, y_pos, BlendColor(x_pos, y_pos, pixel_color));
-}
-
-void Renderer::DrawPixel(Pixel& point)
-{
-    current_frame_buffer_->SetOnePixelColor(point.pos.x, point.pos.y, BlendColor(point.pos.x, point.pos.x, point.color));
-}
-
-void Renderer::DrawLine(Pixel& start, Pixel& end)
-{
-    //auto raster_line = RasterTool::SimpleRasterizeLine(start, end);
-    auto raster_line = RasterTool::RasterizeLine(start, end);
-    for(auto& p : raster_line)
-    {
-        DrawPixel(p);
-    }
-}
-
-void Renderer::DrawTriangle(Pixel& p1, Pixel& p2, Pixel& p3)
-{
-    auto raster_triangle = RasterTool::RasterizeTriangle(p1, p2, p3);
-
-    if(texture_)
-    {
-        if(start_bilinear_sample_)
-        {
-            for(auto& p : raster_triangle)
-            {
-                p.color = BilinearUvSample(p.uv);
-                DrawPixel(p);
-            }
-        }
-        else
-        {
-            for(auto& p : raster_triangle)
-            {
-                p.color = NearestUvSample(p.uv);
-                DrawPixel(p);
-            }
-        }
-        
-    }
-    else
-    {
-        for(auto& p : raster_triangle)
-        {
-            DrawPixel(p);
-        }
-    }   
-}
-
-void Renderer::DrawPicture(const Image& image)
-{
-    Color* data = image.get_data();
-    if(nullptr == data)
-    {
-        return;
-    }
-
-    uint32_t width = image.get_width();
-    uint32_t height = image.get_height();
-
-    for (uint32_t i = 0; i < width; i++)
-    {
-        for (uint32_t j = 0; j < height; j++)
-        {
-            Color blend_color = BlendColor(i, j, data[j * width + i]);
-            DrawPixel(Pixel(i, j, blend_color));
-        }
-    }   
-}
-
-void Renderer::DrawPictureOnBlend(const Image& image, unsigned char src_alpha)
-{
-    Color* data = image.get_data();
-    if(nullptr == data)
-    {
-        return;
-    }
-
-    if(src_alpha < 0)
-    {
-        src_alpha = 0;
-    }
-
-    if(src_alpha > 255)
-    {
-        src_alpha = 255;
-    }
-
-    uint32_t width = image.get_width();
-    uint32_t height = image.get_height();
-
-    SetColorBlend(true);
-    for (uint32_t i = 0; i < width; i++)
-    {
-        for (uint32_t j = 0; j < height; j++)
-        {
-            Color src_color(data[j * width + i]);
-            src_color.a = src_alpha;
-            Color blend_color = BlendColor(i, j, src_color);
-            DrawPixel(Pixel(i, j, blend_color));
-        }
-    } 
-    SetColorBlend(false);
 }
 
 uint32_t Renderer::GenBuffer()
@@ -192,7 +83,7 @@ void Renderer::DeleteBuffer(uint32_t vbo)
     buffer_map_.erase(vbo);
 }
 
-void Renderer::BindBuffer(const uint32_t &buffer_type, const uint32_t &buffer_id)
+void Renderer::BindBuffer(uint32_t buffer_type, uint32_t buffer_id)
 {
     if (buffer_type == ARRAY_BUFFER) 
     {
@@ -204,7 +95,7 @@ void Renderer::BindBuffer(const uint32_t &buffer_type, const uint32_t &buffer_id
 	}
 }
 
-void Renderer::BufferData(const uint32_t &buffer_type, size_t data_size, void *data)
+void Renderer::BufferData(uint32_t buffer_type, size_t data_size, void *data)
 {
     uint32_t buffer_id = 0;
 	if (buffer_type == ARRAY_BUFFER) 
@@ -251,12 +142,12 @@ void Renderer::DeleteVertexArray(uint32_t vao)
     vao_map_.erase(vao);
 }
 
-void Renderer::BindVertexArray(const uint32_t &vao_id)
+void Renderer::BindVertexArray(uint32_t vao_id)
 {
     current_vao_ = vao_id;
 }
 
-void Renderer::VertexAttributePointer(const uint32_t &binding, const uint32_t &item_size, const uint32_t &stride, const uint32_t &offset)
+void Renderer::VertexAttributePointer(uint32_t binding, uint32_t item_size, uint32_t stride, uint32_t offset)
 {
     auto iter = vao_map_.find(current_vao_);
 	if (iter == vao_map_.end()) 
@@ -273,7 +164,7 @@ void Renderer::UseProgram(Shader* shader)
     current_shader_ = shader;
 }
 
-void Renderer::DrawElement(const uint32_t& drawMode, const uint32_t& first, const uint32_t& count)
+void Renderer::DrawElement(uint32_t drawMode, uint32_t first, uint32_t count)
 {
     if(current_vao_ == 0 || nullptr == current_shader_ || count == 0)
     {
@@ -346,7 +237,7 @@ void Renderer::DrawElement(const uint32_t& drawMode, const uint32_t& first, cons
 	}
 }
 
-void Renderer::PrintVao(const uint32_t& vao) const
+void Renderer::PrintVao(uint32_t vao) const
 {
     auto it = vao_map_.find(vao);
     if(it != vao_map_.end())
@@ -470,8 +361,8 @@ float Renderer::Fracpart(float num)
 		std::vector<VsOutput>& vsOutputs,
 		const VertexArrayObject* vao,
 		const BufferObject* ebo,
-		const uint32_t first,
-		const uint32_t count)
+		uint32_t first,
+		uint32_t count)
 {
     auto binding_map = vao->GetBindingMap();
 	uint8_t* indicesData = ebo->GetBuffer();

@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-#include "pixel.h"
+#include "pipeline_data.h"
 
 class Image
 {

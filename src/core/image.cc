@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "pixel.h"
+#include "pipeline_data.h"
 #include "stb_image.h"
 
 Image::Image(const uint32_t& width, const uint32_t& height, Color* data)

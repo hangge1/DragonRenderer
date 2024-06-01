@@ -5,7 +5,7 @@
 
 #include <map>
 
-#include "pixel.h"
+#include "pipeline_data.h"
 
 class VertexArrayObject
 {

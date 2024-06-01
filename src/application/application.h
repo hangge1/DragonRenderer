@@ -25,16 +25,12 @@ public:
 
 	void ProcessMessage(HWND window_handler, UINT message_id, WPARAM message_wparam, LPARAM message_lparam);
 
-	void DispatchMessageLoop();
-
-    bool HasMainWindowDestoryed() const { return has_main_window_destoryed_; }
+	bool DispatchMessageLoop();
 
     LONG GetMainWindowWidth() const { return main_window_width_; }
     LONG GetMainWindowHeight() const { return main_window_height_; }
 
     void* GetRenderBuffer() const { return canvas_buffer_;}
-
-    void Render();
 private:
     bool CreateMainWindow();
 
@@ -43,6 +39,10 @@ private:
 	ATOM RegisterMainWindowClass();
 
     void InitDrawContext();
+
+    bool HasMainWindowDestoryed() const { return has_main_window_destoryed_; }
+
+    void Render();
 private:
     static Application* self_instance_;
 

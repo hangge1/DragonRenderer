@@ -6,7 +6,7 @@
 
 #include "frame_buffer.h"
 
-#include "pixel.h"
+#include "pipeline_data.h"
 
 class FrameBuffer
 {

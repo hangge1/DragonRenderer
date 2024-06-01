@@ -4,7 +4,7 @@
 #include <map>
 
 #include "buffer_object.h"
-#include "pixel.h"
+#include "pipeline_data.h"
 
 class Shader
 {
@@ -25,7 +25,6 @@ public:
 	) = 0;
 
 	virtual void fragmentShader(const VsOutput& input, FsOutput& output) = 0;
-	//tool functions
 public:
 
 	glm::vec4 getVector(

@@ -1,10 +1,9 @@
 ﻿
-#ifndef _CORE_PIXEL_H_
-#define _CORE_PIXEL_H_
+#ifndef _CORE_PIPELINE_DATA_H_
+#define _CORE_PIPELINE_DATA_H_
 
 #include "glm/glm.hpp"
 
-//using Color = glm::u8vec4;
 
 #define ARRAY_BUFFER 0
 #define ELEMENT_ARRAY_BUFFER 1
@@ -52,22 +51,6 @@ struct Color
 };
 
 
-struct Pixel
-{
-    Pixel(int x = 0, int y = 0, Color r = Color(), float u = 0.0f, float v = 0.0f)
-        : pos(x, y), 
-          color(r),
-          uv(u, v)
-    {
-
-    }
-
-    glm::ivec2 pos;
-    Color color;
-    glm::vec2 uv;
-};
-
-
 //仿OpenGL数据结构
 struct BindingDescription {
 	uint32_t	vbo_id{ 0 };
@@ -88,6 +71,12 @@ struct FsOutput
 	glm::ivec2 pixelPos;
 	float depth;
 	Color color;//此处使用0-255来进行颜色显示
+};
+
+enum TextureUvWrap
+{
+    WrapRepeat,
+    WrapMirror
 };
 
 #endif

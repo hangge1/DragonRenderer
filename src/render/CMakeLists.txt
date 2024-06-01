@@ -8,4 +8,4 @@ add_library(Render ${SRCS} ${INCLUDES})
 target_include_directories(Render PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 # link lib glm
-target_link_libraries(Render thirdpart_lib_glm CoreLib)
+target_link_libraries(Render thirdpart_lib_glm PipelineDataLib)

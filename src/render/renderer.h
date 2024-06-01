@@ -7,17 +7,12 @@
 #include <vector>
 
 #include "frame_buffer.h"
-#include "pixel.h"
+#include "pipeline_data.h"
 #include "image.h"
 #include "buffer_object.h"
 #include "vertex_array_object.h"
 #include "shader.h"
 
-enum TextureUvWrap
-{
-    WrapRepeat,
-    WrapMirror
-};
 
 class Renderer
 {
@@ -29,19 +24,7 @@ public:
 
     void InitFrameBuffer(LONG frame_width, LONG frame_height, void *buffer = nullptr);
 
-    void ClearFrameBuffer();
-
-    void DrawPixel(LONG x_pox, LONG y_pox, Color &pixel_color);
-
-    void DrawPixel(Pixel &point);
-
-    void DrawLine(Pixel &start, Pixel &end);
-
-    void DrawTriangle(Pixel &p1, Pixel &p2, Pixel &p3);
-
-    void DrawPicture(const Image &image);
-
-    void DrawPictureOnBlend(const Image &image, unsigned char src_alpha);
+    void Clear();
 
     inline void SetColorBlend(bool start_color_blend) { start_color_blend_ = start_color_blend; }
 
@@ -54,23 +37,18 @@ public:
     // =============================仿OpenGL接口================================
     uint32_t GenBuffer();
     void DeleteBuffer(uint32_t vbo);
-    void BindBuffer(const uint32_t& buffer_type, const uint32_t& buffer_id);
-	void BufferData(const uint32_t& buffer_type, size_t data_size, void* data);
+    void BindBuffer(uint32_t buffer_type, uint32_t buffer_id);
+	void BufferData(uint32_t buffer_type, size_t data_size, void* data);
 
     uint32_t GenVertexArray();
     void DeleteVertexArray(uint32_t vao);
-    void BindVertexArray(const uint32_t& vao_id);
-	void VertexAttributePointer(
-		const uint32_t& binding,
-		const uint32_t& item_size,
-		const uint32_t& stride,
-		const uint32_t& offset);
+    void BindVertexArray(uint32_t vao_id);
+	void VertexAttributePointer(uint32_t binding, uint32_t item_size, uint32_t stride, uint32_t offset);
 
     void UseProgram(Shader* shader);
-    void DrawElement(const uint32_t& drawMode, const uint32_t& first, const uint32_t& count);
+    void DrawElement(uint32_t drawMode, uint32_t first, uint32_t count);
 
-
-    void PrintVao(const uint32_t& vao) const;
+    void PrintVao(uint32_t vao) const;
 private:
     Color BlendColor(LONG x, LONG y, const Color &src_color);
 
@@ -80,22 +58,17 @@ private:
     void CheckUv(float &ux, float &uy);
     float Fracpart(float num);
 
-
-    void VertexShaderApply(
-		std::vector<VsOutput>& vsOutputs,
-		const VertexArrayObject* vao,
-		const BufferObject* ebo,
-		const uint32_t first,
-		const uint32_t count);
+    void VertexShaderApply(std::vector<VsOutput>& vsOutputs, const VertexArrayObject* vao,
+		const BufferObject* ebo, uint32_t first, uint32_t count);
 
     void PerspectiveDivision(VsOutput& vs_output);
     void ScreenMapping(VsOutput& vs_output);
 private:
-    FrameBuffer *current_frame_buffer_{nullptr};
-    bool start_color_blend_{false};
-    bool start_bilinear_sample_{false};
-    TextureUvWrap texture_uv_wrap_{WrapRepeat};
-    Image *texture_{nullptr};
+    FrameBuffer *current_frame_buffer_ { nullptr };
+    bool start_color_blend_ { false };
+    bool start_bilinear_sample_ { false };
+    TextureUvWrap texture_uv_wrap_ { WrapRepeat };
+    Image *texture_ { nullptr };
 
 
 
