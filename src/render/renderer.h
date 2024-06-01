@@ -1,4 +1,4 @@
-#ifndef _RENDER_RENDERER_H
+﻿#ifndef _RENDER_RENDERER_H
 #define _RENDER_RENDERER_H_
 
 #include <Windows.h>

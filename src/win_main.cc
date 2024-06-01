@@ -1,4 +1,4 @@
-/*
+﻿/*
     Author: 航火火
     Path: main.cpp
     Description:  Application Exe Main Entry Point File
@@ -335,26 +335,13 @@ void RenderTransform3(Renderer& renderer)
     renderer.DrawTriangle(pos1, pos2, pos3);
 }
 
-DefaultShader* shader;
-glm::mat4 model_matrix;
-glm::mat4 view_matrix;
-glm::mat4 perspective_matrix;
+
 
 uint32_t vao;
 uint32_t ebo;
 
-float angle = 0.0f;
-
 void InitData(Renderer& renderer)
 {
-    shader = new DefaultShader();
-    
-    model_matrix = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3{ 0.0f, 1.0f, 0.0f });
-	view_matrix = glm::lookAtRH(glm::vec3(0.0f, 0.0f, 3.0f), 
-        glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    perspective_matrix = glm::perspective(30.0f, 
-        (float)APP->GetMainWindowWidth() / (float)APP->GetMainWindowHeight(), 0.1f, 60.0f);
-
 	float positions[] = {
 		-0.5f, -0.5f, 0.0f,
 		-0.5f, 0.5f, 0.0f,
@@ -407,11 +394,19 @@ void InitData(Renderer& renderer)
 	renderer.PrintVao(vao);
 }
 
-void RenderByPipeline(Renderer& renderer)
+//利用重构后的仿OpenGL接口，进行渲染
+void RenderTrianglePipeline(Renderer& renderer)
 {
-    angle += 1.0f;
-    model_matrix = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3{ 0.0f, 1.0f, 0.0f });
+    static auto* shader = new DefaultShader();
+    static float angle = 0.0f;
+    static auto model_matrix = glm::identity<glm::mat4>();
+	static auto view_matrix = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f), 
+        glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    static auto perspective_matrix = glm::perspective(glm::radians(60.0f), 
+        (float)APP->GetMainWindowWidth() / (float)APP->GetMainWindowHeight(), 0.1f, 100.0f);
 
+    angle += 0.01f;
+    model_matrix = glm::rotate(glm::mat4(1.0f), angle, glm::vec3{ 0.0f, 1.0f, 0.0f });
 
     shader->model_matrix = model_matrix;
     shader->view_matrix = view_matrix;
@@ -444,7 +439,7 @@ void CustomDraw(Renderer& renderer)
     //RenderTransform1(renderer);
     //RenderTransform2(renderer);
     //RenderTransform3(renderer);
-    RenderByPipeline(renderer);
+    RenderTrianglePipeline(renderer);
 }
 
 int WINAPI wWinMain(HINSTANCE hInstance,
@@ -469,7 +464,6 @@ int WINAPI wWinMain(HINSTANCE hInstance,
     while(!APP->HasMainWindowDestoryed())
     {
         APP->DispatchMessageLoop();
-
         renderer.ClearFrameBuffer();
 
         //draw something

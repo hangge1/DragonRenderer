@@ -1,4 +1,4 @@
-
+﻿
 #include "shader.h"
 
 glm::vec4 Shader::getVector(

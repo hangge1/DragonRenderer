@@ -1,4 +1,4 @@
-
+﻿
 #include "default_shader.h"
 
 VsOutput DefaultShader::vertexShader(
