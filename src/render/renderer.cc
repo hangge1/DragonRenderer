@@ -10,6 +10,7 @@
 #include "image.h"
 #include "buffer_object.h"
 #include "vertex_array_object.h"
+#include "clip_tool.h"
 
 Renderer::~Renderer()
 {
@@ -171,7 +172,7 @@ void Renderer::DrawElement(uint32_t drawMode, uint32_t first, uint32_t count)
         return;
     }
 
-    //获取vao
+    //1 获取vao
     auto vao_iter = vao_map_.find(current_vao_);
     if(vao_iter == vao_map_.end())
     {
@@ -182,7 +183,7 @@ void Renderer::DrawElement(uint32_t drawMode, uint32_t first, uint32_t count)
     VertexArrayObject* vao = vao_iter->second;
     auto& binding_map = vao->GetBindingMap();
 
-    //获取ebo
+    //2 获取ebo
     auto ebo_iter = buffer_map_.find(current_ebo_);
     if(ebo_iter == buffer_map_.end())
     {
@@ -192,7 +193,7 @@ void Renderer::DrawElement(uint32_t drawMode, uint32_t first, uint32_t count)
 
     const BufferObject* ebo = ebo_iter->second;
 
-    //VertexShader处理
+    //3 执行VertexShader
     //按照ebo的index顺序，处理顶点，依次通过顶点着色器
     std::vector<VsOutput> vs_outputs {};
 	VertexShaderApply(vs_outputs, vao, ebo, first, count);
@@ -202,31 +203,41 @@ void Renderer::DrawElement(uint32_t drawMode, uint32_t first, uint32_t count)
         return;
     }
 
-    //NDC处理：坐标转换为NDC
-    for (auto& output : vs_outputs) 
+    //4 Clip剪裁
+    std::vector<VsOutput> clip_outputs {};
+    ClipTool::Clip(drawMode, vs_outputs, clip_outputs);
+
+    if(clip_outputs.empty())
+    {
+        return;
+    }
+
+
+    //5 NDC处理：坐标转换为NDC
+    for (auto& output : clip_outputs) 
     {
 		PerspectiveDivision(output);
 	}
 
 
-    //屏幕映射
+    //6 屏幕映射
     //转化坐标到屏幕空间
-    for (auto& output : vs_outputs) 
+    for (auto& output : clip_outputs) 
     {
 		ScreenMapping(output);
 	}
 
 
-    //光栅化
+    //7 光栅化
     //离散出所有Fragment
-    std::vector<VsOutput> raster_outputs = RasterTool::Rasterize(drawMode, vs_outputs);
+    std::vector<VsOutput> raster_outputs = RasterTool::Rasterize(drawMode, clip_outputs);
 
     if(raster_outputs.empty()) 
     {
         return;
     }
 
-    //FragmentShader
+    //8 FragmentShader
     //颜色输出处理
     FsOutput fs_output;
 	uint32_t pixel_pos = 0;

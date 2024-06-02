@@ -1,4 +1,4 @@
-#ifndef _RENDER_SHADER_H
+﻿#ifndef _RENDER_SHADER_H
 #define _RENDER_SHADER_H
 
 #include <map>

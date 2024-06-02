@@ -152,7 +152,13 @@
 
 
 
+2024-6-2
 
+1、编写Suntherland hodgman剪裁算法（仅针对三角形绘制），并在透视除法之前引入（TODO）
+
+2、编写针对Suntherland hodgman算法博客（TODO）
+
+3、完善Suntherland hodgman剪裁算法（补充针对直线绘制）（TODO）
 
 
 

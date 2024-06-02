@@ -78,14 +78,19 @@ void RenderTrianglePipeline(Renderer& renderer)
 {
     static auto* shader = new DefaultShader();
     static float angle = 0.0f;
+    static float cameraz = 2.0f;
     static auto model_matrix = glm::identity<glm::mat4>();
-	static auto view_matrix = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f), 
+	static auto view_matrix = glm::lookAt(glm::vec3(0.0f, 0.0f, cameraz), 
         glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     static auto perspective_matrix = glm::perspective(glm::radians(60.0f), 
         (float)APP->GetMainWindowWidth() / (float)APP->GetMainWindowHeight(), 0.1f, 100.0f);
 
-    angle += 0.01f;
-    model_matrix = glm::rotate(glm::mat4(1.0f), angle, glm::vec3{ 0.0f, 1.0f, 0.0f });
+    //angle += 0.01f;
+    //model_matrix = glm::rotate(glm::mat4(1.0f), angle, glm::vec3{ 0.0f, 1.0f, 0.0f });
+
+    cameraz -= 0.01f;
+    view_matrix = glm::lookAt(glm::vec3(0.0f, 0.0f, cameraz), 
+        glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
     shader->model_matrix = model_matrix;
     shader->view_matrix = view_matrix;

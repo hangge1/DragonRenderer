@@ -1,4 +1,4 @@
-#ifndef _CORE_IMAGE_H_
+﻿#ifndef _CORE_IMAGE_H_
 #define _CORE_IMAGE_H_
 
 #include <iostream>

@@ -1,4 +1,4 @@
-#ifndef _RENDER_SHADER_DEFAULT_SHADER_H_
+﻿#ifndef _RENDER_SHADER_DEFAULT_SHADER_H_
 #define _RENDER_SHADER_DEFAULT_SHADER_H_
 
 #include "shader.h"

@@ -1,4 +1,4 @@
-
+﻿
 #ifndef _RENDER_RASTER_TOOL_H_
 #define _RENDER_RASTER_TOOL_H_
 

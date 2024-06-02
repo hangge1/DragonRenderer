@@ -1,4 +1,4 @@
-
+﻿
 #ifndef _RENDER_FRAME_BUFFER_H_
 #define _RENDER_FRAME_BUFFER_H_
 
