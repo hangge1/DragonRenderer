@@ -24,19 +24,22 @@ uint32_t ebo2;
 
 void InitTriangleData(Renderer& renderer)
 {
-	float positions[] = {
-		-0.5f, -0.5f, 0.0f,
+	float positions[] = 
+	{	
 		-0.5f, 0.5f, 0.0f,
+		-0.5f, -0.5f, 0.0f,	
 		0.5f, -0.5f, 0.0f,
 	};
 
-	float colors[] = {
+	float colors[] = 
+	{
 		1.0f, 0.0f, 0.0f, 1.0f,
 		0.0f, 1.0f, 0.0f, 1.0f,
 		0.0f, 0.0f, 1.0f, 1.0f,
 	};
 
-	float uvs[] = {
+	float uvs[] = 
+	{
 		0.0f, 0.0f,
 		0.0f, 1.0f,
 		1.0f, 0.0f,
@@ -91,9 +94,9 @@ void RenderTriangle(Renderer& renderer)
     //angle += 0.01f;
     //model_matrix = glm::rotate(glm::mat4(1.0f), angle, glm::vec3{ 0.0f, 1.0f, 0.0f });
 
-    cameraz -= 0.01f;
-    view_matrix = glm::lookAt(glm::vec3(0.0f, 0.0f, cameraz), 
-        glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    //cameraz -= 0.01f;
+    //view_matrix = glm::lookAt(glm::vec3(0.0f, 0.0f, cameraz), 
+    //    glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
     shader->model_matrix = model_matrix;
     shader->view_matrix = view_matrix;
@@ -107,17 +110,20 @@ void RenderTriangle(Renderer& renderer)
 
 void InitLineData(Renderer& renderer)
 {
-	float positions[] = {
+	float positions[] = 
+	{
 		-0.5f, 0.0f, 0.0f,
 		0.5f, 0.0f, 0.0f
 	};
 
-	float colors[] = {
+	float colors[] = 
+	{
 		1.0f, 0.0f, 0.0f, 1.0f,
 		0.0f, 1.0f, 0.0f, 1.0f
 	};
 
-	float uvs[] = {
+	float uvs[] = 
+	{
 		0.0f, 0.0f,
 		0.0f, 1.0f
 	};

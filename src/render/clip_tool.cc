@@ -95,6 +95,38 @@ void ClipTool::Clip(uint32_t draw_mode, const std::vector<VsOutput> &input_primi
     }
 }
 
+bool ClipTool::CullFace(uint32_t front_face_link_style, uint32_t cull_which_face, 
+                        const VsOutput &p1, const VsOutput &p2, const VsOutput &p3)
+{
+    glm::vec3 v1 = p2.position - p1.position;
+    glm::vec3 v2 = p3.position - p1.position;
+
+    glm::vec3 cross = glm::cross(v1, v2);
+
+    if(cull_which_face == FRONT_FACE) //剔除正面
+    {
+        if(front_face_link_style == FRONT_FACE_CW) //顺时针表示正面
+        {
+            return cross.z < 0;
+        }
+        else
+        {
+            return cross.z > 0;
+        }
+    }
+    else //剔除背面
+    {
+        if(front_face_link_style == FRONT_FACE_CW) //顺时针表示正面
+        {
+            return cross.z > 0;
+        }
+        else
+        {
+            return cross.z < 0;
+        }
+    }
+}
+
 void ClipTool::TriangleClip(const glm::vec4 &clip_plane, std::vector<VsOutput> &clip_result)
 {
     std::vector<VsOutput> targetVertexList = clip_result;

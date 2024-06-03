@@ -49,6 +49,16 @@ public:
     void DrawElement(uint32_t drawMode, uint32_t first, uint32_t count);
 
     void PrintVao(uint32_t vao) const;
+
+    
+    void Enable(uint32_t param);
+
+	void Disable(uint32_t param);
+
+	//cull face
+	void SetFrontFaceLinkStyle(uint32_t front_face_link_style);
+
+	void SetCullWhichFace(uint32_t cull_which_face);
 private:
     Color BlendColor(LONG x, LONG y, const Color &src_color);
 
@@ -62,6 +72,7 @@ private:
 		const BufferObject* ebo, uint32_t first, uint32_t count);
 
     void PerspectiveDivision(VsOutput& vs_output);
+
     void ScreenMapping(VsOutput& vs_output);
 private:
     FrameBuffer *current_frame_buffer_ { nullptr };
@@ -88,6 +99,11 @@ private:
 
     Shader* current_shader_{ nullptr };
 	glm::mat4 screen_matrix_;
+
+    //cull face
+	bool enable_cull_face_ { true };
+	uint32_t front_face_link_style_ { FRONT_FACE_CCW }; 
+	uint32_t cull_which_face_ { BACK_FACE };
 };
 
 #endif

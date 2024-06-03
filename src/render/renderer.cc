@@ -219,10 +219,28 @@ void Renderer::DrawElement(uint32_t drawMode, uint32_t first, uint32_t count)
 		PerspectiveDivision(output);
 	}
 
+    //背面剔除
+    std::vector<VsOutput> cull_outputs {};
+    if(drawMode == DRAW_TRIANGLES && enable_cull_face_)
+    {
+        for (int i = 0; i < clip_outputs.size() - 2; i += 3) {
+			if (!ClipTool::CullFace(front_face_link_style_, cull_which_face_, clip_outputs[i], clip_outputs[i + 1], clip_outputs[i + 2])) {
+				auto start = clip_outputs.begin() + i;
+				auto end = clip_outputs.begin() + i + 3;
+				cull_outputs.insert(cull_outputs.end(), start, end);
+			}
+		}
+    }
+    else
+    {
+        cull_outputs = clip_outputs;
+    }
+
+
 
     //6 屏幕映射
     //转化坐标到屏幕空间
-    for (auto& output : clip_outputs) 
+    for (auto& output : cull_outputs) 
     {
 		ScreenMapping(output);
 	}
@@ -230,7 +248,7 @@ void Renderer::DrawElement(uint32_t drawMode, uint32_t first, uint32_t count)
 
     //7 光栅化
     //离散出所有Fragment
-    std::vector<VsOutput> raster_outputs = RasterTool::Rasterize(drawMode, clip_outputs);
+    std::vector<VsOutput> raster_outputs = RasterTool::Rasterize(drawMode, cull_outputs);
 
     if(raster_outputs.empty()) 
     {
@@ -400,4 +418,40 @@ void Renderer::PerspectiveDivision(VsOutput& vs_output)
 void Renderer::ScreenMapping(VsOutput& vs_output)
 {
     vs_output.position = screen_matrix_ * vs_output.position;
+}
+
+void Renderer::Enable(uint32_t param)
+{
+    switch (param)
+    {
+    case CULL_FACE_ENABLE:
+        enable_cull_face_ = true; 
+        break;
+    
+    default:
+        break;
+    }
+}
+
+void Renderer::Disable(uint32_t param)
+{
+    switch (param)
+    {
+    case CULL_FACE_ENABLE:
+        enable_cull_face_ = false; 
+        break;
+    
+    default:
+        break;
+    }
+}
+
+void Renderer::SetFrontFaceLinkStyle(uint32_t front_face_link_style)
+{
+    front_face_link_style_ = front_face_link_style;
+}
+
+void Renderer::SetCullWhichFace(uint32_t cull_which_face)
+{
+    cull_which_face_ = cull_which_face;
 }

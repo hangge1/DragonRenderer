@@ -11,6 +11,13 @@
 #define DRAW_LINES 0
 #define DRAW_TRIANGLES 1
 
+#define FRONT_FACE 0
+#define BACK_FACE 1
+#define FRONT_FACE_CW 0
+#define FRONT_FACE_CCW 1
+
+#define CULL_FACE_ENABLE 1
+
 struct Color
 {
     Color(): r(255), g(255), b(255), a(255)
@@ -78,5 +85,7 @@ enum TextureUvWrap
     WrapRepeat,
     WrapMirror
 };
+
+
 
 #endif

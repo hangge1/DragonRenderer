@@ -156,13 +156,17 @@
 
 1、编写Suntherland hodgman剪裁算法（仅针对三角形绘制），并在透视除法之前引入（ok）
 
-2、编写针对Suntherland hodgman算法博客（TODO）
+2、编写针对Suntherland hodgman算法博客（ok）
 
 3、完善Suntherland hodgman剪裁算法（补充针对直线绘制）（ok）
 
 
 
+2024-6-3
 
+1、实现背面剔除相关接口和设置（ok）
+
+2、实现z-buffer机制的深度测试（TODO）
 
 
 
