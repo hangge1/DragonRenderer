@@ -161,10 +161,9 @@ void RasterTool::InterpolateLine(const VsOutput& start, const VsOutput& end, VsO
         weight = static_cast<float>(vec_start2target.x) / vec_start2end.x;
     }
 
-    target.color.r = weight * end.color.r + (1.0f - weight) * start.color.r;
-    target.color.g = weight * end.color.g + (1.0f - weight) * start.color.g;
-    target.color.b = weight * end.color.b + (1.0f - weight) * start.color.b;
-    target.color.a = weight * end.color.a + (1.0f - weight) * start.color.a;
+    target.color = weight * end.color + (1.0f - weight) * start.color;
+    target.uv = weight * end.uv + (1.0f - weight) * start.uv;
+    target.position.z = weight * end.position.z + (1.0f - weight) * start.position.z;
 }
 
 void RasterTool::RasterizeTriangle(std::vector<VsOutput>& result, const VsOutput& p1, const VsOutput& p2, const VsOutput& p3)
@@ -198,9 +197,9 @@ void RasterTool::RasterizeTriangle(std::vector<VsOutput>& result, const VsOutput
 
 void RasterTool::InterpolateTriangle(const VsOutput& p1, const VsOutput& p2, const VsOutput& p3, VsOutput& target)
 {
-    auto pp1 = p1.position - target.position;
-    auto pp2 = p2.position - target.position;
-    auto pp3 = p3.position - target.position;
+    glm::vec2 pp1 = p1.position - target.position;
+    glm::vec2 pp2 = p2.position - target.position;
+    glm::vec2 pp3 = p3.position - target.position;
 
     float s_p12 = std::abs( crossProduct(pp1, pp2) );
     float s_p23 = std::abs( crossProduct(pp2, pp3) );
@@ -213,6 +212,8 @@ void RasterTool::InterpolateTriangle(const VsOutput& p1, const VsOutput& p2, con
     float coff2 = s * s_p31;
     float coff3 = 1.0f - coff2 - coff1; //s * s_p12;
 
+
+    target.position.z = p1.position.z * coff1 + p2.position.z * coff2 + p3.position.z * coff3;
     target.color = p1.color * coff1 + p2.color * coff2 + p3.color * coff3;
     target.uv = p1.uv * coff1 + p2.uv * coff2 + p3.uv * coff3;
 }

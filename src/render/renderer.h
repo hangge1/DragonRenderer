@@ -55,10 +55,15 @@ public:
 
 	void Disable(uint32_t param);
 
-	//cull face
+	//剔除
 	void SetFrontFaceLinkStyle(uint32_t front_face_link_style);
 
 	void SetCullWhichFace(uint32_t cull_which_face);
+
+    //深度测试
+    void SetDepthTestFunc(uint32_t depth_test_func);
+
+
 private:
     Color BlendColor(LONG x, LONG y, const Color &src_color);
 
@@ -74,6 +79,8 @@ private:
     void PerspectiveDivision(VsOutput& vs_output);
 
     void ScreenMapping(VsOutput& vs_output);
+
+    bool DepthTest(const FsOutput& output);
 private:
     FrameBuffer *current_frame_buffer_ { nullptr };
     bool start_color_blend_ { false };
@@ -104,6 +111,10 @@ private:
 	bool enable_cull_face_ { true };
 	uint32_t front_face_link_style_ { FRONT_FACE_CCW }; 
 	uint32_t cull_which_face_ { BACK_FACE };
+
+    //depth
+	bool enable_depth_test_ { true };
+	uint32_t depth_test_func_ { DEPTH_LESS };
 };
 
 #endif

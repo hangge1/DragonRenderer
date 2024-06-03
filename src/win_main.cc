@@ -79,6 +79,75 @@ void InitTriangleData(Renderer& renderer)
 	renderer.PrintVao(vao);
 }
 
+void Init2TriangleData(Renderer& renderer)
+{
+	float positions[] = 
+	{	
+		-0.5f, 0.5f, 0.0f,
+		-0.5f, -0.5f, 0.0f,	
+		0.5f, -0.5f, 0.0f,
+
+		0.0f, 0.5f, 0.1f,
+		0.0f, -0.5f, 0.1f,
+		1.0f, -0.5f, 0.1f,
+	};
+
+	float colors[] = 
+	{
+		1.0f, 0.0f, 0.0f, 1.0f,
+		0.0f, 1.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f, 1.0f,
+
+		0.0f, 1.0f, 0.0f, 1.0f,
+		0.0f, 1.0f, 0.0f, 1.0f,
+		0.0f, 1.0f, 0.0f, 1.0f
+	};
+
+	float uvs[] = 
+	{
+		0.0f, 0.0f,
+		0.0f, 1.0f,
+		1.0f, 0.0f,
+
+		0.0f, 0.0f,
+		0.0f, 1.0f,
+		1.0f, 0.0f
+	};
+
+	uint32_t indices[] = { 0, 1, 2, 3, 4, 5 };
+
+	//生成indices对应ebo
+	ebo = renderer.GenBuffer();
+	renderer.BindBuffer(ELEMENT_ARRAY_BUFFER, ebo);
+	renderer.BufferData(ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * 6, indices);
+	renderer.BindBuffer(ELEMENT_ARRAY_BUFFER, 0);
+
+	//生成vao并且绑定
+	vao = renderer.GenVertexArray();
+	renderer.BindVertexArray(vao);
+	
+	//生成每个vbo，绑定后，设置属性ID及读取参数
+	static auto positionVbo = renderer.GenBuffer();
+	renderer.BindBuffer(ARRAY_BUFFER, positionVbo);
+	renderer.BufferData(ARRAY_BUFFER, sizeof(float) * 18, positions);
+	renderer.VertexAttributePointer(0, 3, 3 * sizeof(float), 0);
+
+	static auto colorVbo = renderer.GenBuffer();
+	renderer.BindBuffer(ARRAY_BUFFER, colorVbo);
+	renderer.BufferData(ARRAY_BUFFER, sizeof(float) * 24, colors);
+	renderer.VertexAttributePointer(1, 4, 4 * sizeof(float), 0);
+
+	static auto uvVbo = renderer.GenBuffer();
+	renderer.BindBuffer(ARRAY_BUFFER, uvVbo);
+	renderer.BufferData(ARRAY_BUFFER, sizeof(float) * 12, uvs);
+	renderer.VertexAttributePointer(2, 2, 2 * sizeof(float), 0);
+
+	renderer.BindBuffer(ARRAY_BUFFER, 0);
+	renderer.BindVertexArray(0);
+
+	renderer.PrintVao(vao);
+}
+
 //利用重构后的仿OpenGL接口，进行渲染
 void RenderTriangle(Renderer& renderer)
 {
@@ -105,7 +174,7 @@ void RenderTriangle(Renderer& renderer)
     renderer.UseProgram(shader);
     renderer.BindVertexArray(vao);
     renderer.BindBuffer(ELEMENT_ARRAY_BUFFER, ebo);
-    renderer.DrawElement(DRAW_TRIANGLES, 0, 3);
+    renderer.DrawElement(DRAW_TRIANGLES, 0, 6);
 }
 
 void InitLineData(Renderer& renderer)
@@ -217,8 +286,10 @@ int WINAPI wWinMain(HINSTANCE hInstance,
     Renderer renderer;
     renderer.InitFrameBuffer(window_width, window_height, APP->GetRenderBuffer());
 
-    InitTriangleData(renderer);
+    //InitTriangleData(renderer);
     //InitLineData(renderer);
+
+	Init2TriangleData(renderer);
     while(APP->DispatchMessageLoop())
     {
         renderer.Clear();

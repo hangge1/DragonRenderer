@@ -11,10 +11,17 @@ FrameBuffer::~FrameBuffer()
     {
         delete[] frame_buffer_;
     }
+
+    if(nullptr != depth_buffer_)
+    {
+        delete[] depth_buffer_;
+    }
+
     frame_width_ = 0;
     frame_height_ = 0;
     frame_buffer_ = nullptr;
     is_buffer_external = false;
+    depth_buffer_ = nullptr;
 }
 
 void FrameBuffer::InitFrame(LONG frame_width, LONG frame_height, Color* frame_buffer)
@@ -35,6 +42,10 @@ void FrameBuffer::InitFrame(LONG frame_width, LONG frame_height, Color* frame_bu
     }
 
     frame_buffer_ = temp_frame_buffer;
+
+    depth_buffer_ = new float[frame_width_ * frame_height_];
+    std::fill_n(depth_buffer_, frame_width_ * frame_height_, 1.0f);
+
 }
 
 void FrameBuffer::FillColor(const Color& will_fill_color)
@@ -42,6 +53,14 @@ void FrameBuffer::FillColor(const Color& will_fill_color)
     if(nullptr != frame_buffer_)
     {
         std::fill_n(frame_buffer_, frame_width_ * frame_height_, will_fill_color);
+    }
+}
+
+void FrameBuffer::FillDepth(float depth)
+{
+    if(nullptr != depth_buffer_)
+    {
+        std::fill_n(depth_buffer_, frame_width_ * frame_height_, depth);
     }
 }
 
@@ -68,4 +87,28 @@ Color* FrameBuffer::GetFrameColor(LONG x_pox, LONG y_pox)
     }
 
     return frame_buffer_ + (frame_width_ * y_pox + x_pox);
+}
+
+void FrameBuffer::SetOnePixelDepth(LONG x_pox, LONG y_pox, float depth)
+{
+    if(nullptr == depth_buffer_ || 
+        x_pox < 0 || x_pox >= frame_width_ || 
+        y_pox < 0 || y_pox >= frame_height_)
+    {
+        return;
+    }
+
+    depth_buffer_[frame_width_ * y_pox + x_pox] = depth;
+}
+
+float FrameBuffer::GetFrameDepth(LONG x_pox, LONG y_pox)
+{
+    if(nullptr == depth_buffer_ || 
+        x_pox < 0 || x_pox >= frame_width_ || 
+        y_pox < 0 || y_pox >= frame_height_)
+    {
+        return 1.0f;
+    }
+
+    return *(depth_buffer_ + (frame_width_ * y_pox + x_pox));
 }

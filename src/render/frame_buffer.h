@@ -19,9 +19,13 @@ public:
     void InitFrame(LONG frame_width, LONG frame_height, Color* frame_buffer = nullptr);
 
     void FillColor(const Color& will_fill_color);
+    void FillDepth(float depth = 1.0f);
 
     void SetOnePixelColor(LONG x_pox, LONG y_pox, Color& color);
     Color* GetFrameColor(LONG x_pox, LONG y_pox);
+
+    void SetOnePixelDepth(LONG x_pox, LONG y_pox, float depth);
+    float GetFrameDepth(LONG x_pox, LONG y_pox);
 
     LONG GetWidth() const { return frame_width_; }
     LONG GetHeight() const { return frame_height_; }
@@ -29,6 +33,7 @@ private:
     LONG frame_width_ {0};
     LONG frame_height_ {0};
     Color* frame_buffer_ {nullptr};
+    float* depth_buffer_ {nullptr};
     bool is_buffer_external {false};
 };
 

@@ -59,6 +59,7 @@ void Renderer::Clear()
     if(nullptr != current_frame_buffer_)
     {
         current_frame_buffer_->FillColor(Color(0, 0, 0, 0));
+        current_frame_buffer_->FillDepth();
     }
 }
 
@@ -262,6 +263,13 @@ void Renderer::DrawElement(uint32_t drawMode, uint32_t first, uint32_t count)
 	for (uint32_t i = 0; i < raster_outputs.size(); ++i) 
     {
 		current_shader_->fragmentShader(raster_outputs[i], fs_output);
+
+        //深度测试
+		if (enable_depth_test_ && !DepthTest(fs_output)) 
+        {
+			continue;
+		}
+
 		current_frame_buffer_->SetOnePixelColor(fs_output.pixelPos.x, fs_output.pixelPos.y, fs_output.color);
 	}
 }
@@ -420,14 +428,49 @@ void Renderer::ScreenMapping(VsOutput& vs_output)
     vs_output.position = screen_matrix_ * vs_output.position;
 }
 
+bool Renderer::DepthTest(const FsOutput &output)
+{
+	float oldDepth = current_frame_buffer_->GetFrameDepth(output.pixelPos.x, output.pixelPos.y);
+	switch (depth_test_func_)
+	{
+	case DEPTH_LESS:
+		if (output.depth < oldDepth) 
+        {
+			current_frame_buffer_->SetOnePixelDepth(output.pixelPos.x, output.pixelPos.y, output.depth);
+			return true;
+		}
+		else 
+        {
+			return false;
+		}
+		break;
+	case DEPTH_GREATER:
+		if (output.depth > oldDepth) 
+        {
+			current_frame_buffer_->SetOnePixelDepth(output.pixelPos.x, output.pixelPos.y, output.depth);
+			return true;
+		}
+		else 
+        {
+			return false;
+		}
+		break;
+	default:
+		return false;
+		break;
+	}
+}
+
 void Renderer::Enable(uint32_t param)
 {
     switch (param)
     {
-    case CULL_FACE_ENABLE:
+    case CULL_FACE:
         enable_cull_face_ = true; 
         break;
-    
+    case DEPTH_TEST:
+        enable_depth_test_ = true;
+        break;
     default:
         break;
     }
@@ -437,10 +480,12 @@ void Renderer::Disable(uint32_t param)
 {
     switch (param)
     {
-    case CULL_FACE_ENABLE:
+    case CULL_FACE:
         enable_cull_face_ = false; 
         break;
-    
+    case DEPTH_TEST:
+        enable_depth_test_ = false;
+        break;
     default:
         break;
     }
@@ -454,4 +499,9 @@ void Renderer::SetFrontFaceLinkStyle(uint32_t front_face_link_style)
 void Renderer::SetCullWhichFace(uint32_t cull_which_face)
 {
     cull_which_face_ = cull_which_face;
+}
+
+void Renderer::SetDepthTestFunc(uint32_t depth_test_func)
+{
+    depth_test_func_ = depth_test_func;
 }
