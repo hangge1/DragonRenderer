@@ -81,6 +81,8 @@ private:
     void ScreenMapping(VsOutput& vs_output);
 
     bool DepthTest(const FsOutput& output);
+
+    void PerspectiveRecover(VsOutput& vs_output);
 private:
     FrameBuffer *current_frame_buffer_ { nullptr };
     bool start_color_blend_ { false };

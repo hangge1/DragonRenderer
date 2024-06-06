@@ -220,7 +220,7 @@ void Renderer::DrawElement(uint32_t drawMode, uint32_t first, uint32_t count)
 		PerspectiveDivision(output);
 	}
 
-    //背面剔除
+    //6 背面剔除
     std::vector<VsOutput> cull_outputs {};
     if(drawMode == DRAW_TRIANGLES && enable_cull_face_)
     {
@@ -239,7 +239,7 @@ void Renderer::DrawElement(uint32_t drawMode, uint32_t first, uint32_t count)
 
 
 
-    //6 屏幕映射
+    //7 屏幕映射
     //转化坐标到屏幕空间
     for (auto& output : cull_outputs) 
     {
@@ -247,7 +247,7 @@ void Renderer::DrawElement(uint32_t drawMode, uint32_t first, uint32_t count)
 	}
 
 
-    //7 光栅化
+    //8 光栅化
     //离散出所有Fragment
     std::vector<VsOutput> raster_outputs = RasterTool::Rasterize(drawMode, cull_outputs);
 
@@ -256,7 +256,15 @@ void Renderer::DrawElement(uint32_t drawMode, uint32_t first, uint32_t count)
         return;
     }
 
-    //8 FragmentShader
+    //9 透视恢复处理阶段
+    //离散出来的像素插值结果，需要乘以w_0值恢复到正常态
+    for (auto& output : raster_outputs) 
+    {
+		PerspectiveRecover(output);
+	}
+
+
+    //10 FragmentShader
     //颜色输出处理
     FsOutput fs_output;
 	uint32_t pixel_pos = 0;
@@ -419,8 +427,12 @@ void Renderer::PerspectiveDivision(VsOutput& vs_output)
 {
     float coff = 1.0f / vs_output.position.w;
 
+    vs_output.one_devide_w = coff;
 	vs_output.position *= coff;
 	vs_output.position.w = 1.0f;
+
+    vs_output.color *= coff;
+    vs_output.uv *= coff;
 }
 
 void Renderer::ScreenMapping(VsOutput& vs_output)
@@ -459,6 +471,12 @@ bool Renderer::DepthTest(const FsOutput &output)
 		return false;
 		break;
 	}
+}
+
+void Renderer::PerspectiveRecover(VsOutput& vs_output)
+{
+    vs_output.color /= vs_output.one_devide_w;
+    vs_output.uv /= vs_output.one_devide_w;
 }
 
 void Renderer::Enable(uint32_t param)

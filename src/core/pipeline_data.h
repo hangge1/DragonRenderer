@@ -72,6 +72,7 @@ struct BindingDescription {
 
 struct VsOutput 
 {
+    float one_devide_w { 0.0f };
 	glm::vec4 position { 0.0f, 0.0f, 0.0f, 1.0f };
 	glm::vec4 color; //此处颜色改为0.0-1.0之间表达0-255的量
 	glm::vec2 uv;
