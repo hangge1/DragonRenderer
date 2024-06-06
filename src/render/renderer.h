@@ -117,6 +117,9 @@ private:
     //depth
 	bool enable_depth_test_ { true };
 	uint32_t depth_test_func_ { DEPTH_LESS };
+
+    //blend
+    bool enable_blend_ { false };
 };
 
 #endif

@@ -98,9 +98,9 @@ void Init2TriangleData(Renderer& renderer)
 		0.0f, 1.0f, 0.0f, 1.0f,
 		0.0f, 0.0f, 1.0f, 1.0f,
 
-		0.0f, 1.0f, 0.0f, 1.0f,
-		0.0f, 1.0f, 0.0f, 1.0f,
-		0.0f, 1.0f, 0.0f, 1.0f
+		0.0f, 1.0f, 0.0f, 0.5f,
+		0.0f, 1.0f, 0.0f, 0.5f,
+		0.0f, 1.0f, 0.0f, 0.5f
 	};
 
 	float uvs[] = 
@@ -113,6 +113,8 @@ void Init2TriangleData(Renderer& renderer)
 		0.0f, 1.0f,
 		1.0f, 0.0f
 	};
+
+	renderer.Enable(COLOR_BLEND);
 
 	uint32_t indices[] = { 0, 1, 2, 3, 4, 5 };
 
@@ -302,11 +304,3 @@ int WINAPI wWinMain(HINSTANCE hInstance,
 
     return 0;
 }
-
-
-// 控制台入口函数
-// int main()
-// {
-//     std::cout << "Hello Dragon Renderer" << std::endl;
-//     return 0;
-// }

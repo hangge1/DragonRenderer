@@ -278,7 +278,14 @@ void Renderer::DrawElement(uint32_t drawMode, uint32_t first, uint32_t count)
 			continue;
 		}
 
-		current_frame_buffer_->SetOnePixelColor(fs_output.pixelPos.x, fs_output.pixelPos.y, fs_output.color);
+        //混合判断
+        Color color = fs_output.color;
+        if(enable_blend_)
+        {
+            color = BlendColor(fs_output.pixelPos.x, fs_output.pixelPos.y, color);
+        }
+
+		current_frame_buffer_->SetOnePixelColor(fs_output.pixelPos.x, fs_output.pixelPos.y, color);
 	}
 }
 
@@ -304,20 +311,14 @@ Color Renderer::BlendColor(LONG x, LONG y, const Color &src_color)
         return src_color;
     }
 
+    float src_weight = src_color.a / 255.0f;
 
-    if(start_color_blend_)
-    {
-        float src_weight = src_color.a / 255.0f;
+    Color result;
+    result.r = src_color.r * src_weight + dst_color->r * (1.0f - src_weight);
+    result.g = src_color.g * src_weight + dst_color->g * (1.0f - src_weight);
+    result.b = src_color.b * src_weight + dst_color->b * (1.0f - src_weight);
 
-        Color result;
-        result.r = src_color.r * src_weight + dst_color->r * (1.0f - src_weight);
-        result.g = src_color.g * src_weight + dst_color->g * (1.0f - src_weight);
-        result.b = src_color.b * src_weight + dst_color->b * (1.0f - src_weight);
-
-        return result;
-    }
-
-    return src_color;
+    return result;
 }
 
 Color Renderer::NearestUvSample(glm::vec2 &uv)
@@ -489,6 +490,9 @@ void Renderer::Enable(uint32_t param)
     case DEPTH_TEST:
         enable_depth_test_ = true;
         break;
+    case COLOR_BLEND:
+        enable_blend_ = true;
+        break;
     default:
         break;
     }
@@ -503,6 +507,9 @@ void Renderer::Disable(uint32_t param)
         break;
     case DEPTH_TEST:
         enable_depth_test_ = false;
+        break;
+    case COLOR_BLEND:
+        enable_blend_ = false;
         break;
     default:
         break;
