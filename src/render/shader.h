@@ -5,6 +5,7 @@
 
 #include "buffer_object.h"
 #include "pipeline_data.h"
+#include "texture.h"
 
 class Shader
 {
@@ -24,7 +25,7 @@ public:
 		const uint32_t& index
 	) = 0;
 
-	virtual void fragmentShader(const VsOutput& input, FsOutput& output) = 0;
+	virtual void fragmentShader(const VsOutput& input, FsOutput& output, const std::map<uint32_t, Texture*>& textures) = 0;
 public:
 
 	glm::vec4 getVector(

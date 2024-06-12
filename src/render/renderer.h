@@ -12,6 +12,7 @@
 #include "buffer_object.h"
 #include "vertex_array_object.h"
 #include "shader.h"
+#include "texture.h"
 
 
 class Renderer
@@ -50,20 +51,23 @@ public:
 
     void PrintVao(uint32_t vao) const;
 
-    
     void Enable(uint32_t param);
 
 	void Disable(uint32_t param);
 
-	//剔除
+	//剔除Cull
 	void SetFrontFaceLinkStyle(uint32_t front_face_link_style);
-
 	void SetCullWhichFace(uint32_t cull_which_face);
 
     //深度测试
     void SetDepthTestFunc(uint32_t depth_test_func);
 
-
+    //纹理
+	uint32_t GenTexture();
+	void DeleteTexture(uint32_t tex_id);
+	void BindTexture(uint32_t tex_id);
+	void TexImage2D(uint32_t width, uint32_t height, void* data);
+	void TexParameter(uint32_t param, uint32_t value);
 private:
     Color BlendColor(LONG x, LONG y, const Color &src_color);
 
@@ -120,6 +124,11 @@ private:
 
     //blend
     bool enable_blend_ { false };
+
+    //texture
+    uint32_t current_texture_ { 0 };
+	uint32_t texture_num_ { 0 };
+	std::map<uint32_t, Texture*> texture_map_;
 };
 
 #endif

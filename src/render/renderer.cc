@@ -11,6 +11,7 @@
 #include "buffer_object.h"
 #include "vertex_array_object.h"
 #include "clip_tool.h"
+#include "texture.h"
 
 Renderer::~Renderer()
 {
@@ -224,7 +225,8 @@ void Renderer::DrawElement(uint32_t drawMode, uint32_t first, uint32_t count)
     std::vector<VsOutput> cull_outputs {};
     if(drawMode == DRAW_TRIANGLES && enable_cull_face_)
     {
-        for (int i = 0; i < clip_outputs.size() - 2; i += 3) {
+        for (int i = 0; i < clip_outputs.size() - 2; i += 3) 
+        {
 			if (!ClipTool::CullFace(front_face_link_style_, cull_which_face_, clip_outputs[i], clip_outputs[i + 1], clip_outputs[i + 2])) {
 				auto start = clip_outputs.begin() + i;
 				auto end = clip_outputs.begin() + i + 3;
@@ -270,7 +272,7 @@ void Renderer::DrawElement(uint32_t drawMode, uint32_t first, uint32_t count)
 	uint32_t pixel_pos = 0;
 	for (uint32_t i = 0; i < raster_outputs.size(); ++i) 
     {
-		current_shader_->fragmentShader(raster_outputs[i], fs_output);
+		current_shader_->fragmentShader(raster_outputs[i], fs_output, texture_map_);
 
         //深度测试
 		if (enable_depth_test_ && !DepthTest(fs_output)) 
@@ -529,4 +531,62 @@ void Renderer::SetCullWhichFace(uint32_t cull_which_face)
 void Renderer::SetDepthTestFunc(uint32_t depth_test_func)
 {
     depth_test_func_ = depth_test_func;
+}
+
+uint32_t Renderer::GenTexture()
+{
+    texture_num_++;
+	texture_map_.insert(std::make_pair(texture_num_, new Texture()));
+
+	return texture_num_;
+}
+
+void Renderer::DeleteTexture(uint32_t tex_id)
+{
+    auto iter = texture_map_.find(tex_id);
+	if (iter == texture_map_.end()) 
+    {
+		return;
+	}
+
+	delete iter->second;
+	texture_map_.erase(iter);
+}
+
+void Renderer::BindTexture(uint32_t tex_id)
+{
+    current_texture_ = tex_id;
+}
+
+void Renderer::TexImage2D(uint32_t width, uint32_t height, void* data)
+{
+    if (!current_texture_) 
+    {
+		return;
+	}
+
+	auto iter = texture_map_.find(current_texture_);
+	if (iter == texture_map_.end()) 
+    {
+		return;
+	}
+
+	auto texture = iter->second;
+	texture->SetBufferData(width, height, data);
+}
+
+void Renderer::TexParameter(uint32_t param, uint32_t value)
+{
+    if (!current_texture_) 
+    {
+		return;
+	}
+
+	auto iter = texture_map_.find(current_texture_);
+	if (iter == texture_map_.end()) 
+    {
+		return;
+	}
+	auto texture = iter->second;
+	texture->SetParameter(param, value);
 }

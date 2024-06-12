@@ -1,5 +1,5 @@
-﻿#ifndef _RENDER_SHADER_DEFAULT_SHADER_H_
-#define _RENDER_SHADER_DEFAULT_SHADER_H_
+﻿#ifndef _RENDER_SHADER_TEXTURE_SHADER_H_
+#define _RENDER_SHADER_TEXTURE_SHADER_H_
 
 #include "shader.h"
 
@@ -7,13 +7,14 @@
 
 #include "glm/glm.hpp"
 #include "pipeline_data.h"
+#include "buffer_object.h"
 #include "texture.h"
 
-class DefaultShader: public Shader 
+class TextureShader : public Shader
 {
 public:
-	DefaultShader() = default;
-	~DefaultShader() = default;
+	TextureShader() = default;
+	~TextureShader() = default;
 
 	VsOutput vertexShader(
 		const std::map<uint32_t, BindingDescription>& bindingMap,
@@ -28,6 +29,9 @@ public:
 	glm::mat4 model_matrix;
 	glm::mat4 view_matrix;
 	glm::mat4 project_matrix;
+
+	uint32_t diffuse_texture { 0 };
 };
+
 
 #endif

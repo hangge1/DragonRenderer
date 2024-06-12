@@ -24,6 +24,20 @@
 #define DEPTH_LESS 0
 #define DEPTH_GREATER 1
 
+//纹理参数类型选项
+#define TEXTURE_FILTER 0
+#define TEXTURE_WRAP_U 1
+#define TEXTURE_WRAP_V 2
+
+//纹理参数
+#define TEXTURE_FILTER_NEAREST 0
+#define TEXTURE_FILTER_LINEAR 1
+
+#define TEXTURE_WRAP_REPEAT 0
+#define TEXTURE_WRAP_MIRROR 1
+
+#define FRACTION(v)			((v) - (int)(v))
+
 struct Color
 {
     Color(): r(255), g(255), b(255), a(255)
@@ -57,12 +71,22 @@ struct Color
         return Color(r + other.r, g + other.g, b + other.b, a + other.a);
     }
 
+    Color Lerp(const Color& rhs, const float& weight)
+    {
+        Color result;
+        result.r = static_cast<unsigned char>(static_cast<float>(rhs.r) * weight + (1.0f - weight) * static_cast<float>(r));
+        result.g = static_cast<unsigned char>(static_cast<float>(rhs.g) * weight + (1.0f - weight) * static_cast<float>(g));
+        result.b = static_cast<unsigned char>(static_cast<float>(rhs.b) * weight + (1.0f - weight) * static_cast<float>(b));
+        result.a = static_cast<unsigned char>(static_cast<float>(rhs.a) * weight + (1.0f - weight) * static_cast<float>(a));
+
+        return result;
+    }
+
     unsigned char b;
     unsigned char g;
     unsigned char r;
     unsigned char a;
 };
-
 
 //仿OpenGL数据结构
 struct BindingDescription {
