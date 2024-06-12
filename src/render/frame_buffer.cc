@@ -24,7 +24,7 @@ FrameBuffer::~FrameBuffer()
     depth_buffer_ = nullptr;
 }
 
-void FrameBuffer::InitFrame(LONG frame_width, LONG frame_height, Color* frame_buffer)
+void FrameBuffer::Init(int32_t frame_width, int32_t frame_height, Color* frame_buffer)
 {
     frame_width_ = frame_width;
     frame_height_ = frame_height;
@@ -64,7 +64,7 @@ void FrameBuffer::FillDepth(float depth)
     }
 }
 
-void FrameBuffer::SetOnePixelColor(LONG x_pox, LONG y_pox, Color& color)
+void FrameBuffer::SetPixelColor(int32_t x_pox, int32_t y_pox, Color& color)
 {
     if(nullptr == frame_buffer_ || 
         x_pox < 0 || x_pox >= frame_width_ || 
@@ -76,7 +76,7 @@ void FrameBuffer::SetOnePixelColor(LONG x_pox, LONG y_pox, Color& color)
     frame_buffer_[frame_width_ * y_pox + x_pox] = color;
 }
 
-Color* FrameBuffer::GetFrameColor(LONG x_pox, LONG y_pox)
+Color* FrameBuffer::GetPixelColor(int32_t x_pox, int32_t y_pox) const
 {
     // TODO: 在此处插入 return 语句
     if(nullptr == frame_buffer_ || 
@@ -89,7 +89,7 @@ Color* FrameBuffer::GetFrameColor(LONG x_pox, LONG y_pox)
     return frame_buffer_ + (frame_width_ * y_pox + x_pox);
 }
 
-void FrameBuffer::SetOnePixelDepth(LONG x_pox, LONG y_pox, float depth)
+void FrameBuffer::SetOnePixelDepth(int32_t x_pox, int32_t y_pox, float depth)
 {
     if(nullptr == depth_buffer_ || 
         x_pox < 0 || x_pox >= frame_width_ || 
@@ -101,7 +101,7 @@ void FrameBuffer::SetOnePixelDepth(LONG x_pox, LONG y_pox, float depth)
     depth_buffer_[frame_width_ * y_pox + x_pox] = depth;
 }
 
-float FrameBuffer::GetFrameDepth(LONG x_pox, LONG y_pox)
+float FrameBuffer::GetPixelDepth(int32_t x_pox, int32_t y_pox) const
 {
     if(nullptr == depth_buffer_ || 
         x_pox < 0 || x_pox >= frame_width_ || 

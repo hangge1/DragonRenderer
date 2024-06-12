@@ -3,44 +3,55 @@
 
 #include "glm/ext.hpp"
 
+const uint32_t KEY_W = 0x57;
+const uint32_t KEY_A = 0x41;
+const uint32_t KEY_S = 0x53;
+const uint32_t KEY_D = 0x44;
+
+const int32_t NO_MOVE = 0;
+const int32_t MOVE_LEFT = 0x001;
+const int32_t MOVE_RIGHT = 0x002;
+const int32_t MOVE_FRONT = 0x004;
+const int32_t MOVE_BACK = 0x008;
+
 Camera::Camera(float fovy, float aspect, float n, float f, const glm::vec3& top) 
 {
 	top_ = top;
 	projection_matrix_ = glm::perspective(fovy, aspect, n, f);
-	update();
+	Update();
 }
 
-Camera::~Camera() {}
-
-void Camera::onRMouseDown(int x, int y) 
+void Camera::OnRMouseDown(int x, int y) 
 {
 	is_mouse_moving_ = true;
 	current_mouse_x_ = x;
 	current_mouse_y_ = y;
 }
 
-void Camera::onRMouseUp(int x, int y) 
+void Camera::OnRMouseUp(int x, int y) 
 {
 	is_mouse_moving_ = false;
 }
 
-void Camera::onMouseMove(int x, int y) 
+void Camera::OnMouseMove(int x, int y) 
 {
-	if (is_mouse_moving_) {
+	if (is_mouse_moving_) 
+	{
 		int xOffset = x - current_mouse_x_;
 		int yOffset = y - current_mouse_y_;
 
 		current_mouse_x_ = x;
 		current_mouse_y_ = y;
 
-		pitch(-yOffset);
-		yaw(xOffset);
+		Pitch(-yOffset);
+		Yaw(xOffset);
 	}
 }
 
-void Camera::onKeyDown(uint32_t key) 
+void Camera::OnKeyDown(uint32_t key) 
 {
-	switch (key) {
+	switch (key) 
+	{
 	case KEY_W:
 		move_state_ |= MOVE_FRONT;
 		break;
@@ -58,9 +69,10 @@ void Camera::onKeyDown(uint32_t key)
 	}
 }
 
-void Camera::onKeyUp(uint32_t key) 
+void Camera::OnKeyUp(uint32_t key) 
 {
-	switch (key) {
+	switch (key) 
+	{
 	case KEY_W:
 		move_state_ &= ~MOVE_FRONT;
 		break;
@@ -78,39 +90,39 @@ void Camera::onKeyUp(uint32_t key)
 	}
 }
 
-void Camera::pitch(int yoffset) 
+void Camera::Pitch(int yoffset) 
 {
-	pitch_ += yoffset * mouse_sensitivity_;
+	pitch_angle_ += yoffset * mouse_sensitivity_;
 
-	if (pitch_ >= 89.0f)
+	if (pitch_angle_ >= 89.0f)
 	{
-		pitch_ = 89.0f;
+		pitch_angle_ = 89.0f;
 	}
 
-	if (pitch_ <= -89.0f)
+	if (pitch_angle_ <= -89.0f)
 	{
-		pitch_ = -89.0f;
+		pitch_angle_ = -89.0f;
 	}
 
-	front_.y = sin(glm::radians(pitch_));
-	front_.x = cos(glm::radians(yaw_)) * cos(glm::radians(pitch_));
-	front_.z = sin(glm::radians(yaw_)) * cos(glm::radians(pitch_));
+	front_.y = sin(glm::radians(pitch_angle_));
+	front_.x = cos(glm::radians(yaw_angle_)) * cos(glm::radians(pitch_angle_));
+	front_.z = sin(glm::radians(yaw_angle_)) * cos(glm::radians(pitch_angle_));
 
 	front_ = glm::normalize(front_);
 }
 
-void Camera::yaw(int xoffset) 
+void Camera::Yaw(int xoffset) 
 {
-	yaw_ += xoffset * mouse_sensitivity_;
+	yaw_angle_ += xoffset * mouse_sensitivity_;
 
-	front_.y = sin(glm::radians(pitch_));
-	front_.x = cos(glm::radians(yaw_)) * cos(glm::radians(pitch_));
-	front_.z = sin(glm::radians(yaw_)) * cos(glm::radians(pitch_));
+	front_.y = sin(glm::radians(pitch_angle_));
+	front_.x = cos(glm::radians(yaw_angle_)) * cos(glm::radians(pitch_angle_));
+	front_.z = sin(glm::radians(yaw_angle_)) * cos(glm::radians(pitch_angle_));
 
 	front_ = glm::normalize(front_);
 }
 
-void Camera::update() 
+void Camera::Update() 
 {
 	glm::vec3 moveDirection = {0.0f, 0.0f, 0.0f};
 
@@ -137,7 +149,7 @@ void Camera::update()
 		moveDirection += right;
 	}
 
-	if (glm::length(moveDirection) != 0) 
+	if (moveDirection != glm::vec3(0.0, 0.0, 0.0)) 
     {
 		moveDirection = glm::normalize(moveDirection);
 		position_ += move_speed_ * moveDirection;

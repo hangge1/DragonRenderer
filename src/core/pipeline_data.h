@@ -5,38 +5,38 @@
 #include "glm/glm.hpp"
 
 
-#define ARRAY_BUFFER 0
-#define ELEMENT_ARRAY_BUFFER 1
+const int ARRAY_BUFFER = 0;
+const int ELEMENT_ARRAY_BUFFER = 1;
 
-#define DRAW_LINES 0
-#define DRAW_TRIANGLES 1
+const int DRAW_LINES = 0;
+const int DRAW_TRIANGLES = 1;
 
-#define FRONT_FACE 0
-#define BACK_FACE 1
-#define FRONT_FACE_CW 0
-#define FRONT_FACE_CCW 1
+const int FRONT_FACE = 0;
+const int BACK_FACE = 1;
+const int FRONT_FACE_CW = 0;
+const int FRONT_FACE_CCW = 1;
 
-#define CULL_FACE 1
-#define DEPTH_TEST 2
-#define COLOR_BLEND 3
+const int CULL_FACE = 1;
+const int DEPTH_TEST = 2;
+const int COLOR_BLEND = 3;
 
 
-#define DEPTH_LESS 0
-#define DEPTH_GREATER 1
+const int DEPTH_LESS = 0;
+const int DEPTH_GREATER = 1;
 
 //纹理参数类型选项
-#define TEXTURE_FILTER 0
-#define TEXTURE_WRAP_U 1
-#define TEXTURE_WRAP_V 2
+const int TEXTURE_FILTER = 0;
+const int TEXTURE_WRAP_U = 1;
+const int TEXTURE_WRAP_V = 2;
 
 //纹理参数
-#define TEXTURE_FILTER_NEAREST 0
-#define TEXTURE_FILTER_LINEAR 1
+const int TEXTURE_FILTER_NEAREST = 0;
+const int TEXTURE_FILTER_LINEAR = 1;
 
-#define TEXTURE_WRAP_REPEAT 0
-#define TEXTURE_WRAP_MIRROR 1
+const int TEXTURE_WRAP_REPEAT = 0;
+const int TEXTURE_WRAP_MIRROR = 1;
 
-#define FRACTION(v)			((v) - (int)(v))
+
 
 struct Color
 {
@@ -89,11 +89,12 @@ struct Color
 };
 
 //仿OpenGL数据结构
-struct BindingDescription {
-	uint32_t	vbo_id{ 0 };
-	size_t		item_size{ 0 };
-	size_t		stride{ 0 };
-	size_t		offset{ 0 };
+struct BindingDescription 
+{
+	uint32_t  vbo_id { 0 };
+	size_t  item_size { 0 };
+	size_t  stride { 0 };
+	size_t  offset { 0 };
 };
 
 struct VsOutput 
@@ -109,12 +110,6 @@ struct FsOutput
 	glm::ivec2 pixelPos;
 	float depth;
 	Color color;//此处使用0-255来进行颜色显示
-};
-
-enum TextureUvWrap
-{
-    WrapRepeat,
-    WrapMirror
 };
 
 

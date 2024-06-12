@@ -16,25 +16,25 @@ public:
     FrameBuffer(const FrameBuffer&) = delete;
     FrameBuffer& operator=(const FrameBuffer&) = delete;
 
-    void InitFrame(LONG frame_width, LONG frame_height, Color* frame_buffer = nullptr);
+    void Init(int32_t width, int32_t height, Color* buffer = nullptr);
 
-    void FillColor(const Color& will_fill_color);
+    void FillColor(const Color& will_fill_color = Color(0,0,0,0));
     void FillDepth(float depth = 1.0f);
 
-    void SetOnePixelColor(LONG x_pox, LONG y_pox, Color& color);
-    Color* GetFrameColor(LONG x_pox, LONG y_pox);
+    void SetPixelColor(int32_t x_pox, int32_t y_pox, Color& color);
+    Color* GetPixelColor(int32_t x_pox, int32_t y_pox) const;
 
-    void SetOnePixelDepth(LONG x_pox, LONG y_pox, float depth);
-    float GetFrameDepth(LONG x_pox, LONG y_pox);
+    void SetOnePixelDepth(int32_t x_pox, int32_t y_pox, float depth);
+    float GetPixelDepth(int32_t x_pox, int32_t y_pox) const;
 
-    LONG GetWidth() const { return frame_width_; }
-    LONG GetHeight() const { return frame_height_; }
+    int32_t GetWidth() const { return frame_width_; }
+    int32_t GetHeight() const { return frame_height_; }
 private:
-    LONG frame_width_ {0};
-    LONG frame_height_ {0};
-    Color* frame_buffer_ {nullptr};
-    float* depth_buffer_ {nullptr};
-    bool is_buffer_external {false};
+    int32_t frame_width_ { 0 };
+    int32_t frame_height_ { 0 };
+    Color* frame_buffer_ { nullptr };
+    float* depth_buffer_ { nullptr };
+    bool is_buffer_external { false };
 };
 
 

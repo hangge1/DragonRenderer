@@ -9,6 +9,8 @@ class Texture
 public:
 	Texture() = default;
 	~Texture();
+	Texture(const Texture&) = delete;
+    Texture& operator=(const Texture&) = delete;
 
 	//默认都是rgba格式
 	void SetBufferData(uint32_t width, uint32_t height, void* data);

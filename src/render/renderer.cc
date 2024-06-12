@@ -30,9 +30,14 @@ Renderer::~Renderer()
 		delete iter.second;
 	}
 	vao_map_.clear();
+
+    for (auto iter : texture_map_) {
+		delete iter.second;
+	}
+	texture_map_.clear();
 }
 
-void Renderer::InitFrameBuffer(LONG frame_width, LONG frame_height, void* buffer)
+void Renderer::Init(int32_t frame_width, int32_t frame_height, void* buffer)
 {
     if(nullptr != current_frame_buffer_)
     {
@@ -40,26 +45,27 @@ void Renderer::InitFrameBuffer(LONG frame_width, LONG frame_height, void* buffer
     }
 
     current_frame_buffer_ = new FrameBuffer();
-    current_frame_buffer_->InitFrame(frame_width, frame_height, (Color*)buffer);
+    current_frame_buffer_->Init(frame_width, frame_height, (Color*)buffer);
 
 
     int screen_width = frame_width;
     int screen_height = frame_height;
-    screen_matrix_ = {
+    screen_matrix_ = 
+    {
         screen_width / 2, 0.0f, 0.0f, screen_width / 2,
         0.0f, screen_height / 2, 0.0f, screen_height / 2,
         0.0f, 0.0f, 0.5f, 0.5f, 
         0.0f, 0.0f, 0.0f, 1.0f
     };
 
-    screen_matrix_ = glm::transpose(screen_matrix_);
+    screen_matrix_ = glm::transpose(screen_matrix_); //因为glm是列优先存储
 }
 
 void Renderer::Clear()
 {
     if(nullptr != current_frame_buffer_)
     {
-        current_frame_buffer_->FillColor(Color(0, 0, 0, 0));
+        current_frame_buffer_->FillColor();
         current_frame_buffer_->FillDepth();
     }
 }
@@ -272,7 +278,7 @@ void Renderer::DrawElement(uint32_t drawMode, uint32_t first, uint32_t count)
 	uint32_t pixel_pos = 0;
 	for (uint32_t i = 0; i < raster_outputs.size(); ++i) 
     {
-		current_shader_->fragmentShader(raster_outputs[i], fs_output, texture_map_);
+		current_shader_->FragmentShader(raster_outputs[i], fs_output, texture_map_);
 
         //深度测试
 		if (enable_depth_test_ && !DepthTest(fs_output)) 
@@ -287,7 +293,7 @@ void Renderer::DrawElement(uint32_t drawMode, uint32_t first, uint32_t count)
             color = BlendColor(fs_output.pixelPos.x, fs_output.pixelPos.y, color);
         }
 
-		current_frame_buffer_->SetOnePixelColor(fs_output.pixelPos.x, fs_output.pixelPos.y, color);
+		current_frame_buffer_->SetPixelColor(fs_output.pixelPos.x, fs_output.pixelPos.y, color);
 	}
 }
 
@@ -300,14 +306,14 @@ void Renderer::PrintVao(uint32_t vao) const
     }
 }
 
-Color Renderer::BlendColor(LONG x, LONG y, const Color &src_color)
+Color Renderer::BlendColor(int32_t x, int32_t y, const Color &src_color)
 {
     if(nullptr == current_frame_buffer_)
     {
         return src_color;
     }
 
-    Color* dst_color = current_frame_buffer_->GetFrameColor(x, y);
+    Color* dst_color = current_frame_buffer_->GetPixelColor(x, y);
     if(nullptr == dst_color)
     {
         return src_color;
@@ -323,89 +329,7 @@ Color Renderer::BlendColor(LONG x, LONG y, const Color &src_color)
     return result;
 }
 
-Color Renderer::NearestUvSample(glm::vec2 &uv)
-{
-    if(nullptr == texture_ || nullptr == current_frame_buffer_)
-    {
-        return Color();
-    }
-
-    CheckUv(uv.x, uv.y);
-
-    int x = uv.x * (texture_->get_width() - 1);
-    int y = uv.y * (texture_->get_height() - 1);
-
-    return texture_->get_data()[y * texture_->get_width() + x];
-}
-
-Color Renderer::BilinearUvSample(glm::vec2 &uv)
-{
-    if(nullptr == texture_ || nullptr == current_frame_buffer_)
-    {
-        return Color();
-    }
-
-    CheckUv(uv.x, uv.y);
-
-    float x = uv.x * (texture_->get_width() - 1);
-    float y = uv.y * (texture_->get_height() - 1);
-
-    int x0 = std::floor(x);
-    int x1 = std::ceil(x);
-    int y0 = std::floor(y);
-    int y1 = std::ceil(y);
-
-    if(x0 == texture_->get_width() - 1)
-    {
-        x0--;
-        x1 = x0 + 1;
-    }
-
-    if(y0 == texture_->get_height() - 1)
-    {
-        y0--;
-        y1 = y0 + 1;
-    }
-
-    float weight = x - x0;
-    Color x_y0 = texture_->get_data()[y0 * texture_->get_width() + x1] * weight + 
-                 texture_->get_data()[y0 * texture_->get_width() + x0] * (1.0f - weight);
-
-    Color x_y1 = texture_->get_data()[y1 * texture_->get_width() + x1] * weight + 
-                 texture_->get_data()[y1 * texture_->get_width() + x0] * (1.0f - weight);
-
-    weight = y - y0;
-
-    return x_y1 * weight + x_y0 * (1 - weight);
-}
-
-void Renderer::CheckUv(float &ux, float &uy)
-{
-    if(ux < 0.0f || ux > 1.0f)
-    {
-        ux = Fracpart(Fracpart(ux) + 1.0f);
-        if(texture_uv_wrap_ == WrapMirror)
-        {
-            ux = 1.0f - ux;
-        }
-    }
-
-    if(uy < 0.0f || uy > 1.0f)
-    {
-        uy = Fracpart(Fracpart(uy) + 1.0f);
-        if(texture_uv_wrap_ == WrapMirror)
-        {
-            uy = 1.0f - uy;
-        }
-    }
-}
-
-float Renderer::Fracpart(float num)
-{
-    return num - (int)num;
-}
-
- void Renderer::VertexShaderApply(
+void Renderer::VertexShaderApply(
 		std::vector<VsOutput>& vsOutputs,
 		const VertexArrayObject* vao,
 		const BufferObject* ebo,
@@ -421,7 +345,7 @@ float Renderer::Fracpart(float num)
 		size_t indicesOffset = i * sizeof(uint32_t);
 		memcpy(&index, indicesData + indicesOffset, sizeof(uint32_t));
 
-		VsOutput output = current_shader_->vertexShader(binding_map, buffer_map_, index);
+		VsOutput output = current_shader_->VertexShader(binding_map, buffer_map_, index);
 		vsOutputs.push_back(output);
 	}
 }
@@ -445,7 +369,7 @@ void Renderer::ScreenMapping(VsOutput& vs_output)
 
 bool Renderer::DepthTest(const FsOutput &output)
 {
-	float oldDepth = current_frame_buffer_->GetFrameDepth(output.pixelPos.x, output.pixelPos.y);
+	float oldDepth = current_frame_buffer_->GetPixelDepth(output.pixelPos.x, output.pixelPos.y);
 	switch (depth_test_func_)
 	{
 	case DEPTH_LESS:

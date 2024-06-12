@@ -8,11 +8,12 @@
 class Image
 {
 public:
-	Image(const uint32_t& width = 0, const uint32_t& height = 0, Color* data = nullptr);
-	~Image();
-
 	static Image* createImage(const std::string& path);
 	static void destroyImage(Image* image);
+
+public:
+	Image(const uint32_t& width = 0, const uint32_t& height = 0, Color* data = nullptr);
+	~Image();
 	
     inline Color* get_data() const { return data_; }
     inline uint32_t get_width() const { return width_; }

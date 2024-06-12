@@ -1,7 +1,7 @@
 ﻿
 #include "shader.h"
 
-glm::vec4 Shader::getVector(
+glm::vec4 Shader::GetVector(
 		const std::map<uint32_t, BindingDescription>& binding_map,
 		const std::map<uint32_t, BufferObject*>& buffer_map,
 		const uint32_t& attribute_location,

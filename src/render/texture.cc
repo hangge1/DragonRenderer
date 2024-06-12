@@ -7,20 +7,24 @@
 #include "pipeline_data.h"
 #include "glm/glm.hpp"
 
-
-Texture::~Texture() 
+const float FRACTION(float v)
 {
-	if (buffer_ != nullptr) 
+	return v - (int)v;
+};
+
+Texture::~Texture()
+{
+	if (buffer_ != nullptr)
 	{
 		delete[] buffer_;
 		buffer_ = nullptr;
 	}
 }
 
-void Texture::SetBufferData(uint32_t width, uint32_t height, void* data) 
+void Texture::SetBufferData(uint32_t width, uint32_t height, void *data)
 {
-	if (buffer_ != nullptr) 
-    {
+	if (buffer_ != nullptr)
+	{
 		delete[] buffer_;
 		buffer_ = nullptr;
 	}
@@ -28,31 +32,32 @@ void Texture::SetBufferData(uint32_t width, uint32_t height, void* data)
 	width_ = width;
 	height_ = height;
 
-	if (buffer_ == nullptr) {
+	if (buffer_ == nullptr)
+	{
 		buffer_ = new Color[width * height];
 	}
 
 	std::memcpy(buffer_, data, width * height * sizeof(Color));
 }
 
-glm::vec4 Texture::GetColor(float u, float v) 
+glm::vec4 Texture::GetColor(float u, float v)
 {
 	Color resultColor;
 
-	//处理uv坐标
+	// 处理uv坐标
 	CheckWrap(u, wrapu_);
 	CheckWrap(v, wrapv_);
 
-	if (filter_ == TEXTURE_FILTER_NEAREST) 
-    {
+	if (filter_ == TEXTURE_FILTER_NEAREST)
+	{
 		int x = std::round(u * (width_ - 1));
 		int y = std::round(v * (height_ - 1));
 
 		int position = y * width_ + x;
 		resultColor = buffer_[position];
 	}
-	else if (filter_ == TEXTURE_FILTER_LINEAR) 
-    {
+	else if (filter_ == TEXTURE_FILTER_LINEAR)
+	{
 		float x = u * static_cast<float>(width_ - 1);
 		float y = v * static_cast<float>(height_ - 1);
 
@@ -61,14 +66,14 @@ glm::vec4 Texture::GetColor(float u, float v)
 		int bottom = std::floor(y);
 		int top = std::ceil(y);
 
-		//对上下插值，得到左右
+		// 对上下插值，得到左右
 		float yScale = 0.0f;
-		if (top == bottom) 
-        {
+		if (top == bottom)
+		{
 			yScale = 1.0f;
 		}
-		else 
-        {
+		else
+		{
 			yScale = (y - static_cast<float>(bottom)) / static_cast<float>(top - bottom);
 		}
 
@@ -80,14 +85,14 @@ glm::vec4 Texture::GetColor(float u, float v)
 		Color leftColor = buffer_[positionLeftBottom].Lerp(buffer_[positionLeftTop], yScale);
 		Color rightColor = buffer_[positionRightBottom].Lerp(buffer_[positionRightTop], yScale);
 
-		//对左右插值，得到结果
+		// 对左右插值，得到结果
 		float xScale = 0.0f;
-		if (right == left) 
-        {
+		if (right == left)
+		{
 			xScale = 1.0f;
 		}
-		else 
-        {
+		else
+		{
 			xScale = (x - static_cast<float>(left)) / static_cast<float>(right - left);
 		}
 
@@ -103,13 +108,14 @@ glm::vec4 Texture::GetColor(float u, float v)
 	return result;
 }
 
-void Texture::CheckWrap(float& n, uint32_t type) 
+void Texture::CheckWrap(float &n, uint32_t type)
 {
-	if (n > 1.0f || n < 0.0f) 
-    {
+	if (n > 1.0f || n < 0.0f)
+	{
 		n = FRACTION(n);
 
-		switch (type) {
+		switch (type)
+		{
 		case TEXTURE_WRAP_REPEAT:
 			n = FRACTION(n + 1);
 			break;
@@ -120,12 +126,11 @@ void Texture::CheckWrap(float& n, uint32_t type)
 			break;
 		}
 	}
-
 }
 
-void Texture::SetParameter(uint32_t type, uint32_t value) 
+void Texture::SetParameter(uint32_t type, uint32_t value)
 {
-	switch (type) 
+	switch (type)
 	{
 	case TEXTURE_FILTER:
 		filter_ = value;

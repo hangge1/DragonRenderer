@@ -242,8 +242,8 @@ void RenderTriangle(Renderer& renderer)
     static auto model_matrix = glm::identity<glm::mat4>();
 
     shader->model_matrix = model_matrix;
-    shader->view_matrix = camera->getViewMatrix();
-    shader->project_matrix = camera->getProjectionMatrix();
+    shader->view_matrix = camera->GetViewMatrix();
+    shader->project_matrix = camera->GetProjectionMatrix();
 
     renderer.UseProgram(shader);
     renderer.BindVertexArray(vao);
@@ -312,8 +312,8 @@ void RenderLine(Renderer& renderer)
     static auto model_matrix = glm::identity<glm::mat4>();
 
     shader->model_matrix = model_matrix;
-    shader->view_matrix = camera->getViewMatrix();
-    shader->project_matrix = camera->getProjectionMatrix();
+    shader->view_matrix = camera->GetViewMatrix();
+    shader->project_matrix = camera->GetProjectionMatrix();
 
     renderer.UseProgram(shader);
     renderer.BindVertexArray(vao2);
@@ -331,8 +331,8 @@ void RenderTexture(Renderer& renderer)
 
 
     textureShader->model_matrix = model_matrix;
-    textureShader->view_matrix = camera->getViewMatrix();
-    textureShader->project_matrix = camera->getProjectionMatrix();
+    textureShader->view_matrix = camera->GetViewMatrix();
+    textureShader->project_matrix = camera->GetProjectionMatrix();
 	textureShader->diffuse_texture = texture;
 
     renderer.UseProgram(textureShader);
@@ -367,7 +367,7 @@ int WINAPI wWinMain(HINSTANCE hInstance,
 	APP->SetCamera(camera);	
 
     Renderer renderer;
-    renderer.InitFrameBuffer(window_width, window_height, APP->GetRenderBuffer());
+    renderer.Init(window_width, window_height, APP->GetRenderBuffer());
 
     //InitTriangleData(renderer);
     //InitLineData(renderer);
@@ -376,15 +376,19 @@ int WINAPI wWinMain(HINSTANCE hInstance,
     while(APP->DispatchMessageLoop())
     {
         renderer.Clear();
-		camera->update();
+		camera->Update();
         //draw something
         CustomDraw(renderer);
     }
  
     std::cout << "Application will exit!" << std::endl;
 
+
+
+
 	delete camera;
 	camera = nullptr;
+
 
     return 0;
 }

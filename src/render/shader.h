@@ -15,20 +15,21 @@ public:
     Shader(const Shader&) = delete;
     Shader& operator=(const Shader&) = delete;
 
-	virtual VsOutput vertexShader(
+	virtual VsOutput VertexShader(
 		//vao
 		const std::map<uint32_t, BindingDescription>& bindingMap,
-
 		//vbo
 		const std::map<uint32_t,BufferObject*>& bufferMap,
-
+		
 		const uint32_t& index
 	) = 0;
 
-	virtual void fragmentShader(const VsOutput& input, FsOutput& output, const std::map<uint32_t, Texture*>& textures) = 0;
+	virtual void FragmentShader(const VsOutput& input, FsOutput& output, 
+		const std::map<uint32_t, Texture*>& textures) = 0;
+
 public:
 
-	glm::vec4 getVector(
+	glm::vec4 GetVector(
 		const std::map<uint32_t, BindingDescription>& bindingMap,
 		const std::map<uint32_t, BufferObject*>& bufferMap,
 		const uint32_t& attributeLocation,

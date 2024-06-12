@@ -42,7 +42,7 @@ Application* Application::GetInstance()
 
 
 bool Application::InitMainWindow(HINSTANCE program_instance, const CHAR* main_window_title,
-	LONG main_window_width, LONG main_window_height) 
+	int32_t main_window_width, int32_t main_window_height) 
 {
 	main_window_width_ = main_window_width;
 	main_window_height_ = main_window_height;
@@ -75,7 +75,7 @@ void Application::ProcessMessage(HWND window_handler, UINT message_id, WPARAM me
 		{
 			if(camera_)
 			{
-				camera_->onKeyDown(message_wparam);
+				camera_->OnKeyDown(message_wparam);
 			}
 		}
 		break;
@@ -83,7 +83,7 @@ void Application::ProcessMessage(HWND window_handler, UINT message_id, WPARAM me
 		{
 			if(camera_)
 			{
-				camera_->onKeyUp(message_wparam);
+				camera_->OnKeyUp(message_wparam);
 			}
 		}
 		break;
@@ -91,7 +91,7 @@ void Application::ProcessMessage(HWND window_handler, UINT message_id, WPARAM me
 		{
 			if(camera_)
 			{
-				camera_->onRMouseDown(GET_X_LPARAM(message_lparam), GET_Y_LPARAM(message_lparam));
+				camera_->OnRMouseDown(GET_X_LPARAM(message_lparam), GET_Y_LPARAM(message_lparam));
 			}
 		}
 		break;
@@ -99,7 +99,7 @@ void Application::ProcessMessage(HWND window_handler, UINT message_id, WPARAM me
 		{
 			if(camera_)
 			{
-				camera_->onRMouseUp(GET_X_LPARAM(message_lparam), GET_Y_LPARAM(message_lparam));
+				camera_->OnRMouseUp(GET_X_LPARAM(message_lparam), GET_Y_LPARAM(message_lparam));
 			}
 		}
 		break;
@@ -107,7 +107,7 @@ void Application::ProcessMessage(HWND window_handler, UINT message_id, WPARAM me
 		{
 			if(camera_)
 			{
-				camera_->onMouseMove(GET_X_LPARAM(message_lparam), GET_Y_LPARAM(message_lparam));
+				camera_->OnMouseMove(GET_X_LPARAM(message_lparam), GET_Y_LPARAM(message_lparam));
 			}
 		}
 		break;
