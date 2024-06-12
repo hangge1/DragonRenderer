@@ -34,6 +34,7 @@ public:
     void* GetRenderBuffer() const { return canvas_buffer_;}
 
     void SetCamera(Camera* camera);
+    Camera* GetCamera() const;
 private:
     bool CreateMainWindow();
 

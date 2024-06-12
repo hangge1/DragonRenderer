@@ -17,8 +17,6 @@
 #include "shader/texture_shader.h"
 #include "camera.h"
 
-Camera* camera = nullptr;
-
 //使用的texture
 uint32_t texture = 0;
 TextureShader* textureShader = nullptr;
@@ -29,6 +27,7 @@ uint32_t ebo;
 uint32_t vao2;
 uint32_t ebo2;
 
+//单独一个三角形
 void InitTriangleData(Renderer& renderer)
 {
 	float positions[] = 
@@ -86,7 +85,8 @@ void InitTriangleData(Renderer& renderer)
 	renderer.PrintVao(vao);
 }
 
-void Init2TriangleData(Renderer& renderer)
+//两个三角形测试混合
+void InitTwoTriangleData(Renderer& renderer)
 {
 	float positions[] = 
 	{	
@@ -158,7 +158,7 @@ void Init2TriangleData(Renderer& renderer)
 }
 
 //纹理测试
-void Init3TriangleData(Renderer& renderer)
+void InitTextureTriangleData(Renderer& renderer)
 {
 	textureShader = new TextureShader();
 
@@ -235,22 +235,7 @@ void Init3TriangleData(Renderer& renderer)
 	renderer.PrintVao(vao);
 }
 
-//利用重构后的仿OpenGL接口，进行渲染
-void RenderTriangle(Renderer& renderer)
-{
-    static auto* shader = new DefaultShader();
-    static auto model_matrix = glm::identity<glm::mat4>();
-
-    shader->model_matrix = model_matrix;
-    shader->view_matrix = camera->GetViewMatrix();
-    shader->project_matrix = camera->GetProjectionMatrix();
-
-    renderer.UseProgram(shader);
-    renderer.BindVertexArray(vao);
-    renderer.BindBuffer(ELEMENT_ARRAY_BUFFER, ebo);
-    renderer.DrawElement(DRAW_TRIANGLES, 0, 6);
-}
-
+//直线测试
 void InitLineData(Renderer& renderer)
 {
 	float positions[] = 
@@ -305,6 +290,23 @@ void InitLineData(Renderer& renderer)
 	renderer.PrintVao(vao2);
 }
 
+
+//利用重构后的仿OpenGL接口，进行渲染
+void RenderTriangle(Renderer& renderer)
+{
+    static auto* shader = new DefaultShader();
+    static auto model_matrix = glm::identity<glm::mat4>();
+
+    shader->model_matrix = model_matrix;
+    shader->view_matrix = APP->GetCamera()->GetViewMatrix();
+    shader->project_matrix = APP->GetCamera()->GetProjectionMatrix();
+
+    renderer.UseProgram(shader);
+    renderer.BindVertexArray(vao);
+    renderer.BindBuffer(ELEMENT_ARRAY_BUFFER, ebo);
+    renderer.DrawElement(DRAW_TRIANGLES, 0, 6);
+}
+
 //利用重构后的仿OpenGL接口，进行渲染
 void RenderLine(Renderer& renderer)
 {
@@ -312,8 +314,8 @@ void RenderLine(Renderer& renderer)
     static auto model_matrix = glm::identity<glm::mat4>();
 
     shader->model_matrix = model_matrix;
-    shader->view_matrix = camera->GetViewMatrix();
-    shader->project_matrix = camera->GetProjectionMatrix();
+    shader->view_matrix = APP->GetCamera()->GetViewMatrix();
+    shader->project_matrix = APP->GetCamera()->GetProjectionMatrix();
 
     renderer.UseProgram(shader);
     renderer.BindVertexArray(vao2);
@@ -321,6 +323,7 @@ void RenderLine(Renderer& renderer)
     renderer.DrawElement(DRAW_LINES, 0, 2);
 }
 
+//渲染纹理图片
 void RenderTexture(Renderer& renderer)
 {
     static float angle = 0.0f;
@@ -331,8 +334,8 @@ void RenderTexture(Renderer& renderer)
 
 
     textureShader->model_matrix = model_matrix;
-    textureShader->view_matrix = camera->GetViewMatrix();
-    textureShader->project_matrix = camera->GetProjectionMatrix();
+    textureShader->view_matrix = APP->GetCamera()->GetViewMatrix();
+    textureShader->project_matrix = APP->GetCamera()->GetProjectionMatrix();
 	textureShader->diffuse_texture = texture;
 
     renderer.UseProgram(textureShader);
@@ -341,10 +344,9 @@ void RenderTexture(Renderer& renderer)
     renderer.DrawElement(DRAW_TRIANGLES, 0, 3);
 }
 
+
 void CustomDraw(Renderer& renderer)
 {
-    //RenderTriangle(renderer);
-    //RenderLine(renderer);
 	RenderTexture(renderer);
 }
 
@@ -363,32 +365,19 @@ int WINAPI wWinMain(HINSTANCE hInstance,
         return -1;
     }
 
-	camera = new Camera(glm::radians(60.0f), (float)window_width / (float)window_height, 0.1f, 100.0f, { 0.0f, 1.0f, 0.0f });
-	APP->SetCamera(camera);	
-
     Renderer renderer;
     renderer.Init(window_width, window_height, APP->GetRenderBuffer());
 
-    //InitTriangleData(renderer);
-    //InitLineData(renderer);
-	//Init2TriangleData(renderer);
-	Init3TriangleData(renderer);
+	InitTextureTriangleData(renderer);
     while(APP->DispatchMessageLoop())
     {
         renderer.Clear();
-		camera->Update();
+		
         //draw something
         CustomDraw(renderer);
     }
  
     std::cout << "Application will exit!" << std::endl;
-
-
-
-
-	delete camera;
-	camera = nullptr;
-
 
     return 0;
 }

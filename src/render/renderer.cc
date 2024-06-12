@@ -68,6 +68,8 @@ void Renderer::Clear()
         current_frame_buffer_->FillColor();
         current_frame_buffer_->FillDepth();
     }
+
+    
 }
 
 uint32_t Renderer::GenBuffer()

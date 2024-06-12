@@ -28,6 +28,12 @@ Application::~Application()
 	{
 		ReleaseDC(main_window_handler_, current_window_device_context_);
 	}
+
+	if(nullptr != camera_)
+	{
+		delete camera_;
+		camera_ = nullptr;
+	}
 }
 
 Application* Application::GetInstance() 
@@ -58,10 +64,13 @@ bool Application::InitMainWindow(HINSTANCE program_instance, const CHAR* main_wi
 		return false;
 	}
 
-
-
 	//根据DC创建双缓冲CavasDC，利用位图进行绑定
 	InitDrawContext();
+
+	if(nullptr == camera_)
+	{
+		camera_ = new Camera(glm::radians(60.0f), (float)main_window_width_ / (float)main_window_width_, 0.1f, 100.0f, { 0.0f, 1.0f, 0.0f });	
+	}
 
 	return true;
 }
@@ -156,11 +165,25 @@ void Application::Render()
 {
 	BitBlt(current_window_device_context_, 0, 0, main_window_width_, main_window_height_, 
 	canvas_device_contex_, 0, 0, SRCCOPY);
+
+	if(nullptr != camera_)
+	{
+		camera_->Update();
+	}
 }
 
 void Application::SetCamera(Camera* camera)
 {
+	if(nullptr != camera && nullptr != camera_)
+	{
+		delete camera_;
+	}
 	camera_ = camera;
+}
+
+Camera* Application::GetCamera() const
+{
+	return camera_;
 }
 
 bool Application::CreateMainWindow()
