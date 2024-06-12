@@ -8,3 +8,5 @@ add_library(Application ${SRCS} ${INCLUDES})
 target_include_directories(Application PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_include_directories(Application PRIVATE ${CMAKE_SOURCE_DIR}/src/core)
+
+target_link_libraries(Application thirdpart_lib_glm)

@@ -1,6 +1,8 @@
 ﻿#include "application.h"
 
 #include <Windows.h>
+#include <windowsx.h>
+#include "camera.h"
 
 LRESULT CALLBACK Wndproc(HWND window_handler, UINT message_id, WPARAM message_wparam, LPARAM message_lparam) 
 {
@@ -69,6 +71,46 @@ void Application::ProcessMessage(HWND window_handler, UINT message_id, WPARAM me
 {
 	switch (message_id)
 	{
+		case WM_KEYDOWN:
+		{
+			if(camera_)
+			{
+				camera_->onKeyDown(message_wparam);
+			}
+		}
+		break;
+		case WM_KEYUP:
+		{
+			if(camera_)
+			{
+				camera_->onKeyUp(message_wparam);
+			}
+		}
+		break;
+		case WM_RBUTTONDOWN:
+		{
+			if(camera_)
+			{
+				camera_->onRMouseDown(GET_X_LPARAM(message_lparam), GET_Y_LPARAM(message_lparam));
+			}
+		}
+		break;
+		case WM_RBUTTONUP:
+		{
+			if(camera_)
+			{
+				camera_->onRMouseUp(GET_X_LPARAM(message_lparam), GET_Y_LPARAM(message_lparam));
+			}
+		}
+		break;
+		case WM_MOUSEMOVE:
+		{
+			if(camera_)
+			{
+				camera_->onMouseMove(GET_X_LPARAM(message_lparam), GET_Y_LPARAM(message_lparam));
+			}
+		}
+		break;
 		case WM_CLOSE: 
 		{
 			DestroyWindow(window_handler);//此处销毁窗体,会自动发出WM_DESTROY
@@ -116,6 +158,10 @@ void Application::Render()
 	canvas_device_contex_, 0, 0, SRCCOPY);
 }
 
+void Application::SetCamera(Camera* camera)
+{
+	camera_ = camera;
+}
 
 bool Application::CreateMainWindow()
 {

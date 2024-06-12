@@ -10,15 +10,14 @@
 
 #include "application.h"
 #include "renderer.h"
-
-
-
 #include "pipeline_data.h"
 #include "image.h"
 #include "glm/ext.hpp"
-
 #include "shader/default_shader.h"
 #include "shader/texture_shader.h"
+#include "camera.h"
+
+Camera* camera = nullptr;
 
 //使用的texture
 uint32_t texture = 0;
@@ -240,24 +239,11 @@ void Init3TriangleData(Renderer& renderer)
 void RenderTriangle(Renderer& renderer)
 {
     static auto* shader = new DefaultShader();
-    static float angle = 0.0f;
-    static float cameraz = 2.0f;
     static auto model_matrix = glm::identity<glm::mat4>();
-	static auto view_matrix = glm::lookAt(glm::vec3(0.0f, 0.0f, cameraz), 
-        glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    static auto perspective_matrix = glm::perspective(glm::radians(60.0f), 
-        (float)APP->GetMainWindowWidth() / (float)APP->GetMainWindowHeight(), 0.1f, 100.0f);
-
-    //angle += 0.01f;
-    //model_matrix = glm::rotate(glm::mat4(1.0f), angle, glm::vec3{ 0.0f, 1.0f, 0.0f });
-
-    //cameraz -= 0.01f;
-    //view_matrix = glm::lookAt(glm::vec3(0.0f, 0.0f, cameraz), 
-    //    glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
     shader->model_matrix = model_matrix;
-    shader->view_matrix = view_matrix;
-    shader->project_matrix = perspective_matrix;
+    shader->view_matrix = camera->getViewMatrix();
+    shader->project_matrix = camera->getProjectionMatrix();
 
     renderer.UseProgram(shader);
     renderer.BindVertexArray(vao);
@@ -323,25 +309,11 @@ void InitLineData(Renderer& renderer)
 void RenderLine(Renderer& renderer)
 {
     static auto* shader = new DefaultShader();
-    static float angle = 0.0f;
-    static float cameraz = 10.0f;
     static auto model_matrix = glm::identity<glm::mat4>();
-	static auto view_matrix = glm::lookAt(glm::vec3(0.0f, 0.0f, cameraz), 
-        glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    static auto perspective_matrix = glm::perspective(glm::radians(60.0f), 
-        (float)APP->GetMainWindowWidth() / (float)APP->GetMainWindowHeight(), 0.1f, 100.0f);
-
-    //angle += 0.01f;
-    //model_matrix = glm::rotate(glm::mat4(1.0f), angle, glm::vec3{ 0.0f, 1.0f, 0.0f });
-
-    cameraz -= 0.002f;
-
-    view_matrix = glm::lookAt(glm::vec3(0.0f, 0.0f, cameraz), 
-       glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
     shader->model_matrix = model_matrix;
-    shader->view_matrix = view_matrix;
-    shader->project_matrix = perspective_matrix;
+    shader->view_matrix = camera->getViewMatrix();
+    shader->project_matrix = camera->getProjectionMatrix();
 
     renderer.UseProgram(shader);
     renderer.BindVertexArray(vao2);
@@ -352,23 +324,15 @@ void RenderLine(Renderer& renderer)
 void RenderTexture(Renderer& renderer)
 {
     static float angle = 0.0f;
-    static float cameraz = 1.0f;
     static auto model_matrix = glm::identity<glm::mat4>();
-	static auto view_matrix = glm::lookAt(glm::vec3(0.0f, 0.0f, cameraz), 
-        glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    static auto perspective_matrix = glm::perspective(glm::radians(60.0f), 
-        (float)APP->GetMainWindowWidth() / (float)APP->GetMainWindowHeight(), 0.1f, 100.0f);
 
-    angle += 0.01f;
-    model_matrix = glm::rotate(glm::mat4(1.0f), angle, glm::vec3{ 0.0f, 1.0f, 0.0f });
+    //angle += 0.01f;
+    //model_matrix = glm::rotate(glm::mat4(1.0f), angle, glm::vec3{ 0.0f, 1.0f, 0.0f });
 
-    //cameraz -= 0.01f;
-    //view_matrix = glm::lookAt(glm::vec3(0.0f, 0.0f, cameraz), 
-    //    glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
     textureShader->model_matrix = model_matrix;
-    textureShader->view_matrix = view_matrix;
-    textureShader->project_matrix = perspective_matrix;
+    textureShader->view_matrix = camera->getViewMatrix();
+    textureShader->project_matrix = camera->getProjectionMatrix();
 	textureShader->diffuse_texture = texture;
 
     renderer.UseProgram(textureShader);
@@ -381,7 +345,6 @@ void CustomDraw(Renderer& renderer)
 {
     //RenderTriangle(renderer);
     //RenderLine(renderer);
-
 	RenderTexture(renderer);
 }
 
@@ -400,23 +363,28 @@ int WINAPI wWinMain(HINSTANCE hInstance,
         return -1;
     }
 
+	camera = new Camera(glm::radians(60.0f), (float)window_width / (float)window_height, 0.1f, 100.0f, { 0.0f, 1.0f, 0.0f });
+	APP->SetCamera(camera);	
+
     Renderer renderer;
     renderer.InitFrameBuffer(window_width, window_height, APP->GetRenderBuffer());
 
     //InitTriangleData(renderer);
     //InitLineData(renderer);
-
 	//Init2TriangleData(renderer);
 	Init3TriangleData(renderer);
     while(APP->DispatchMessageLoop())
     {
         renderer.Clear();
-
+		camera->update();
         //draw something
         CustomDraw(renderer);
     }
  
     std::cout << "Application will exit!" << std::endl;
+
+	delete camera;
+	camera = nullptr;
 
     return 0;
 }

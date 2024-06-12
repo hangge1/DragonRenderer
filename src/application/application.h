@@ -6,6 +6,8 @@
 
 #include <Windows.h>
 
+#include "camera.h"
+
 class Application 
 {
 public:
@@ -31,6 +33,8 @@ public:
     LONG GetMainWindowHeight() const { return main_window_height_; }
 
     void* GetRenderBuffer() const { return canvas_buffer_;}
+
+    void SetCamera(Camera* camera);
 private:
     bool CreateMainWindow();
 
@@ -43,8 +47,11 @@ private:
     bool HasMainWindowDestoryed() const { return has_main_window_destoryed_; }
 
     void Render();
+
 private:
     static Application* self_instance_;
+
+    Camera* camera_ { nullptr };
 
     LONG main_window_width_ {0};
     LONG main_window_height_ {0};
