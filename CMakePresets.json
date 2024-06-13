@@ -50,7 +50,8 @@
         {
             "name": "x64-Windows-Build-Debug",
             "configurePreset": "Debug",
-            "configuration": "Debug"
+            "configuration": "Debug",
+            "verbose": true
         },
         {
             "name": "x64-Windows-Build-Release",

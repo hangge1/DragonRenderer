@@ -15,17 +15,21 @@
 #include "glm/ext.hpp"
 #include "shader/default_shader.h"
 #include "shader/texture_shader.h"
+#include "shader/lambert_light_shader.h"
 #include "camera.h"
 
 //使用的texture
 uint32_t texture = 0;
 TextureShader* textureShader = nullptr;
+LambertLightShader* lightShader = nullptr;
 
 uint32_t vao;
 uint32_t ebo;
 
 uint32_t vao2;
 uint32_t ebo2;
+
+uint32_t intervbo;
 
 //单独一个三角形
 void InitTriangleData(Renderer& renderer)
@@ -290,6 +294,117 @@ void InitLineData(Renderer& renderer)
 	renderer.PrintVao(vao2);
 }
 
+//立方体测试
+void InitTextureCube(Renderer& renderer)
+{
+	lightShader = new LambertLightShader();
+	lightShader->directional_light_.color = { 1.0f, 1.0f, 1.0f };
+	lightShader->directional_light_.direction = { -1.0f, -0.3f, -0.7f };
+	lightShader->environment_light_.color = { 0.1f, 0.1f, 0.1f };
+
+	static Image* image = Image::createImage(ASSETS_PATH "/texture/goku.jpg");
+
+	texture = renderer.GenTexture();
+
+	renderer.BindTexture(texture);
+	renderer.TexImage2D(image->get_width(), image->get_height(), image->get_data());
+	renderer.TexParameter(TEXTURE_FILTER, TEXTURE_FILTER_LINEAR);
+	renderer.TexParameter(TEXTURE_WRAP_U, TEXTURE_WRAP_REPEAT);
+	renderer.TexParameter(TEXTURE_WRAP_V, TEXTURE_WRAP_REPEAT);
+	renderer.BindTexture(0);
+
+
+	// renderer.Enable(CULL_FACE);
+	// renderer.SetFrontFaceLinkStyle(FRONT_FACE_CCW);
+	// renderer.SetCullWhichFace(BACK_FACE);
+	// renderer.Disable(CULL_FACE);
+
+	float vertices[] = 
+	{
+		// positions          // normals           // texture coords
+		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+
+		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+
+		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+		-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+		-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+
+		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+
+		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+
+		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
+	};
+
+	uint32_t indices[] = 
+	{
+		0, 1, 2, 3, 4, 5,
+		6, 7, 8, 9, 10, 11,
+		12,13,14,15,16,17,
+		18,19,20,21,22,23,
+		24,25,26,27,28,29,
+		30,31,32,33,34,35
+	};
+
+	//renderer.Enable(COLOR_BLEND);
+
+	//生成indices对应ebo
+	ebo = renderer.GenBuffer();
+	renderer.BindBuffer(ELEMENT_ARRAY_BUFFER, ebo);
+	renderer.BufferData(ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * 36, indices);
+	renderer.BindBuffer(ELEMENT_ARRAY_BUFFER, 0);
+
+	intervbo = renderer.GenBuffer();
+	renderer.BindBuffer(ARRAY_BUFFER, intervbo);
+	renderer.BufferData(ARRAY_BUFFER, sizeof(float) * 288, vertices);
+
+	//生成vao并且绑定
+	vao = renderer.GenVertexArray();
+	renderer.BindVertexArray(vao);
+	renderer.BindBuffer(ARRAY_BUFFER, intervbo);
+
+	//position
+	renderer.VertexAttributePointer(0, 3, 8 * sizeof(float), 0);
+	//color
+	renderer.VertexAttributePointer(1, 4, 8 * sizeof(float), 3 * sizeof(float));
+	//uv
+	renderer.VertexAttributePointer(2, 2, 8 * sizeof(float), 6 * sizeof(float));
+
+
+	renderer.BindBuffer(ARRAY_BUFFER, 0);
+	renderer.BindVertexArray(0);
+	renderer.PrintVao(vao);
+}
+
 
 //利用重构后的仿OpenGL接口，进行渲染
 void RenderTriangle(Renderer& renderer)
@@ -344,10 +459,33 @@ void RenderTexture(Renderer& renderer)
     renderer.DrawElement(DRAW_TRIANGLES, 0, 3);
 }
 
+//渲染goku立方体
+void RenderCube(Renderer& renderer)
+{
+    static float angle = 0.0f;
+    static auto model_matrix = glm::identity<glm::mat4>();
+
+    //angle += 0.01f;
+    //model_matrix = glm::rotate(glm::mat4(1.0f), angle, glm::vec3{ 0.0f, 1.0f, 0.0f });
+
+
+    lightShader->model_matrix = model_matrix;
+    lightShader->view_matrix = APP->GetCamera()->GetViewMatrix();
+    lightShader->project_matrix = APP->GetCamera()->GetProjectionMatrix();
+	lightShader->diffuse_texture = texture;
+
+    renderer.UseProgram(lightShader);
+    renderer.BindVertexArray(vao);
+    renderer.BindBuffer(ELEMENT_ARRAY_BUFFER, ebo);
+    renderer.DrawElement(DRAW_TRIANGLES, 0, 36);
+}
+
 
 void CustomDraw(Renderer& renderer)
 {
-	RenderTexture(renderer);
+	//RenderTexture(renderer);
+
+	RenderCube(renderer);
 }
 
 int WINAPI wWinMain(HINSTANCE hInstance,
@@ -368,7 +506,9 @@ int WINAPI wWinMain(HINSTANCE hInstance,
     Renderer renderer;
     renderer.Init(window_width, window_height, APP->GetRenderBuffer());
 
-	InitTextureTriangleData(renderer);
+	//InitTextureTriangleData(renderer);
+
+	InitTextureCube(renderer);
     while(APP->DispatchMessageLoop())
     {
         renderer.Clear();

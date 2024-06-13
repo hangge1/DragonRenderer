@@ -14,6 +14,9 @@ class DefaultShader: public Shader
 public:
 	DefaultShader() = default;
 	~DefaultShader() = default;
+	DefaultShader(const DefaultShader&) = delete;
+    DefaultShader& operator=(const DefaultShader&) = delete;
+
 
 	VsOutput VertexShader(
 		const std::map<uint32_t, BindingDescription>& bindingMap,

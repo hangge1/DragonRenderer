@@ -1,5 +1,5 @@
-﻿#ifndef _RENDER_SHADER_TEXTURE_SHADER_H_
-#define _RENDER_SHADER_TEXTURE_SHADER_H_
+﻿#ifndef _RENDER_SHADER_LAMBERT_LIGHT_SHADER_H_
+#define _RENDER_SHADER_LAMBERT_LIGHT_SHADER_H_
 
 #include "shader.h"
 
@@ -10,13 +10,25 @@
 #include "buffer_object.h"
 #include "texture.h"
 
-class TextureShader : public Shader
+struct DirectionalLight 
+{
+	glm::vec3 color;
+	glm::vec3 direction;
+};
+
+struct EnvironmentLight
+{
+    glm::vec3 color;
+};
+
+class LambertLightShader : public Shader
 {
 public:
-	TextureShader() = default;
-	~TextureShader() = default;
-	TextureShader(const TextureShader&) = delete;
-    TextureShader& operator=(const TextureShader&) = delete;
+	LambertLightShader() = default;
+	~LambertLightShader() = default;
+    LambertLightShader(const LambertLightShader&) = delete;
+    LambertLightShader& operator=(const LambertLightShader&) = delete;
+
 
 	VsOutput VertexShader(
 		const std::map<uint32_t, BindingDescription>& bindingMap,
@@ -33,6 +45,9 @@ public:
 	glm::mat4 project_matrix;
 
 	uint32_t diffuse_texture { 0 };
+
+    DirectionalLight directional_light_;
+    EnvironmentLight environment_light_;
 };
 
 

@@ -362,6 +362,7 @@ void Renderer::PerspectiveDivision(VsOutput& vs_output)
 
     vs_output.color *= coff;
     vs_output.uv *= coff;
+    vs_output.normal *= coff;
 }
 
 void Renderer::ScreenMapping(VsOutput& vs_output)
@@ -406,6 +407,7 @@ void Renderer::PerspectiveRecover(VsOutput& vs_output)
 {
     vs_output.color /= vs_output.one_devide_w;
     vs_output.uv /= vs_output.one_devide_w;
+    vs_output.normal /= vs_output.one_devide_w;
 }
 
 void Renderer::Enable(uint32_t param)
