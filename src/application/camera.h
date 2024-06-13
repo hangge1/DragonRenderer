@@ -41,7 +41,7 @@ private:
 	glm::mat4 view_matrix_;
 	glm::mat4 projection_matrix_;
 
-	glm::vec3	position_ { 0.0f,0.0f,1.0f };
+	glm::vec3	position_ { 0.0f,0.0f,3.0f };
 	glm::vec3	front_ { 0.0f,0.0f,-1.0f };
 	glm::vec3	top_ { 0.0f,1.0f,0.0f };
 	float		move_speed_ { 0.01f };

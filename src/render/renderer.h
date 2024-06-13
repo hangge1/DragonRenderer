@@ -107,7 +107,7 @@ private:
 	glm::mat4 screen_matrix_;
 
     //面片剔除相关
-	bool enable_cull_face_ { true };
+	bool enable_cull_face_ { false };
 	uint32_t front_face_link_style_ { FRONT_FACE_CCW }; 
 	uint32_t cull_which_face_ { BACK_FACE };
 

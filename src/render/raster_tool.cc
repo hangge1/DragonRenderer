@@ -164,6 +164,7 @@ void RasterTool::InterpolateLine(const VsOutput& start, const VsOutput& end, VsO
     target.one_devide_w = end.one_devide_w * weight + start.one_devide_w * (1.0f - weight);
     target.color = weight * end.color + (1.0f - weight) * start.color;
     target.uv = weight * end.uv + (1.0f - weight) * start.uv;
+    target.normal = weight * end.normal + (1.0f - weight) * start.normal;
     target.position.z = weight * end.position.z + (1.0f - weight) * start.position.z;
 }
 
@@ -216,5 +217,6 @@ void RasterTool::InterpolateTriangle(const VsOutput& p1, const VsOutput& p2, con
     target.one_devide_w = p1.one_devide_w * coff1 + p2.one_devide_w * coff2 + p3.one_devide_w * coff3;
     target.position.z = p1.position.z * coff1 + p2.position.z * coff2 + p3.position.z * coff3;
     target.color = p1.color * coff1 + p2.color * coff2 + p3.color * coff3;
+    target.normal = p1.normal * coff1 + p2.normal * coff2 + p3.normal * coff3;
     target.uv = p1.uv * coff1 + p2.uv * coff2 + p3.uv * coff3;
 }
