@@ -24,8 +24,8 @@ Camera::Camera(float fovy, float aspect, float n, float f, const glm::vec3& top)
 void Camera::OnRMouseDown(int x, int y) 
 {
 	is_mouse_moving_ = true;
-	current_mouse_x_ = x;
-	current_mouse_y_ = y;
+	last_mouse_x_ = x;
+	last_mouse_y_ = y;
 }
 
 void Camera::OnRMouseUp(int x, int y) 
@@ -37,11 +37,11 @@ void Camera::OnMouseMove(int x, int y)
 {
 	if (is_mouse_moving_) 
 	{
-		int xOffset = x - current_mouse_x_;
-		int yOffset = y - current_mouse_y_;
+		int xOffset = x - last_mouse_x_;
+		int yOffset = y - last_mouse_y_;
 
-		current_mouse_x_ = x;
-		current_mouse_y_ = y;
+		last_mouse_x_ = x;
+		last_mouse_y_ = y;
 
 		Pitch(-yOffset);
 		Yaw(xOffset);
@@ -124,7 +124,7 @@ void Camera::Yaw(int xoffset)
 
 void Camera::Update() 
 {
-	glm::vec3 moveDirection = {0.0f, 0.0f, 0.0f};
+	glm::vec3 moveDirection = { 0.0f, 0.0f, 0.0f };
 
 	glm::vec3 front = front_;
 	glm::vec3 right = glm::normalize(glm::cross(front_, top_));
