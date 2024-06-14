@@ -58,3 +58,40 @@ void Image::destroyImage(Image* image)
         image = nullptr;
 	}
 }
+
+Image* Image::CreateImageFromMemory(
+	const std::string& path,
+	unsigned char* dataIn,
+	uint32_t widthIn,
+	uint32_t heightIn
+) 
+{
+	int picType = 0;
+	int width{ 0 }, height{ 0 };
+
+	//记录了整个数据的大小
+	uint32_t dataInSize = 0;
+
+	//一个fbx模型有可能打包进来jpg，带有压缩格式的图片情况下，height可能为0，width就代表了整个图片的大小
+	if (!heightIn) 
+	{
+		dataInSize = widthIn;
+	}
+	else 
+	{
+		dataInSize = widthIn * heightIn;
+	}
+
+	//我们现在拿到的dataIn，并不是展开的位图数据，有可能是一个jpg png等格式的图片数据流
+	unsigned char* bits = stbi_load_from_memory(dataIn, dataInSize, &width, &height, &picType, STBI_rgb_alpha);
+	for (int i = 0; i < width * height * 4; i += 4)
+	{
+		unsigned char tmp = bits[i];
+		bits[i] = bits[i + 2];
+		bits[i + 2] = tmp;
+	}
+
+	Image* image = new Image(width, height, (Color*)bits);
+
+	return image;
+}

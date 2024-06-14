@@ -60,9 +60,9 @@ link_directories(${ASSIMP_LIB_PATH})
 add_executable(Test_Assimp "assimp_test.cc")
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_link_libraries(Test_Assimp "assimp-vc143-mtd.lib" assets_lib)
+    target_link_libraries(Test_Assimp "${ASSIMP_LIB_PATH}/assimp-vc143-mtd.lib" assets_lib)
 else()
-    target_link_libraries(Test_Assimp "assimp-vc143-mt.lib" assets_lib)
+    target_link_libraries(Test_Assimp "${ASSIMP_LIB_PATH}/assimp-vc143-mt.lib" assets_lib)
 endif()
 
 

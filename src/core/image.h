@@ -10,7 +10,8 @@ class Image
 public:
 	static Image* createImage(const std::string& path);
 	static void destroyImage(Image* image);
-
+	static Image* CreateImageFromMemory(const std::string& path, 
+		unsigned char* dataIn, uint32_t widthIn, uint32_t heightIn);
 public:
 	Image(const uint32_t& width = 0, const uint32_t& height = 0, Color* data = nullptr);
 	~Image();
