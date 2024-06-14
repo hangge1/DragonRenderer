@@ -40,3 +40,32 @@ target_link_libraries(Test_StbImage thirdpart_lib_stb_image assets_lib)
 add_test(NAME test_thirdpart_lib_stb_image COMMAND Test_StbImage) 
 set_tests_properties(test_thirdpart_lib_stb_image PROPERTIES PASS_REGULAR_EXPRESSION "thirdparts library stb_image Pass")
 # =======================================================================================
+
+
+# =======================================================================================
+# assimp_test.cc
+
+# 设置库的路径
+set(ASSIMP_LIB_PATH ${CMAKE_SOURCE_DIR}/thirdparts/assimp/${CMAKE_BUILD_TYPE}/lib)
+set(ASSIMP_BIN_PATH ${CMAKE_SOURCE_DIR}/thirdparts/assimp/${CMAKE_BUILD_TYPE}/bin)
+set(ASSIMP_INCLUDE_PATH ${CMAKE_SOURCE_DIR}/thirdparts/assimp/include)
+
+
+# 添加库的头文件路径
+include_directories(${ASSIMP_INCLUDE_PATH})
+
+# 添加库文件路径
+link_directories(${ASSIMP_LIB_PATH})
+
+add_executable(Test_Assimp "assimp_test.cc")
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_link_libraries(Test_Assimp "assimp-vc143-mtd.lib" assets_lib)
+else()
+    target_link_libraries(Test_Assimp "assimp-vc143-mt.lib" assets_lib)
+endif()
+
+
+add_test(NAME thirdpart_lib_assimp COMMAND Test_Assimp) 
+set_tests_properties(thirdpart_lib_assimp PROPERTIES PASS_REGULAR_EXPRESSION "thirdparts library assimp Pass")
+# =======================================================================================
