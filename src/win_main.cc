@@ -18,10 +18,15 @@
 #include "shader/lambert_light_shader.h"
 #include "camera.h"
 
+#include "model.h"
+//#include "mesh.h"
+
 //使用的texture
 uint32_t texture = 0;
 TextureShader* textureShader = nullptr;
 LambertLightShader* lightShader = nullptr;
+Model* model = nullptr;
+Camera* camera;
 
 uint32_t vao;
 uint32_t ebo;
@@ -405,6 +410,31 @@ void InitTextureCube(Renderer& renderer)
 	renderer.PrintVao(vao);
 }
 
+//初始化模型加载数据
+void InitLoadModel(Renderer& renderer) 
+{
+	camera = new Camera(60.0f, (float)APP->GetMainWindowWidth() / (float)APP->GetMainWindowHeight(), 0.1f, 1000.0f, { 0.0f, 1.0f, 0.0f });
+	APP->SetCamera(camera);
+
+	lightShader = new LambertLightShader();
+	lightShader->directional_light_.color = { 1.0f, 1.0f, 1.0f };
+	lightShader->directional_light_.direction = { -1.0f, -0.5f, -0.7f };
+	lightShader->environment_light_.color = { 0.5f, 0.5f, 0.5f };
+
+	renderer.Enable(CULL_FACE);
+
+	model = new Model(&renderer);
+	model->Read(ASSETS_PATH "/model/dinosaur/source/Rampaging T-Rex.glb");
+	//model->read("assets/model/Fist Fight B.fbx");
+	//model->read("assets/model/bag/backpack.obj");
+
+	auto rotateMatrix = glm::rotate(glm::identity<glm::mat4>(), 0.0f , glm::vec3(0.0f, 1.0f, 0.0f));
+	auto translateMatrix = glm::translate(glm::identity<glm::mat4>(), glm::vec3(0.0f, 0.0f, -5.0f));
+	auto m = translateMatrix * rotateMatrix;
+
+	m = glm::scale(m, glm::vec3(0.1f, 0.1f, 0.1f));
+	model->SetModelMatrix(m);
+}
 
 //利用重构后的仿OpenGL接口，进行渲染
 void RenderTriangle(Renderer& renderer)
@@ -480,12 +510,24 @@ void RenderCube(Renderer& renderer)
     renderer.DrawElement(DRAW_TRIANGLES, 0, 36);
 }
 
+//渲染模型
+void RenderModel(Renderer& renderer)
+{
+	lightShader->view_matrix = APP->GetCamera()->GetViewMatrix();
+	lightShader->project_matrix = APP->GetCamera()->GetProjectionMatrix();
+
+	renderer.Clear();
+	renderer.UseProgram(lightShader);
+	model->Draw(lightShader);
+}
 
 void CustomDraw(Renderer& renderer)
 {
 	//RenderTexture(renderer);
 
-	RenderCube(renderer);
+	//RenderCube(renderer);
+
+	RenderModel(renderer);
 }
 
 int WINAPI wWinMain(HINSTANCE hInstance,
@@ -508,7 +550,9 @@ int WINAPI wWinMain(HINSTANCE hInstance,
 
 	//InitTextureTriangleData(renderer);
 
-	InitTextureCube(renderer);
+	//InitTextureCube(renderer);
+
+	InitLoadModel(renderer);
     while(APP->DispatchMessageLoop())
     {
         renderer.Clear();

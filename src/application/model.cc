@@ -11,7 +11,6 @@
 #include "pipeline_data.h"
 #include "renderer.h"
 
-#include "glm/glm.hpp"
 #include "assimp/Importer.hpp"
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
@@ -53,7 +52,7 @@ bool Model::Read(const std::string& path)
 	}
 
 	root_mesh_ = new Mesh(renderer_);
-    root_mesh_->Init({}, {}, 0, glm::mat4());
+    root_mesh_->Init({}, {}, 0, {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1});
 	ProcessNode(root_mesh_, scene->mRootNode, scene);
 
     return true;
@@ -73,7 +72,7 @@ void Model::ProcessNode(Mesh* parent, aiNode* ainode, const aiScene* scene)
 {
 	//创建新节点
 	auto node = new Mesh(renderer_);
-    node->Init({}, {}, 0, glm::mat4());
+    node->Init({}, {}, 0, {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1});
 	parent->AddChild(node);
     node->SetLocalMatrix(GetMat4f(ainode->mTransformation));
 
@@ -144,7 +143,8 @@ Mesh* Model::ProcessMesh(aiMesh* aimesh, const aiScene* scene)
 
 	//其上方已经拥有了parentNode，不需要自己的localMatrix
     Mesh* result = new Mesh(renderer_);
-    result->Init(vertices, indices, diffuseTexture, glm::mat4());
+
+    result->Init(vertices, indices, diffuseTexture, {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1});
 	return result;
 }
 
