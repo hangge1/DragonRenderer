@@ -1,0 +1,9 @@
+libdir=E:/study/SoftRenderer/assimp/install_/lib
+includedir=E:/study/SoftRenderer/assimp/install_/include
+
+Name: Assimp
+Description: Import various well-known 3D model formats in an uniform manner.
+Version: 5.4.1
+Libs: -L${libdir} -lassimp
+Libs.private:  
+Cflags: -I${includedir}
