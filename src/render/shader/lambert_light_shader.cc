@@ -41,7 +41,13 @@ void LambertLightShader::FragmentShader(const VsOutput& input, FsOutput& output,
 
 	//取出texture
 	auto iter = textures.find(diffuse_texture);
-	auto texture = iter->second;
+	Texture* texture = nullptr;
+	if(iter != textures.end())
+	{
+		texture = iter->second;
+	}
+	
+	
 
 	//计算颜色
     glm::vec4 texColor = { 1.0f, 1.0f, 1.0f, 1.0f };

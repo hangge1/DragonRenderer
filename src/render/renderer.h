@@ -80,6 +80,7 @@ private:
 
     void PerspectiveRecover(VsOutput& vs_output);
 
+    void Trim(VsOutput& vsOutput);
 private:
     FrameBuffer* current_frame_buffer_ { nullptr };
 

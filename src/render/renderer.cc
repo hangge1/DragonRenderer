@@ -363,6 +363,8 @@ void Renderer::PerspectiveDivision(VsOutput& vs_output)
     vs_output.color *= coff;
     vs_output.uv *= coff;
     vs_output.normal *= coff;
+
+    Trim(vs_output);
 }
 
 void Renderer::ScreenMapping(VsOutput& vs_output)
@@ -408,6 +410,40 @@ void Renderer::PerspectiveRecover(VsOutput& vs_output)
     vs_output.color /= vs_output.one_devide_w;
     vs_output.uv /= vs_output.one_devide_w;
     vs_output.normal /= vs_output.one_devide_w;
+}
+
+void Renderer::Trim(VsOutput & vsOutput)
+{
+    //修剪毛刺,边界求交点的时候，可能会产生超过-1-1现象
+	if (vsOutput.position.x < -1.0f) 
+    {
+		vsOutput.position.x = -1.0f;
+	}
+
+	if (vsOutput.position.x > 1.0f) 
+    {
+		vsOutput.position.x = 1.0f;
+	}
+
+	if (vsOutput.position.y < -1.0f) 
+    {
+		vsOutput.position.y = -1.0f;
+	}
+
+	if (vsOutput.position.y > 1.0f) 
+    {
+		vsOutput.position.y = 1.0f;
+	}
+
+	if (vsOutput.position.z < -1.0f) 
+    {
+		vsOutput.position.z = -1.0f;
+	}
+
+	if (vsOutput.position.z > 1.0f) 
+    {
+		vsOutput.position.z = 1.0f;
+	}
 }
 
 void Renderer::Enable(uint32_t param)

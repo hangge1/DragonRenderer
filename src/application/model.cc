@@ -60,7 +60,7 @@ bool Model::Read(const std::string& path)
 
 void Model::Draw(LambertLightShader* shader) 
 {
-	root_mesh_->Draw(glm::mat4(), shader);
+	root_mesh_->Draw({ 1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1 }, shader);
 }
 
 void Model::SetModelMatrix(const glm::mat4& m) 

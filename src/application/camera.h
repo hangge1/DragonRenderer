@@ -1,4 +1,4 @@
-
+ï»¿
 #ifndef _APPLICATION_CAMERA_H_
 #define _APPLICATION_CAMERA_H_
 
@@ -41,25 +41,25 @@ private:
 	glm::mat4 view_matrix_;
 	glm::mat4 projection_matrix_;
 
-	//ÉãÏñ»úËùÔÚÎ»ÖÃ
+	//æ‘„åƒæœºæ‰€åœ¨ä½ç½®
 	glm::vec3	position_ { 0.0f,0.0f,1.0f };
-	//ÉãÏñ»ú¹Û²ì·½Ïò
+	//æ‘„åƒæœºè§‚å¯Ÿæ–¹å‘
 	glm::vec3	front_ { 0.0f,0.0f,-1.0f };
-	//ÉãÏñ»úñ·¶¥·½Ïò
+	//æ‘„åƒæœºç©¹é¡¶æ–¹å‘
 	glm::vec3	top_ { 0.0f,1.0f,0.0f };
-	//ÉãÏñ»úÒÆ¶¯ËÙ¶È
-	float		move_speed_ { 0.01f };
-	//ÉãÏñ»úpitchÕÅ½Ç
+	//æ‘„åƒæœºç§»åŠ¨é€Ÿåº¦
+	float		move_speed_ { 0.1f };
+	//æ‘„åƒæœºpitchå¼ è§’
 	float		pitch_angle_ { 0.0f };
-	//ÉãÏñ»úyawÕÅ½Ç
+	//æ‘„åƒæœºyawå¼ è§’
 	float		yaw_angle_ { -90.0f };
-	//Êó±êÒÆ¶¯ÁéÃô¶È
+	//é¼ æ ‡ç§»åŠ¨çµæ•åº¦
 	float		mouse_sensitivity_ { 0.1f };
-	//ÒÆ¶¯×´Ì¬£¨Ç°ºó×óÓÒ¡¢²»ÒÆ¶¯£©
+	//ç§»åŠ¨çŠ¶æ€ï¼ˆå‰åå·¦å³ã€ä¸ç§»åŠ¨ï¼‰
 	int32_t	move_state_ { 0 };
-	//ÊÇ·ñÊó±êÕıÔÚ°´ÏÂÒÆ¶¯ÖĞ
+	//æ˜¯å¦é¼ æ ‡æ­£åœ¨æŒ‰ä¸‹ç§»åŠ¨ä¸­
 	bool		is_mouse_moving_ { false };
-	//ÉÏ´ÎÊó±êËùÔÚµÄÆÁÄ»¿Õ¼äÎ»ÖÃ
+	//ä¸Šæ¬¡é¼ æ ‡æ‰€åœ¨çš„å±å¹•ç©ºé—´ä½ç½®
 	int			last_mouse_x_ { 0 };
 	int			last_mouse_y_ { 0 };
 };

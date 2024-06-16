@@ -40,11 +40,14 @@ glm::vec4 Shader::GetVector(
 
 Color Shader::VectorToRGBA(const glm::vec4& v) 
 {
+	glm::vec4 clampv = glm::clamp(v, 0.0f, 1.0f);
+
+
     Color color;
-    color.r = v.x * 255.0;
-    color.g = v.y * 255.0;
-    color.b = v.z * 255.0;
-    color.a = v.w * 255.0;
+    color.r = clampv.x * 255.0;
+    color.g = clampv.y * 255.0;
+    color.b = clampv.z * 255.0;
+    color.a = clampv.w * 255.0;
 
     return color;
 }

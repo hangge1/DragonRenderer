@@ -413,7 +413,9 @@ void InitTextureCube(Renderer& renderer)
 //初始化模型加载数据
 void InitLoadModel(Renderer& renderer) 
 {
-	camera = new Camera(60.0f, (float)APP->GetMainWindowWidth() / (float)APP->GetMainWindowHeight(), 0.1f, 1000.0f, { 0.0f, 1.0f, 0.0f });
+	camera = new Camera(glm::radians(60.0f), (float)APP->GetMainWindowWidth() / (float)APP->GetMainWindowHeight(), 
+		0.1f, 1000.0f, { 0.0f, 1.0f, 0.0f });
+	
 	APP->SetCamera(camera);
 
 	lightShader = new LambertLightShader();
@@ -421,11 +423,11 @@ void InitLoadModel(Renderer& renderer)
 	lightShader->directional_light_.direction = { -1.0f, -0.5f, -0.7f };
 	lightShader->environment_light_.color = { 0.5f, 0.5f, 0.5f };
 
-	renderer.Enable(CULL_FACE);
+	//renderer.Enable(CULL_FACE);
 
 	model = new Model(&renderer);
 	model->Read(ASSETS_PATH "/model/dinosaur/source/Rampaging T-Rex.glb");
-	//model->read("assets/model/Fist Fight B.fbx");
+	//model->Read(ASSETS_PATH "/model/Fist_Fight_B.fbx");
 	//model->read("assets/model/bag/backpack.obj");
 
 	auto rotateMatrix = glm::rotate(glm::identity<glm::mat4>(), 0.0f , glm::vec3(0.0f, 1.0f, 0.0f));
@@ -535,8 +537,8 @@ int WINAPI wWinMain(HINSTANCE hInstance,
                     LPWSTR lpCmdLine,
                     int nCmdShow)
 {
-    const int window_width = 800;
-    const int window_height = 600;
+    const int window_width = 1200;
+    const int window_height = 900;
     const char* window_title = "DragonSoftRenderer";
 
     if(!APP->InitMainWindow(hInstance, window_title, window_width, window_height))
