@@ -18,7 +18,7 @@ add_library(Application ${SRCS} ${INCLUDES})
 
 target_include_directories(Application PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${ASSIMP_INCLUDE_PATH})
 
-target_include_directories(Application PRIVATE ${CMAKE_SOURCE_DIR}/src/core ${CMAKE_SOURCE_DIR}/src/render)
+target_include_directories(Application PRIVATE ${CMAKE_SOURCE_DIR}/core ${CMAKE_SOURCE_DIR}/render)
 
 target_link_libraries(Application thirdpart_lib_glm)
 

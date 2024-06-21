@@ -5,7 +5,7 @@
 
 # add_executable(Test_LineRasterize "line_rasterize_test.cc")
 # target_link_libraries(Test_LineRasterize Render)
-# target_include_directories(Test_LineRasterize PRIVATE ${CMAKE_SOURCE_DIR}/src/core)
+# target_include_directories(Test_LineRasterize PRIVATE ${CMAKE_SOURCE_DIR}/core)
 
 
 # # 这里说测试0 < k < 1 是因为，k > 1 确实生成的不是完全一样，所以这里暂且不测试了
