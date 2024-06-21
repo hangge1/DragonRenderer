@@ -1,55 +1,51 @@
 # DragonRenderer
-A soft raster renderer that uses GDI to draw on windows
+一款全自主实现的模拟OpenGL渲染管线的API接口的软光栅渲染器，叫做：DragonSoftRenderer！
+
+![image-20240621144356189](README.assets/image-20240621144356189.png)
 
 
 
 ### DragonRenderer构建说明：
 
+项目采用CMake 3.20构建，仅支持Windows平台，自测编译器套件为Visual Studio 17 2022
+
+
+
 **方法1：手动命令行构建**
-
-1、CMake version >= 3.20
-
-2、编译套件：目前仅测试  Visual Studio 17 2022
-
-3、构建指令
 
 - debug版本
 
     ```
-    进入根目录 Crtl + R 输入cmd进入命令行
-    生成配置 cmake -S . -B build -D CMAKE_BUILD_TYPE=Debug
-    编译 cmake --build build --config Debug
-    运行: .\build\Debug\bin\DragonRenderer.exe
-    单元测试: 
-    cd ./build
-    test -C Debug -VV
+    (1) 生成配置:  cmake -S . -B build -D CMAKE_BUILD_TYPE=Debug
+    (2) 编译 cmake --build build --config Debug
+    (3) 运行: .\build\Debug\bin\DragonRenderer.exe
+    (4) 单元测试:  进入build目录， test -C Debug -VV
     ```
-
+    
 - release版本
 
     ```
-    进入根目录 Crtl + R 输入cmd进入命令行
-    生成配置 cmake -S . -B build -D CMAKE_BUILD_TYPE=Delease 
-    编译 cmake --build build --config Release
-    运行: .\build\Release\bin\DragonRenderer.exe
-    单元测试: 
-    cd ./build
-    ctest -C Release -VV
+    (1) 生成配置:  cmake -S . -B build -D CMAKE_BUILD_TYPE=Release
+    (2) 编译 cmake --build build --config Release
+    (3) 运行: .\build\Debug\bin\DragonRenderer.exe
+    (4) 单元测试:  进入build目录， test -C Release -VV
     ```
 
 
 
-**方法2：利用vscode的cmake插件，利用CMakePresets预设进行构建**
+**方法2：vscode + CMakePresets.json预设自动构建**
 
-确保前提条件：安装visual stdio 2022 以及c++编译套件、cmake >= 3.20
+安装CMake Tools插件，进入后会自动出现下图的左侧栏按钮，根据配置选择Debug或Release进行切换。
+
+左下角的三个箭头分别表示：编译、调试运行、非调试运行
 
 如下图：
 
-![image-20240523221510925](./README.assets/image-20240523221510925.png)
+![image-20240621145137425](README.assets/image-20240621145137425.png)
 
 
 
-**编码规范：** 遵循Google C++代码规范
+**编码规范：** 遵循Google C++代码规范（尽量遵循）
 
 **Git 提交记录规范格式说明：**
 
