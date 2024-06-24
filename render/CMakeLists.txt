@@ -9,7 +9,7 @@ target_include_directories(Render PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 
 # link lib glm
-target_link_libraries(Render PRIVATE thirdpart_lib_stb_image thirdpart_lib_glm Application)
+target_link_libraries(Render PUBLIC thirdpart_lib_stb_image Application)
 
 # -----------------------------assimp------------------------------------
 # 设置库的路径

@@ -12,15 +12,15 @@ class Application
 public:
     static constexpr const int32_t kDefaultWindowWidth = 800;
     static constexpr const int32_t kDefaultWindowHeight = 600;
-    static constexpr const CHAR* kDefaultWindowTitle = "DragonRenderer";
+    static constexpr const TCHAR* kDefaultWindowTitle = TEXT("DragonRenderer");
     static Application* GetInstance();
 public:
 	Application() = default;
 	~Application();
 
     //注册、创建、显示窗口
-    bool InitMainWindow(HINSTANCE program_instance, 
-        const CHAR* main_window_title = kDefaultWindowTitle,
+    bool Init(HINSTANCE program_instance, 
+        const TCHAR* main_window_title = kDefaultWindowTitle,
         int32_t main_window_width = kDefaultWindowWidth, 
         int32_t main_window_height = kDefaultWindowHeight);
 
@@ -28,8 +28,8 @@ public:
 
 	bool DispatchMessageLoop();
 
-    int32_t GetMainWindowWidth() const { return main_window_width_; }
-    int32_t GetMainWindowHeight() const { return main_window_height_; }
+    int32_t GetMainWindowWidth() const { return window_width_; }
+    int32_t GetMainWindowHeight() const { return window_height_; }
 
     void* GetRenderBuffer() const { return canvas_buffer_;}
 
@@ -42,29 +42,30 @@ private:
 
 	ATOM RegisterMainWindowClass();
 
-    void InitDrawContext();
+    void InitDC();
 
-    bool HasMainWindowDestoryed() const { return has_main_window_destoryed_; }
+    bool HasMainWindowDestoryed() const { return has_destoryed_; }
 
     void Render();
 
+    void InitCamera();
 private:
     static Application* self_instance_;
 
     Camera* camera_ { nullptr };
 
-    int32_t main_window_width_ {0};
-    int32_t main_window_height_ {0};
-    const CHAR* main_window_title_ { nullptr };
-    const WCHAR* main_window_class_name_ = L"DragonWindowClass";
+    int32_t window_width_ { 0 };
+    int32_t window_height_ { 0 };
+    const TCHAR* window_title_ { nullptr };
+    const TCHAR* register_class_name_ = TEXT("DragonWindowClass");
 
-    HINSTANCE current_program_instance_ { nullptr };
-    HWND main_window_handler_ { nullptr };
+    HINSTANCE hinstnce_ { nullptr };
+    HWND hwnd_ { nullptr };
 
-    bool has_main_window_destoryed_ = false;
+    bool has_destoryed_ = false;
 
-    HDC current_window_device_context_ { nullptr };
-    HDC canvas_device_contex_ { nullptr };
+    HDC currentDC { nullptr };
+    HDC canvasDC { nullptr };
     HBITMAP bitmap_ { nullptr };
     void* canvas_buffer_ { nullptr };
 };

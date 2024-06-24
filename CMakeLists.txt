@@ -50,14 +50,8 @@ file(COPY ${SOURCE_DIR} DESTINATION ${DEST_DIR})
 add_subdirectory(thirdparts)
 add_subdirectory(application)
 add_subdirectory(render)
-
-add_executable(DragonRenderer "entry_point.cc")
-target_link_libraries(DragonRenderer  Application Render thirdpart_lib_glm)
-
-
-# TODO 可优化为接口库，为所有的可执行程序或者测试程序附加
-target_link_options(DragonRenderer PRIVATE "/subsystem:console" "/entry:wWinMainCRTStartup")
-# or set_target_properties(DragonRenderer PROPERTIES LINK_FLAGS "/subsystem:console /entry:wWinMainCRTStartup")
-
 add_subdirectory(test)
 
+add_executable(DragonRenderer "entry_point.cc")
+target_link_libraries(DragonRenderer PRIVATE  Application Render thirdpart_lib_glm)
+target_link_options(DragonRenderer PRIVATE "/subsystem:console" "/entry:wWinMainCRTStartup")

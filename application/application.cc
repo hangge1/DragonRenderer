@@ -19,14 +19,14 @@ Application::~Application()
 		DeleteObject(bitmap_);
 	}
 
-	if(nullptr != canvas_device_contex_)
+	if(nullptr != canvasDC)
 	{
-		DeleteDC(canvas_device_contex_);
+		DeleteDC(canvasDC);
 	}
 
-	if(nullptr != current_window_device_context_ && nullptr != main_window_handler_)
+	if(nullptr != currentDC && nullptr != hwnd_)
 	{
-		ReleaseDC(main_window_handler_, current_window_device_context_);
+		ReleaseDC(hwnd_, currentDC);
 	}
 
 	if(nullptr != camera_)
@@ -47,13 +47,13 @@ Application* Application::GetInstance()
 }
 
 
-bool Application::InitMainWindow(HINSTANCE program_instance, const CHAR* main_window_title,
-	int32_t main_window_width, int32_t main_window_height) 
+bool Application::Init(HINSTANCE hinstance, const TCHAR* window_title,
+	int32_t window_width, int32_t window_height) 
 {
-	main_window_width_ = main_window_width;
-	main_window_height_ = main_window_height;
-	current_program_instance_ = program_instance;
-	main_window_title_ = main_window_title;
+	window_width_ = window_width;
+	window_height_ = window_height;
+	hinstnce_ = hinstance;
+	window_title_ = window_title;
 
 	//初始化窗体类型，并且注册
 	RegisterMainWindowClass();
@@ -64,13 +64,9 @@ bool Application::InitMainWindow(HINSTANCE program_instance, const CHAR* main_wi
 		return false;
 	}
 
-	//根据DC创建双缓冲CavasDC，利用位图进行绑定
-	InitDrawContext();
+	InitDC();
 
-	if(nullptr == camera_)
-	{
-		camera_ = new Camera(glm::radians(60.0f), (float)main_window_width_ / (float)main_window_width_, 0.1f, 100.0f, { 0.0f, 1.0f, 0.0f });	
-	}
+	InitCamera();
 
 	return true;
 }
@@ -134,7 +130,7 @@ void Application::ProcessMessage(HWND window_handler, UINT message_id, WPARAM me
 		break;
 		case WM_DESTROY: 
 		{
-			has_main_window_destoryed_ = true;
+			has_destoryed_ = true;
 			PostQuitMessage(0);//发出线程终止请求
 		}
 		break;
@@ -163,12 +159,20 @@ bool Application::DispatchMessageLoop()
 
 void Application::Render()
 {
-	BitBlt(current_window_device_context_, 0, 0, main_window_width_, main_window_height_, 
-	canvas_device_contex_, 0, 0, SRCCOPY);
+	BitBlt(currentDC, 0, 0, window_width_, window_height_, 
+	canvasDC, 0, 0, SRCCOPY);
 
 	if(nullptr != camera_)
 	{
 		camera_->Update();
+	}
+}
+
+void Application::InitCamera()
+{
+	if(nullptr == camera_)
+	{
+		camera_ = new Camera(glm::radians(60.0f), (float)window_width_ / (float)window_width_, 0.1f, 100.0f, { 0.0f, 1.0f, 0.0f });	
 	}
 }
 
@@ -203,13 +207,13 @@ bool Application::CreateMainWindow()
 	RECT windowRect;
 	windowRect.left = 0L;
 	windowRect.top = 0L;
-	windowRect.right = (LONG)main_window_width_;
-	windowRect.bottom = (LONG)main_window_height_;
+	windowRect.right = (LONG)window_width_;
+	windowRect.bottom = (LONG)window_height_;
 	AdjustWindowRectEx(&windowRect, dwStyle, FALSE, dwExStyle);
 
-	main_window_handler_ = CreateWindowW(
-		main_window_class_name_,
-		(LPCWSTR)main_window_title_,  //窗体标题，强转的目的: 保证标题正常显示
+	hwnd_ = CreateWindow(
+		register_class_name_,
+		window_title_,  //窗体标题，强转的目的: 保证标题正常显示
 		dwStyle,
 		500,  //x位置，相对左上角
 		500,  //y位置，相对左上角
@@ -217,20 +221,20 @@ bool Application::CreateMainWindow()
 		windowRect.bottom - windowRect.top,
 		nullptr,  //父窗体
 		nullptr,  //菜单栏
-		current_program_instance_,//程序实例
+		hinstnce_,//程序实例
 		nullptr);  //额外参数
 
 
-	if (!main_window_handler_)
+	if (!hwnd_)
 	{
 		return false;
 	}
 
 	MoveWindow2DesktopCenter();
 
-	ShowWindow(main_window_handler_, true);
+	ShowWindow(hwnd_, true);
 
-	UpdateWindow(main_window_handler_);
+	UpdateWindow(hwnd_);
 
 	return true;
 }
@@ -239,7 +243,7 @@ void Application::MoveWindow2DesktopCenter()
 {
 	RECT rectWindow;
 	// 获取窗口的尺寸
-    GetWindowRect(main_window_handler_, &rectWindow);
+    GetWindowRect(hwnd_, &rectWindow);
     
 	RECT rectScreen;
     // 获取屏幕的尺寸
@@ -250,48 +254,48 @@ void Application::MoveWindow2DesktopCenter()
     int posY = (rectScreen.bottom - rectWindow.bottom + rectWindow.top) / 2;
 
     // 移动窗口到新位置
-    SetWindowPos(main_window_handler_, HWND_TOP, posX, posY, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+    SetWindowPos(hwnd_, HWND_TOP, posX, posY, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
 }
 
 ATOM Application::RegisterMainWindowClass()
 {
-	WNDCLASSEXW wndClass;
+	WNDCLASSEX wndClass;
 
 	wndClass.cbSize = sizeof(WNDCLASSEX);
 	wndClass.style = CS_HREDRAW | CS_VREDRAW;	//水平/垂直大小发生变化重绘窗口
 	wndClass.lpfnWndProc = Wndproc;
 	wndClass.cbClsExtra = 0;
 	wndClass.cbWndExtra = 0;
-	wndClass.hInstance = current_program_instance_;		//应用程序句柄
+	wndClass.hInstance = hinstnce_;		//应用程序句柄
 	wndClass.hIcon = LoadIcon(NULL, IDI_APPLICATION);//应用程序图标,即任务栏的大图标
 	wndClass.hCursor = LoadCursor(NULL, IDC_ARROW);//鼠标图标
 	wndClass.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);//窗口背景色
 	wndClass.lpszMenuName = NULL;
-	wndClass.lpszClassName = main_window_class_name_;//窗口类名
+	wndClass.lpszClassName = register_class_name_;//窗口类名
 	wndClass.hIconSm = LoadIcon(NULL, IDI_WINLOGO);//窗口标题图标
 
-	return RegisterClassExW(&wndClass);
+	return RegisterClassEx(&wndClass);
 }
 
 
-void Application::InitDrawContext()
+void Application::InitDC()
 {
-	current_window_device_context_ = GetDC(main_window_handler_);
-	canvas_device_contex_ = CreateCompatibleDC(current_window_device_context_);
+	currentDC = GetDC(hwnd_);
+	canvasDC = CreateCompatibleDC(currentDC);
 
 	BITMAPINFO  temp_bmp_info{};
 	temp_bmp_info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-	temp_bmp_info.bmiHeader.biWidth = main_window_width_;
-	temp_bmp_info.bmiHeader.biHeight = main_window_height_;
+	temp_bmp_info.bmiHeader.biWidth = window_width_;
+	temp_bmp_info.bmiHeader.biHeight = window_height_;
 	temp_bmp_info.bmiHeader.biPlanes = 1;
 	temp_bmp_info.bmiHeader.biBitCount = 32;
 	temp_bmp_info.bmiHeader.biCompression = BI_RGB; //实际上存储方式为bgra
 
 	//创建与mhMem兼容的位图,其实实在mhMem指代的设备上划拨了一块内存，让mCanvasBuffer指向它
-	bitmap_ = CreateDIBSection(canvas_device_contex_, &temp_bmp_info, DIB_RGB_COLORS, (void**)&canvas_buffer_, 0, 0);//在这里创建buffer的内存
+	bitmap_ = CreateDIBSection(canvasDC, &temp_bmp_info, DIB_RGB_COLORS, (void**)&canvas_buffer_, 0, 0);//在这里创建buffer的内存
 
 	//一个设备可以创建多个位图，本设备使用mhBmp作为激活位图，对mCanvasDC的内存拷出，其实就是拷出了mhBmp的数据
-	SelectObject(canvas_device_contex_, bitmap_);
+	SelectObject(canvasDC, bitmap_);
 
-	memset(canvas_buffer_, 0, main_window_width_ * main_window_height_ * 4); //清空buffer为0
+	memset(canvas_buffer_, 0, window_width_ * window_height_ * 4); //清空buffer为0
 }

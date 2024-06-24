@@ -534,14 +534,14 @@ void CustomDraw(Renderer& renderer)
 
 int WINAPI wWinMain(HINSTANCE hInstance,
                     HINSTANCE hPrevInstance,
-                    LPWSTR lpCmdLine,
+                    LPTSTR lpCmdLine,
                     int nCmdShow)
 {
     const int window_width = 1200;
     const int window_height = 900;
-    const char* window_title = "DragonSoftRenderer";
+    const TCHAR* window_title = TEXT("DragonSoftRenderer");
 
-    if(!APP->InitMainWindow(hInstance, window_title, window_width, window_height))
+    if(!APP->Init(hInstance, window_title, window_width, window_height))
     {
         std::cout << "Application Init Failed!" << std::endl;
         return -1;
