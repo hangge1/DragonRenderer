@@ -35,7 +35,7 @@ set_tests_properties(test_thirdpart_lib_glm PROPERTIES PASS_REGULAR_EXPRESSION "
 # stb_image_test.cc
 
 add_executable(Test_StbImage "stb_image_test.cc")
-target_link_libraries(Test_StbImage PRIVATE thirdpart_lib_stb_image assets_lib)
+target_link_libraries(Test_StbImage PRIVATE thirdpart_lib_stb_image)
 
 add_test(NAME test_thirdpart_lib_stb_image COMMAND Test_StbImage) 
 set_tests_properties(test_thirdpart_lib_stb_image PROPERTIES PASS_REGULAR_EXPRESSION "thirdparts library stb_image Pass")
@@ -59,9 +59,9 @@ target_include_directories(Test_Assimp PUBLIC ${ASSIMP_INCLUDE_PATH})
 target_link_directories(Test_Assimp PUBLIC ${ASSIMP_LIB_PATH})
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_link_libraries(Test_Assimp PRIVATE "${ASSIMP_LIB_PATH}/assimp-vc143-mtd.lib" assets_lib)
+    target_link_libraries(Test_Assimp PRIVATE "${ASSIMP_LIB_PATH}/assimp-vc143-mtd.lib")
 else()
-    target_link_libraries(Test_Assimp PRIVATE "${ASSIMP_LIB_PATH}/assimp-vc143-mt.lib" assets_lib)
+    target_link_libraries(Test_Assimp PRIVATE "${ASSIMP_LIB_PATH}/assimp-vc143-mt.lib")
 endif()
 
 add_test(NAME thirdpart_lib_assimp COMMAND Test_Assimp) 

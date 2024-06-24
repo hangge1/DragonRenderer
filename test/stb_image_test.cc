@@ -24,8 +24,7 @@ int main(int argc, char** argv)
     int width{ 0 }, height{ 0 };
     int picType { 0 };
 
-    std::string path = ASSETS_PATH;
-    path += "/texture/lufei.jpg";
+    std::string path = "assets/texture/lufei.jpg";
 	//由于我们是BGRA的格式，图片是RGBA的格式，所以得交换下R&B
 	unsigned char* bits = stbi_load(path.c_str(), &width, &height, &picType, STBI_rgb_alpha);
 

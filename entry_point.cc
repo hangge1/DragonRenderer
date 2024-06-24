@@ -171,7 +171,7 @@ void InitTextureTriangleData(Renderer& renderer)
 {
 	textureShader = new TextureShader();
 
-	static Image* image = Image::createImage(ASSETS_PATH "/texture/goku.jpg");
+	static Image* image = Image::createImage("assets/texture/goku.jpg");
 
 	texture = renderer.GenTexture();
 
@@ -307,7 +307,7 @@ void InitTextureCube(Renderer& renderer)
 	lightShader->directional_light_.direction = { -1.0f, -0.3f, -0.7f };
 	lightShader->environment_light_.color = { 0.1f, 0.1f, 0.1f };
 
-	static Image* image = Image::createImage(ASSETS_PATH "/texture/goku.jpg");
+	static Image* image = Image::createImage("assets/texture/goku.jpg");
 
 	texture = renderer.GenTexture();
 
@@ -426,8 +426,8 @@ void InitLoadModel(Renderer& renderer)
 	//renderer.Enable(CULL_FACE);
 
 	model = new Model(&renderer);
-	model->Read(ASSETS_PATH "/model/dinosaur/source/Rampaging T-Rex.glb");
-	//model->Read(ASSETS_PATH "/model/Fist_Fight_B.fbx");
+	model->Read("assets/model/dinosaur/source/Rampaging T-Rex.glb");
+	//model->Read("assets/model/Fist_Fight_B.fbx");
 	//model->read("assets/model/bag/backpack.obj");
 
 	auto rotateMatrix = glm::rotate(glm::identity<glm::mat4>(), 0.0f , glm::vec3(0.0f, 1.0f, 0.0f));
