@@ -7,8 +7,6 @@
 #include <vector>
 
 #include "frame_buffer.h"
-#include "pipeline_data.h"
-#include "image.h"
 #include "buffer_object.h"
 #include "vertex_array_object.h"
 #include "shader.h"

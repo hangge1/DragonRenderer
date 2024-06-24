@@ -7,7 +7,6 @@
 #include "pipeline_data.h"
 #include "frame_buffer.h"
 #include "raster_tool.h"
-#include "image.h"
 #include "buffer_object.h"
 #include "vertex_array_object.h"
 #include "clip_tool.h"

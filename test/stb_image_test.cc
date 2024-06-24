@@ -2,9 +2,7 @@
 #include <iostream>
 #include <string>
 
-
 #include "stb_image.h"
-
 
 
 int Pass()

@@ -37,7 +37,6 @@ const int TEXTURE_WRAP_REPEAT = 0;
 const int TEXTURE_WRAP_MIRROR = 1;
 
 
-
 struct Color
 {
     Color(): r(255), g(255), b(255), a(255)
