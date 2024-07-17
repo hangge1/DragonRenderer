@@ -6,10 +6,11 @@ file(GLOB_RECURSE INCLUDES . "*.h")
 add_library(Render STATIC ${SRCS} ${INCLUDES})
 
 target_include_directories(Render PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-
+# 宽字节字符集
+target_compile_definitions(Render PUBLIC UNICODE)
 
 # link lib glm
-target_link_libraries(Render PUBLIC thirdpart_lib_stb_image Application)
+target_link_libraries(Render PUBLIC thirdpart_lib_stb_image thirdpart_lib_glm)
 
 # -----------------------------assimp------------------------------------
 # 设置库的路径

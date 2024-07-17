@@ -48,10 +48,9 @@ set(DEST_DIR ${BIN_DIR})
 file(COPY ${SOURCE_DIR} DESTINATION ${DEST_DIR})
 
 add_subdirectory(thirdparts)
-add_subdirectory(application)
 add_subdirectory(render)
 add_subdirectory(test)
 
 add_executable(DragonRenderer "entry_point.cc")
-target_link_libraries(DragonRenderer PRIVATE  Application Render thirdpart_lib_glm)
+target_link_libraries(DragonRenderer PUBLIC Render)
 target_link_options(DragonRenderer PRIVATE "/subsystem:console" "/entry:wWinMainCRTStartup")

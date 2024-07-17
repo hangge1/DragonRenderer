@@ -1,8 +1,15 @@
 ﻿#include "application.h"
 
-#include <Windows.h>
+
 #include <windowsx.h>
 #include "camera.h"
+
+#include "shader/lambert_light_shader.h"
+#include "model.h"
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+
+#include "renderer.h"
 
 LRESULT CALLBACK Wndproc(HWND window_handler, UINT message_id, WPARAM message_wparam, LPARAM message_lparam) 
 {
@@ -68,7 +75,72 @@ bool Application::Init(HINSTANCE hinstance, const TCHAR* window_title,
 
 	InitCamera();
 
+	renderer_ = new Renderer();
+	renderer_->Init(window_width_, window_height_, canvas_buffer_);
+
 	return true;
+}
+
+LambertLightShader* lightShader = nullptr;
+Model* model = nullptr;
+Camera* camera;
+
+//渲染模型
+void RenderModel(Renderer& renderer)
+{
+	lightShader->view_matrix = APP->GetCamera()->GetViewMatrix();
+	lightShader->project_matrix = APP->GetCamera()->GetProjectionMatrix();
+
+	renderer.Clear();
+	renderer.UseProgram(lightShader);
+	model->Draw(lightShader);
+}
+
+void CustomDraw(Renderer& renderer)
+{
+	RenderModel(renderer);
+}
+
+//初始化模型加载数据
+void InitLoadModel(Renderer& renderer) 
+{
+	camera = new Camera(glm::radians(60.0f), (float)APP->GetMainWindowWidth() / (float)APP->GetMainWindowHeight(), 
+		0.1f, 1000.0f, { 0.0f, 1.0f, 0.0f });
+	
+	APP->SetCamera(camera);
+
+	lightShader = new LambertLightShader();
+	lightShader->directional_light_.color = { 1.0f, 1.0f, 1.0f };
+	lightShader->directional_light_.direction = { -1.0f, -0.5f, -0.7f };
+	lightShader->environment_light_.color = { 0.5f, 0.5f, 0.5f };
+
+	//renderer.Enable(CULL_FACE);
+
+	model = new Model(&renderer);
+	model->Read("assets/model/dinosaur/source/Rampaging T-Rex.glb");
+	//model->Read("assets/model/Fist_Fight_B.fbx");
+	//model->read("assets/model/bag/backpack.obj");
+
+	auto rotateMatrix = glm::rotate(glm::identity<glm::mat4>(), 0.0f , glm::vec3(0.0f, 1.0f, 0.0f));
+	auto translateMatrix = glm::translate(glm::identity<glm::mat4>(), glm::vec3(0.0f, 0.0f, -5.0f));
+	auto m = translateMatrix * rotateMatrix;
+
+	m = glm::scale(m, glm::vec3(0.1f, 0.1f, 0.1f));
+	model->SetModelMatrix(m);
+}
+
+
+void Application::Run()
+{
+	InitLoadModel(*renderer_);
+
+    while(DispatchMessageLoop())
+    {
+        renderer_->Clear();
+		
+        //draw something
+        CustomDraw(*renderer_);
+    }
 }
 
 
@@ -145,7 +217,6 @@ bool Application::DispatchMessageLoop()
 		return false;
 	}
 
-	Render();
 	MSG msg;
 	if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 	{
@@ -153,19 +224,20 @@ bool Application::DispatchMessageLoop()
 		DispatchMessage(&msg);
 	}
 
-	return true;
-}
-
-
-void Application::Render()
-{
-	BitBlt(currentDC, 0, 0, window_width_, window_height_, 
-	canvasDC, 0, 0, SRCCOPY);
-
 	if(nullptr != camera_)
 	{
 		camera_->Update();
 	}
+
+	SwapBuffer();
+
+	return true;
+}
+
+
+void Application::SwapBuffer()
+{
+	BitBlt(currentDC, 0, 0, window_width_, window_height_, canvasDC, 0, 0, SRCCOPY);
 }
 
 void Application::InitCamera()

@@ -5,7 +5,10 @@
 #define APP Application::GetInstance()
 
 #include <Windows.h>
-#include "camera.h"
+#include <stdint.h>
+
+class Camera;
+class Renderer;
 
 class Application 
 {
@@ -23,6 +26,9 @@ public:
         const TCHAR* main_window_title = kDefaultWindowTitle,
         int32_t main_window_width = kDefaultWindowWidth, 
         int32_t main_window_height = kDefaultWindowHeight);
+
+
+    void Run();
 
 	void ProcessMessage(HWND window_handler, UINT message_id, WPARAM message_wparam, LPARAM message_lparam);
 
@@ -46,13 +52,15 @@ private:
 
     bool HasMainWindowDestoryed() const { return has_destoryed_; }
 
-    void Render();
+    void SwapBuffer();
 
     void InitCamera();
 private:
     static Application* self_instance_;
 
     Camera* camera_ { nullptr };
+    Renderer* renderer_;
+
 
     int32_t window_width_ { 0 };
     int32_t window_height_ { 0 };

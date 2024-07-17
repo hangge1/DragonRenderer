@@ -221,3 +221,12 @@
 - 没有类似场景的概念，不方便做切换的测试
 - 交互卡顿，尤其是距离模型较近的时候，帧数太低
 
+
+
+2024-7-17
+
+1、考虑重新封装Application，Application将消息封装成事件回调通知Renderer
+
+2、目前将Application并入Render文件夹，后续再考虑如何拆分
+
+3、实际上应该是Application依赖Render，Render被Application通知，它不需要认识Application
