@@ -17,6 +17,7 @@
 
 
 class AbstractCamera;
+class TestLayer;
 
 class Renderer
 {
@@ -27,8 +28,8 @@ public:
     Renderer &operator=(const Renderer &) = delete;
 
     void Init(int32_t frame_width, int32_t frame_height, void *buffer = nullptr);
-
     void Clear();
+    void Render();
 
     void OnEvent(Event& ev);
     void OnUpdate();
@@ -97,8 +98,9 @@ private:
 private:
     void InitCamera();
 private:
-    FrameBuffer* current_frame_buffer_ { nullptr };
-    AbstractCamera* camera_ { nullptr };
+    FrameBuffer* current_frame_buffer_ = nullptr;
+    AbstractCamera* camera_  = nullptr;
+    TestLayer* test_layer_ = nullptr;
 
     //=================仿OpenGL数据结构==================
     // VBO相关/EBO也存在内部

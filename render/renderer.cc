@@ -16,6 +16,8 @@
 
 #include "application.h"
 
+#include "test_layer.h"
+
 Renderer::~Renderer()
 {
     if(nullptr != current_frame_buffer_)
@@ -44,6 +46,12 @@ Renderer::~Renderer()
 		delete camera_;
 		camera_ = nullptr;
 	}
+
+    if(nullptr != test_layer_)
+    {
+        delete test_layer_;
+        test_layer_ = nullptr;
+    }
 }
 
 void Renderer::Init(int32_t frame_width, int32_t frame_height, void* buffer)
@@ -70,6 +78,9 @@ void Renderer::Init(int32_t frame_width, int32_t frame_height, void* buffer)
     screen_matrix_ = glm::transpose(screen_matrix_); //因为glm是列优先存储
 
     InitCamera();
+
+    test_layer_ = new TestLayer(this);
+    test_layer_->Init();
 }
 
 void Renderer::Clear()
@@ -79,6 +90,15 @@ void Renderer::Clear()
         current_frame_buffer_->FillColor();
         current_frame_buffer_->FillDepth();
     }
+}
+
+void Renderer::Render()
+{
+    if(nullptr != test_layer_)
+    {
+        test_layer_->Render();
+    }
+    
 }
 
 void Renderer::OnEvent(Event& ev)
@@ -141,6 +161,7 @@ void Renderer::OnEvent(Event& ev)
         return;
     }
 
+
 }
 
 void Renderer::OnUpdate()
@@ -149,6 +170,12 @@ void Renderer::OnUpdate()
     {
         camera_->Update();
     }
+
+    if(test_layer_ != nullptr)
+    {
+        test_layer_->Update();
+    }
+    
 }
 
 void Renderer::SetCamera(AbstractCamera* camera)

@@ -6,6 +6,8 @@ file(GLOB_RECURSE INCLUDES . "*.h")
 add_library(Render STATIC ${SRCS} ${INCLUDES})
 
 target_include_directories(Render PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(Render PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/layer)
+target_include_directories(Render PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/shader)
 # 宽字节字符集
 target_compile_definitions(Render PUBLIC UNICODE)
 

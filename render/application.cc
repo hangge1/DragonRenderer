@@ -54,10 +54,10 @@ Application* Application::GetInstance()
 bool Application::Init(HINSTANCE hinstance, const TCHAR* window_title,
 	int32_t window_width, int32_t window_height) 
 {
-	window_width_ = window_width;
-	window_height_ = window_height;
+	width_ = window_width;
+	height_ = window_height;
 	hinstnce_ = hinstance;
-	window_title_ = window_title;
+	title_ = window_title;
 
 	//初始化窗体类型，并且注册
 	RegisterMainWindowClass();
@@ -71,60 +71,14 @@ bool Application::Init(HINSTANCE hinstance, const TCHAR* window_title,
 	InitDC();
 
 	renderer_ = new Renderer();
-	renderer_->Init(window_width_, window_height_, canvas_buffer_);
+	renderer_->Init(width_, height_, canvas_buffer_);
 
 	return true;
 }
 
-LambertLightShader* lightShader = nullptr;
-Model* model = nullptr;
-
-
-//渲染模型
-void RenderModel(Renderer& renderer)
-{
-	lightShader->view_matrix = renderer.GetCamera()->GetViewMatrix();
-	lightShader->project_matrix = renderer.GetCamera()->GetProjectionMatrix();
-
-	renderer.Clear();
-	renderer.UseProgram(lightShader);
-	model->Draw(lightShader);
-}
-
-void CustomDraw(Renderer& renderer)
-{
-	RenderModel(renderer);
-}
-
-//初始化模型加载数据
-void InitLoadModel(Renderer& renderer)
-{
-	lightShader = new LambertLightShader();
-	lightShader->directional_light_.color = { 1.0f, 1.0f, 1.0f };
-	lightShader->directional_light_.direction = { -1.0f, -0.5f, -0.7f };
-	lightShader->environment_light_.color = { 0.5f, 0.5f, 0.5f };
-
-	//renderer.Enable(CULL_FACE);
-
-	model = new Model(&renderer);
-	model->Read("assets/model/dinosaur/source/Rampaging T-Rex.glb");
-	//model->Read("assets/model/Fist_Fight_B.fbx");
-	//model->read("assets/model/bag/backpack.obj");
-
-	auto rotateMatrix = glm::rotate(glm::identity<glm::mat4>(), 0.0f , glm::vec3(0.0f, 1.0f, 0.0f));
-	auto translateMatrix = glm::translate(glm::identity<glm::mat4>(), glm::vec3(0.0f, 0.0f, -5.0f));
-	auto m = translateMatrix * rotateMatrix;
-
-	m = glm::scale(m, glm::vec3(0.1f, 0.1f, 0.1f));
-	model->SetModelMatrix(m);
-}
-
-
 void Application::Run()
 {
-	InitLoadModel(*renderer_);
-
-    while(DispatchMessageLoop())
+    while(IsInLoop())
     {
 		//1、清空渲染帧
         renderer_->Clear();
@@ -133,7 +87,7 @@ void Application::Run()
 		renderer_->OnUpdate();
 
         //3、离屏渲染
-        CustomDraw(*renderer_);
+		renderer_->Render();
 
 		//4、交换到屏幕缓冲
 		SwapBuffer();
@@ -197,9 +151,9 @@ void Application::ProcessMessage(HWND window_handler, UINT message_id, WPARAM me
 }
 
 
-bool Application::DispatchMessageLoop() 
+bool Application::IsInLoop() 
 {
-	if(APP->HasMainWindowDestoryed())
+	if(IsExit())
 	{
 		return false;
 	}
@@ -217,16 +171,7 @@ bool Application::DispatchMessageLoop()
 
 void Application::SwapBuffer()
 {
-	BitBlt(currentDC, 0, 0, window_width_, window_height_, canvasDC, 0, 0, SRCCOPY);
-}
-
-
-
-glm::vec2 Application::GetCursorPosition()
-{
-	POINT p;
-	GetCursorPos(&p);
-	return { p.x, p.y };
+	BitBlt(currentDC, 0, 0, width_, height_, canvasDC, 0, 0, SRCCOPY);
 }
 
 bool Application::CreateMainWindow()
@@ -246,13 +191,13 @@ bool Application::CreateMainWindow()
 	RECT windowRect;
 	windowRect.left = 0L;
 	windowRect.top = 0L;
-	windowRect.right = (LONG)window_width_;
-	windowRect.bottom = (LONG)window_height_;
+	windowRect.right = (LONG)width_;
+	windowRect.bottom = (LONG)height_;
 	AdjustWindowRectEx(&windowRect, dwStyle, FALSE, dwExStyle);
 
 	hwnd_ = CreateWindow(
 		register_class_name_,
-		window_title_,  //窗体标题，强转的目的: 保证标题正常显示
+		title_,  //窗体标题，强转的目的: 保证标题正常显示
 		dwStyle,
 		500,  //x位置，相对左上角
 		500,  //y位置，相对左上角
@@ -324,8 +269,8 @@ void Application::InitDC()
 
 	BITMAPINFO  temp_bmp_info{};
 	temp_bmp_info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-	temp_bmp_info.bmiHeader.biWidth = window_width_;
-	temp_bmp_info.bmiHeader.biHeight = window_height_;
+	temp_bmp_info.bmiHeader.biWidth = width_;
+	temp_bmp_info.bmiHeader.biHeight = height_;
 	temp_bmp_info.bmiHeader.biPlanes = 1;
 	temp_bmp_info.bmiHeader.biBitCount = 32;
 	temp_bmp_info.bmiHeader.biCompression = BI_RGB; //实际上存储方式为bgra
@@ -336,5 +281,5 @@ void Application::InitDC()
 	//一个设备可以创建多个位图，本设备使用mhBmp作为激活位图，对mCanvasDC的内存拷出，其实就是拷出了mhBmp的数据
 	SelectObject(canvasDC, bitmap_);
 
-	memset(canvas_buffer_, 0, window_width_ * window_height_ * 4); //清空buffer为0
+	memset(canvas_buffer_, 0, width_ * height_ * 4); //清空buffer为0
 }
