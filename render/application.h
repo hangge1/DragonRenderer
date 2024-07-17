@@ -7,7 +7,7 @@
 #include <Windows.h>
 #include <stdint.h>
 
-class Camera;
+class AbstractCamera;
 class Renderer;
 
 class Application 
@@ -39,8 +39,8 @@ public:
 
     void* GetRenderBuffer() const { return canvas_buffer_;}
 
-    void SetCamera(Camera* camera);
-    Camera* GetCamera() const;
+    void SetCamera(AbstractCamera* camera);
+    AbstractCamera* GetCamera() const;
 private:
     bool CreateMainWindow();
 
@@ -58,7 +58,7 @@ private:
 private:
     static Application* self_instance_;
 
-    Camera* camera_ { nullptr };
+    AbstractCamera* camera_ { nullptr };
     Renderer* renderer_;
 
 

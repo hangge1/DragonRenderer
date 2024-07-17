@@ -2,7 +2,7 @@
 
 
 #include <windowsx.h>
-#include "camera.h"
+#include "perspective_camera.h"
 
 #include "shader/lambert_light_shader.h"
 #include "model.h"
@@ -83,7 +83,7 @@ bool Application::Init(HINSTANCE hinstance, const TCHAR* window_title,
 
 LambertLightShader* lightShader = nullptr;
 Model* model = nullptr;
-Camera* camera;
+AbstractCamera* camera;
 
 //渲染模型
 void RenderModel(Renderer& renderer)
@@ -102,9 +102,9 @@ void CustomDraw(Renderer& renderer)
 }
 
 //初始化模型加载数据
-void InitLoadModel(Renderer& renderer) 
+void InitLoadModel(Renderer& renderer)
 {
-	camera = new Camera(glm::radians(60.0f), (float)APP->GetMainWindowWidth() / (float)APP->GetMainWindowHeight(), 
+	camera = new PerspectiveCamera(glm::radians(60.0f), (float)APP->GetMainWindowWidth() / (float)APP->GetMainWindowHeight(), 
 		0.1f, 1000.0f, { 0.0f, 1.0f, 0.0f });
 	
 	APP->SetCamera(camera);
@@ -136,10 +136,20 @@ void Application::Run()
 
     while(DispatchMessageLoop())
     {
+		//1、清空渲染帧
         renderer_->Clear();
-		
-        //draw something
+
+		//2、计算逻辑
+		if(nullptr != camera_)
+		{
+			camera_->Update();
+		}
+
+        //3、离屏渲染
         CustomDraw(*renderer_);
+
+		//4、交换到屏幕缓冲
+		SwapBuffer();
     }
 }
 
@@ -168,7 +178,7 @@ void Application::ProcessMessage(HWND window_handler, UINT message_id, WPARAM me
 		{
 			if(camera_)
 			{
-				camera_->OnRMouseDown(GET_X_LPARAM(message_lparam), GET_Y_LPARAM(message_lparam));
+				camera_->OnRightMouseDown(GET_X_LPARAM(message_lparam), GET_Y_LPARAM(message_lparam));
 			}
 		}
 		break;
@@ -176,7 +186,7 @@ void Application::ProcessMessage(HWND window_handler, UINT message_id, WPARAM me
 		{
 			if(camera_)
 			{
-				camera_->OnRMouseUp(GET_X_LPARAM(message_lparam), GET_Y_LPARAM(message_lparam));
+				camera_->OnRightMouseUp(GET_X_LPARAM(message_lparam), GET_Y_LPARAM(message_lparam));
 			}
 		}
 		break;
@@ -224,13 +234,6 @@ bool Application::DispatchMessageLoop()
 		DispatchMessage(&msg);
 	}
 
-	if(nullptr != camera_)
-	{
-		camera_->Update();
-	}
-
-	SwapBuffer();
-
 	return true;
 }
 
@@ -244,11 +247,11 @@ void Application::InitCamera()
 {
 	if(nullptr == camera_)
 	{
-		camera_ = new Camera(glm::radians(60.0f), (float)window_width_ / (float)window_width_, 0.1f, 100.0f, { 0.0f, 1.0f, 0.0f });	
+		camera_ = new PerspectiveCamera(glm::radians(60.0f), (float)window_width_ / (float)window_width_, 0.1f, 100.0f, { 0.0f, 1.0f, 0.0f });	
 	}
 }
 
-void Application::SetCamera(Camera* camera)
+void Application::SetCamera(AbstractCamera* camera)
 {
 	if(nullptr != camera && nullptr != camera_)
 	{
@@ -257,7 +260,7 @@ void Application::SetCamera(Camera* camera)
 	camera_ = camera;
 }
 
-Camera* Application::GetCamera() const
+AbstractCamera* Application::GetCamera() const
 {
 	return camera_;
 }
