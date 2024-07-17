@@ -6,12 +6,17 @@
 #include <map>
 #include <vector>
 
+
 #include "frame_buffer.h"
 #include "buffer_object.h"
 #include "vertex_array_object.h"
 #include "shader.h"
 #include "texture.h"
 
+#include "event.h"
+
+
+class AbstractCamera;
 
 class Renderer
 {
@@ -24,6 +29,14 @@ public:
     void Init(int32_t frame_width, int32_t frame_height, void *buffer = nullptr);
 
     void Clear();
+
+    void OnEvent(Event& ev);
+    void OnUpdate();
+
+
+    void SetCamera(AbstractCamera* camera);
+    AbstractCamera* GetCamera() const;
+    
 
     // =============================仿OpenGL接口================================
     // VBO
@@ -79,8 +92,13 @@ private:
     void PerspectiveRecover(VsOutput& vs_output);
 
     void Trim(VsOutput& vsOutput);
+
+
+private:
+    void InitCamera();
 private:
     FrameBuffer* current_frame_buffer_ { nullptr };
+    AbstractCamera* camera_ { nullptr };
 
     //=================仿OpenGL数据结构==================
     // VBO相关/EBO也存在内部

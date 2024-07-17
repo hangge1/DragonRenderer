@@ -1,4 +1,4 @@
-
+﻿
 #ifndef _RENDER_ABSTRACT_CAMERA_H_
 #define _RENDER_ABSTRACT_CAMERA_H_
 

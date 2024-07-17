@@ -2,7 +2,6 @@
 
 
 #include <windowsx.h>
-#include "perspective_camera.h"
 
 #include "shader/lambert_light_shader.h"
 #include "model.h"
@@ -10,6 +9,10 @@
 #include "glm/gtc/matrix_transform.hpp"
 
 #include "renderer.h"
+
+#include "event.h"
+
+#include "perspective_camera.h"
 
 LRESULT CALLBACK Wndproc(HWND window_handler, UINT message_id, WPARAM message_wparam, LPARAM message_lparam) 
 {
@@ -34,12 +37,6 @@ Application::~Application()
 	if(nullptr != currentDC && nullptr != hwnd_)
 	{
 		ReleaseDC(hwnd_, currentDC);
-	}
-
-	if(nullptr != camera_)
-	{
-		delete camera_;
-		camera_ = nullptr;
 	}
 }
 
@@ -73,8 +70,6 @@ bool Application::Init(HINSTANCE hinstance, const TCHAR* window_title,
 
 	InitDC();
 
-	InitCamera();
-
 	renderer_ = new Renderer();
 	renderer_->Init(window_width_, window_height_, canvas_buffer_);
 
@@ -83,13 +78,13 @@ bool Application::Init(HINSTANCE hinstance, const TCHAR* window_title,
 
 LambertLightShader* lightShader = nullptr;
 Model* model = nullptr;
-AbstractCamera* camera;
+
 
 //渲染模型
 void RenderModel(Renderer& renderer)
 {
-	lightShader->view_matrix = APP->GetCamera()->GetViewMatrix();
-	lightShader->project_matrix = APP->GetCamera()->GetProjectionMatrix();
+	lightShader->view_matrix = renderer.GetCamera()->GetViewMatrix();
+	lightShader->project_matrix = renderer.GetCamera()->GetProjectionMatrix();
 
 	renderer.Clear();
 	renderer.UseProgram(lightShader);
@@ -104,11 +99,6 @@ void CustomDraw(Renderer& renderer)
 //初始化模型加载数据
 void InitLoadModel(Renderer& renderer)
 {
-	camera = new PerspectiveCamera(glm::radians(60.0f), (float)APP->GetMainWindowWidth() / (float)APP->GetMainWindowHeight(), 
-		0.1f, 1000.0f, { 0.0f, 1.0f, 0.0f });
-	
-	APP->SetCamera(camera);
-
 	lightShader = new LambertLightShader();
 	lightShader->directional_light_.color = { 1.0f, 1.0f, 1.0f };
 	lightShader->directional_light_.direction = { -1.0f, -0.5f, -0.7f };
@@ -140,10 +130,7 @@ void Application::Run()
         renderer_->Clear();
 
 		//2、计算逻辑
-		if(nullptr != camera_)
-		{
-			camera_->Update();
-		}
+		renderer_->OnUpdate();
 
         //3、离屏渲染
         CustomDraw(*renderer_);
@@ -160,42 +147,32 @@ void Application::ProcessMessage(HWND window_handler, UINT message_id, WPARAM me
 	{
 		case WM_KEYDOWN:
 		{
-			if(camera_)
-			{
-				camera_->OnKeyDown(message_wparam);
-			}
+			KeyDownEvent ev(message_wparam);
+			renderer_->OnEvent(ev);
 		}
 		break;
 		case WM_KEYUP:
 		{
-			if(camera_)
-			{
-				camera_->OnKeyUp(message_wparam);
-			}
+			KeyUpEvent ev(message_wparam);
+			renderer_->OnEvent(ev);
 		}
 		break;
 		case WM_RBUTTONDOWN:
 		{
-			if(camera_)
-			{
-				camera_->OnRightMouseDown(GET_X_LPARAM(message_lparam), GET_Y_LPARAM(message_lparam));
-			}
+			MouseDownEvent ev(GET_X_LPARAM(message_lparam), GET_Y_LPARAM(message_lparam),2);
+			renderer_->OnEvent(ev);
 		}
 		break;
 		case WM_RBUTTONUP:
 		{
-			if(camera_)
-			{
-				camera_->OnRightMouseUp(GET_X_LPARAM(message_lparam), GET_Y_LPARAM(message_lparam));
-			}
+			MouseUpEvent ev(GET_X_LPARAM(message_lparam), GET_Y_LPARAM(message_lparam),2);
+			renderer_->OnEvent(ev);
 		}
 		break;
 		case WM_MOUSEMOVE:
 		{
-			if(camera_)
-			{
-				camera_->OnMouseMove(GET_X_LPARAM(message_lparam), GET_Y_LPARAM(message_lparam));
-			}
+			MouseMoveEvent ev(GET_X_LPARAM(message_lparam), GET_Y_LPARAM(message_lparam));
+			renderer_->OnEvent(ev);
 		}
 		break;
 		case WM_CLOSE: 
@@ -243,26 +220,13 @@ void Application::SwapBuffer()
 	BitBlt(currentDC, 0, 0, window_width_, window_height_, canvasDC, 0, 0, SRCCOPY);
 }
 
-void Application::InitCamera()
-{
-	if(nullptr == camera_)
-	{
-		camera_ = new PerspectiveCamera(glm::radians(60.0f), (float)window_width_ / (float)window_width_, 0.1f, 100.0f, { 0.0f, 1.0f, 0.0f });	
-	}
-}
 
-void Application::SetCamera(AbstractCamera* camera)
-{
-	if(nullptr != camera && nullptr != camera_)
-	{
-		delete camera_;
-	}
-	camera_ = camera;
-}
 
-AbstractCamera* Application::GetCamera() const
+glm::vec2 Application::GetCursorPosition()
 {
-	return camera_;
+	POINT p;
+	GetCursorPos(&p);
+	return { p.x, p.y };
 }
 
 bool Application::CreateMainWindow()

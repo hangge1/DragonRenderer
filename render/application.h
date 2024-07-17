@@ -7,7 +7,9 @@
 #include <Windows.h>
 #include <stdint.h>
 
-class AbstractCamera;
+#include "glm/glm.hpp"
+
+
 class Renderer;
 
 class Application 
@@ -39,8 +41,10 @@ public:
 
     void* GetRenderBuffer() const { return canvas_buffer_;}
 
-    void SetCamera(AbstractCamera* camera);
-    AbstractCamera* GetCamera() const;
+
+
+    //获取鼠标位置
+    glm::vec2 GetCursorPosition();
 private:
     bool CreateMainWindow();
 
@@ -54,11 +58,8 @@ private:
 
     void SwapBuffer();
 
-    void InitCamera();
 private:
     static Application* self_instance_;
-
-    AbstractCamera* camera_ { nullptr };
     Renderer* renderer_;
 
 

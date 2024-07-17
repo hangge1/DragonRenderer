@@ -12,6 +12,10 @@
 #include "clip_tool.h"
 #include "texture.h"
 
+#include "perspective_camera.h"
+
+#include "application.h"
+
 Renderer::~Renderer()
 {
     if(nullptr != current_frame_buffer_)
@@ -34,6 +38,12 @@ Renderer::~Renderer()
 		delete iter.second;
 	}
 	texture_map_.clear();
+
+    if(nullptr != camera_)
+	{
+		delete camera_;
+		camera_ = nullptr;
+	}
 }
 
 void Renderer::Init(int32_t frame_width, int32_t frame_height, void* buffer)
@@ -58,6 +68,8 @@ void Renderer::Init(int32_t frame_width, int32_t frame_height, void* buffer)
     };
 
     screen_matrix_ = glm::transpose(screen_matrix_); //因为glm是列优先存储
+
+    InitCamera();
 }
 
 void Renderer::Clear()
@@ -67,6 +79,90 @@ void Renderer::Clear()
         current_frame_buffer_->FillColor();
         current_frame_buffer_->FillDepth();
     }
+}
+
+void Renderer::OnEvent(Event& ev)
+{
+    //处理事件
+    if(ev.Name() == "KeyDownEvent")
+    {
+        KeyDownEvent& e = dynamic_cast<KeyDownEvent&>(ev);
+        if(camera_)
+        {
+            camera_->OnKeyDown(e.keycode);
+        }
+        return;
+    }
+
+    if(ev.Name() == "KeyUpEvent")
+    {
+        KeyUpEvent& e = dynamic_cast<KeyUpEvent&>(ev);
+        if(camera_)
+        {
+            camera_->OnKeyUp(e.keycode);
+        }
+        return;
+    }
+
+    if(ev.Name() == "MouseDownEvent")
+    {
+        MouseDownEvent& e = dynamic_cast<MouseDownEvent&>(ev);
+
+        if(e.button == 2)
+        {
+            if(camera_)
+            {
+                camera_->OnRightMouseDown(e.posx, e.posy);
+            }
+        }  
+        return;
+    }
+
+    if(ev.Name() == "MouseUpEvent")
+    {
+        MouseUpEvent& e = dynamic_cast<MouseUpEvent&>(ev);
+        if(e.button == 2)
+        {
+            if(camera_)
+            {
+                camera_->OnRightMouseUp(e.posx, e.posy);
+            }
+        } 
+        return;
+    }
+
+    if(ev.Name() == "MouseMoveEvent")
+    {
+        MouseMoveEvent& e = dynamic_cast<MouseMoveEvent&>(ev);
+        if(camera_)
+        {
+            camera_->OnMouseMove(e.posx, e.posy);
+        }
+        return;
+    }
+
+}
+
+void Renderer::OnUpdate()
+{
+    if(nullptr != camera_)
+    {
+        camera_->Update();
+    }
+}
+
+void Renderer::SetCamera(AbstractCamera* camera)
+{
+	if(nullptr != camera && nullptr != camera_)
+	{
+		delete camera_;
+	}
+	camera_ = camera;
+}
+
+AbstractCamera* Renderer::GetCamera() const
+{
+	return camera_;
 }
 
 uint32_t Renderer::GenBuffer()
@@ -440,6 +536,15 @@ void Renderer::Trim(VsOutput & vsOutput)
 	if (vsOutput.position.z > 1.0f) 
     {
 		vsOutput.position.z = 1.0f;
+	}
+}
+
+void Renderer::InitCamera()
+{
+	if(nullptr == camera_)
+	{
+		camera_ = new PerspectiveCamera(glm::radians(60.0f), 
+            (float)current_frame_buffer_->GetWidth() / (float)current_frame_buffer_->GetHeight(), 0.1f, 100.0f, { 0.0f, 1.0f, 0.0f });	
 	}
 }
 
