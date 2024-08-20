@@ -5,7 +5,6 @@
 #define APP Application::GetInstance()
 
 #include <Windows.h>
-
 #include <stdint.h>
 
 
@@ -44,8 +43,6 @@ private:
     void MoveWindow2DesktopCenter();
 
 	ATOM RegisterMainWindowClass();
-
-    bool IsExit() const { return has_destoryed_; }
 
     void SwapBuffer();
 

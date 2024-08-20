@@ -11,7 +11,7 @@
 #include "vertex_array_object.h"
 #include "clip_tool.h"
 #include "texture.h"
-
+#include "frame_buffer.h"
 #include "perspective_camera.h"
 
 #include "application.h"

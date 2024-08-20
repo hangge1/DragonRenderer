@@ -153,7 +153,7 @@ void Application::ProcessMessage(HWND window_handler, UINT message_id, WPARAM me
 
 bool Application::IsInLoop() 
 {
-	if(IsExit())
+	if(has_destoryed_)
 	{
 		return false;
 	}

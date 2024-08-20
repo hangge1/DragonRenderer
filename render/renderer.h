@@ -6,16 +6,14 @@
 #include <map>
 #include <vector>
 
-
-#include "frame_buffer.h"
 #include "buffer_object.h"
-#include "vertex_array_object.h"
-#include "shader.h"
-#include "texture.h"
-
 #include "event.h"
 
+#include "shader.h"
+#include "texture.h"
+#include "vertex_array_object.h"
 
+class FrameBuffer;
 class AbstractCamera;
 class TestLayer;
 
@@ -93,7 +91,6 @@ private:
     void PerspectiveRecover(VsOutput& vs_output);
 
     void Trim(VsOutput& vsOutput);
-
 
 private:
     void InitCamera();
