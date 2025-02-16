@@ -128,18 +128,18 @@ void Texture::CheckWrap(float &n, uint32_t type)
 	}
 }
 
-void Texture::SetParameter(uint32_t type, uint32_t value)
+void Texture::SetParameter(TEXTURE_PARAMETER_TYPE type, uint32_t value)
 {
 	switch (type)
 	{
 	case TEXTURE_FILTER:
-		filter_ = value;
+		filter_ = (TEXTURE_FILTER_TYPE)value;
 		break;
 	case TEXTURE_WRAP_U:
-		wrapu_ = value;
+		wrapu_ = (TEXTURE_WRAP_TYPE)value;
 		break;
 	case TEXTURE_WRAP_V:
-		wrapv_ = value;
+		wrapv_ = (TEXTURE_WRAP_TYPE)value;
 		break;
 	default:
 		break;

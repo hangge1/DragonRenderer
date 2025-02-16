@@ -4,12 +4,12 @@
 #include <iostream>
 #include <map>
 
-void VertexArrayObject::Bind(uint32_t binding, uint32_t vbo_id, size_t item_size, size_t stride, size_t offset)
+void VertexArrayObject::BindVertexAttribute(uint32_t binding, uint32_t vbo_id, size_t item_size, size_t stride, size_t offset)
 {
     auto it = binding_map_.find(binding);
     if(it == binding_map_.end())
     {
-        binding_map_[binding] = BindingDescription();
+        binding_map_[binding] = VertexAttrDescription();
     }
 
     auto& desc = binding_map_[binding];
@@ -17,10 +17,14 @@ void VertexArrayObject::Bind(uint32_t binding, uint32_t vbo_id, size_t item_size
     desc.vbo_id = vbo_id;
     desc.stride = stride;
     desc.offset = offset;
-
 }
 
-std::map<uint32_t, BindingDescription> VertexArrayObject::GetBindingMap() const
+void VertexArrayObject::BindVertexAttribute(uint32_t vertexAttrId, VertexAttrDescription desc)
+{
+    BindVertexAttribute(vertexAttrId, desc.vbo_id, desc.item_size, desc.stride, desc.offset);
+}
+
+std::map<uint32_t, VertexAttrDescription> VertexArrayObject::GetVertexAttrDescMap() const
 {
     return binding_map_;
 }

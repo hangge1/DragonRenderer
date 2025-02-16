@@ -4,37 +4,63 @@
 
 #include "glm/glm.hpp"
 
+enum Buffer_Type
+{
+    ARRAY_BUFFER = 0,
+    ELEMENT_ARRAY_BUFFER = 1
+};
 
-const int ARRAY_BUFFER = 0;
-const int ELEMENT_ARRAY_BUFFER = 1;
+enum DRAW_MODE
+{
+    DRAW_LINES = 0,
+    DRAW_TRIANGLES = 1
+};
 
-const int DRAW_LINES = 0;
-const int DRAW_TRIANGLES = 1;
+enum FACE_FRONT_TYPE
+{
+    FRONT_FACE_CW = 0,
+    FRONT_FACE_CCW = 1,
+};
 
-const int FRONT_FACE = 0;
-const int BACK_FACE = 1;
-const int FRONT_FACE_CW = 0;
-const int FRONT_FACE_CCW = 1;
+enum CULL_FACE_TYPE
+{
+    FRONT_FACE = 0,
+    BACK_FACE = 1
+};
 
-const int CULL_FACE = 1;
-const int DEPTH_TEST = 2;
-const int COLOR_BLEND = 3;
+enum ENABLE_TYPE
+{
+    CULL_FACE,
+    DEPTH_TEST,
+    COLOR_BLEND
+};
 
-
-const int DEPTH_LESS = 0;
-const int DEPTH_GREATER = 1;
+enum DEPTH_TEST_FUNC
+{
+    DEPTH_LESS = 0,
+    DEPTH_GREATER = 1
+};
 
 //纹理参数类型选项
-const int TEXTURE_FILTER = 0;
-const int TEXTURE_WRAP_U = 1;
-const int TEXTURE_WRAP_V = 2;
+enum TEXTURE_PARAMETER_TYPE
+{
+    TEXTURE_FILTER = 0,
+    TEXTURE_WRAP_U = 1,
+    TEXTURE_WRAP_V = 2
+};
 
 //纹理参数
-const int TEXTURE_FILTER_NEAREST = 0;
-const int TEXTURE_FILTER_LINEAR = 1;
+enum TEXTURE_FILTER_TYPE
+{
+    TEXTURE_FILTER_NEAREST = 0,
+    TEXTURE_FILTER_LINEAR = 1
+};
 
-const int TEXTURE_WRAP_REPEAT = 0;
-const int TEXTURE_WRAP_MIRROR = 1;
+enum TEXTURE_WRAP_TYPE
+{
+    TEXTURE_WRAP_REPEAT = 0,
+    TEXTURE_WRAP_MIRROR = 1
+};
 
 
 struct Color
@@ -88,7 +114,7 @@ struct Color
 };
 
 //仿OpenGL数据结构
-struct BindingDescription 
+struct VertexAttrDescription 
 {
 	uint32_t  vbo_id { 0 };
 	size_t  item_size { 0 };
@@ -111,7 +137,6 @@ struct FsOutput
 	float depth;
 	Color color;//此处使用0-255来进行颜色显示
 };
-
 
 
 #endif

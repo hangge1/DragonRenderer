@@ -6,7 +6,7 @@
 #include "texture.h"
 
 VsOutput LambertLightShader::VertexShader(
-	const std::map<uint32_t, BindingDescription>& binding_map,
+	const std::map<uint32_t, VertexAttrDescription>& binding_map,
 	const std::map<uint32_t, BufferObject*>& buffer_map,
 	const uint32_t& index) 
 {

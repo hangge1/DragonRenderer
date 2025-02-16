@@ -242,8 +242,8 @@
 5 优化Render类的接口封装
 6 优化TestLayer层的接口封装
 7 增加ESC键退出
-
-
+8 优化VertexArrayObject成员命名
+9 优化Pipeline_data的原有配置选项, 全部改为enum, 提高可读性
 
 
 

@@ -17,7 +17,7 @@ public:
 
 	virtual VsOutput VertexShader(
 		//vao
-		const std::map<uint32_t, BindingDescription>& bindingMap,
+		const std::map<uint32_t, VertexAttrDescription>& bindingMap,
 		//vbo
 		const std::map<uint32_t,BufferObject*>& bufferMap,
 		
@@ -30,7 +30,7 @@ public:
 public:
 
 	glm::vec4 GetVector(
-		const std::map<uint32_t, BindingDescription>& bindingMap,
+		const std::map<uint32_t, VertexAttrDescription>& bindingMap,
 		const std::map<uint32_t, BufferObject*>& bufferMap,
 		const uint32_t& attributeLocation,
 		const uint32_t& index);

@@ -19,7 +19,7 @@ public:
 
 
 	VsOutput VertexShader(
-		const std::map<uint32_t, BindingDescription>& bindingMap,
+		const std::map<uint32_t, VertexAttrDescription>& bindingMap,
 		const std::map<uint32_t, BufferObject*>& bufferMap,
 		const uint32_t& index
 	) override;

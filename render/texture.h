@@ -17,7 +17,7 @@ public:
 
 	glm::vec4 GetColor(float u, float v);
 
-	void SetParameter(uint32_t type, uint32_t value);
+	void SetParameter(TEXTURE_PARAMETER_TYPE type, uint32_t value);
 
 private:
 	void CheckWrap(float& n, uint32_t type);
@@ -27,9 +27,9 @@ private:
 	uint32_t width_ { 0 };
 	uint32_t height_ { 0 };
 
-	uint32_t filter_ { TEXTURE_FILTER_NEAREST };
-	uint32_t wrapu_ { TEXTURE_WRAP_REPEAT };
-	uint32_t wrapv_ { TEXTURE_WRAP_REPEAT };
+	TEXTURE_FILTER_TYPE filter_ { TEXTURE_FILTER_NEAREST };
+	TEXTURE_WRAP_TYPE wrapu_ { TEXTURE_WRAP_REPEAT };
+	TEXTURE_WRAP_TYPE wrapv_ { TEXTURE_WRAP_REPEAT };
 };
 
 #endif

@@ -161,8 +161,7 @@ void Renderer::OnUpdate()
     if(nullptr != test_layer_)
     {
         test_layer_->Update();
-    }
-    
+    }    
 }
 
 void Renderer::SetCamera(AbstractCamera* camera)
@@ -201,7 +200,7 @@ void Renderer::DeleteBuffer(uint32_t vbo)
     buffer_map_.erase(vbo);
 }
 
-void Renderer::BindBuffer(uint32_t buffer_type, uint32_t buffer_id)
+void Renderer::BindBuffer(Buffer_Type buffer_type, uint32_t buffer_id)
 {
     if (buffer_type == ARRAY_BUFFER) 
     {
@@ -213,7 +212,7 @@ void Renderer::BindBuffer(uint32_t buffer_type, uint32_t buffer_id)
 	}
 }
 
-void Renderer::BufferData(uint32_t buffer_type, size_t data_size, void *data)
+void Renderer::BufferData(Buffer_Type buffer_type, size_t data_size, void *data)
 {
     uint32_t buffer_id = 0;
 	if (buffer_type == ARRAY_BUFFER) 
@@ -265,7 +264,7 @@ void Renderer::BindVertexArray(uint32_t vao_id)
     current_vao_ = vao_id;
 }
 
-void Renderer::VertexAttributePointer(uint32_t binding, uint32_t item_size, uint32_t stride, uint32_t offset)
+void Renderer::VertexAttributePointer(uint32_t vertex_attribute_id, uint32_t item_size, uint32_t stride, uint32_t offset)
 {
     auto iter = vao_map_.find(current_vao_);
 	if (iter == vao_map_.end()) 
@@ -274,7 +273,7 @@ void Renderer::VertexAttributePointer(uint32_t binding, uint32_t item_size, uint
 	}
 
 	auto vao = iter->second;
-	vao->Bind(binding, current_vbo_, item_size, stride, offset);
+	vao->BindVertexAttribute(vertex_attribute_id, current_vbo_, item_size, stride, offset);
 }
 
 void Renderer::UseProgram(Shader* shader)
@@ -282,7 +281,7 @@ void Renderer::UseProgram(Shader* shader)
     current_shader_ = shader;
 }
 
-void Renderer::DrawElement(uint32_t drawMode, uint32_t first, uint32_t count)
+void Renderer::DrawElement(DRAW_MODE drawMode, uint32_t first, uint32_t count)
 {
     if(current_vao_ == 0 || nullptr == current_shader_ || count == 0)
     {
@@ -298,7 +297,7 @@ void Renderer::DrawElement(uint32_t drawMode, uint32_t first, uint32_t count)
     }
 
     VertexArrayObject* vao = vao_iter->second;
-    auto& binding_map = vao->GetBindingMap();
+    auto& binding_map = vao->GetVertexAttrDescMap();
 
     //2 获取ebo
     auto ebo_iter = buffer_map_.find(current_ebo_);
@@ -445,7 +444,7 @@ void Renderer::VertexShaderApply(
 		uint32_t first,
 		uint32_t count)
 {
-    auto binding_map = vao->GetBindingMap();
+    auto binding_map = vao->GetVertexAttrDescMap();
 	uint8_t* indicesData = ebo->GetBuffer();
 
 	uint32_t index = 0;
@@ -596,7 +595,7 @@ void Renderer::InitLayer()
     test_layer_->Init();
 }
 
-void Renderer::Enable(uint32_t param)
+void Renderer::Enable(ENABLE_TYPE param)
 {
     switch (param)
     {
@@ -614,7 +613,7 @@ void Renderer::Enable(uint32_t param)
     }
 }
 
-void Renderer::Disable(uint32_t param)
+void Renderer::Disable(ENABLE_TYPE param)
 {
     switch (param)
     {
@@ -632,17 +631,17 @@ void Renderer::Disable(uint32_t param)
     }
 }
 
-void Renderer::SetFrontFaceLinkStyle(uint32_t front_face_link_style)
+void Renderer::SetFrontFaceType(FACE_FRONT_TYPE front_face_link_style)
 {
     front_face_link_style_ = front_face_link_style;
 }
 
-void Renderer::SetCullWhichFace(uint32_t cull_which_face)
+void Renderer::SetCullFaceType(CULL_FACE_TYPE cull_which_face)
 {
     cull_which_face_ = cull_which_face;
 }
 
-void Renderer::SetDepthTestFunc(uint32_t depth_test_func)
+void Renderer::SetDepthTestFunc(DEPTH_TEST_FUNC depth_test_func)
 {
     depth_test_func_ = depth_test_func;
 }
@@ -689,7 +688,7 @@ void Renderer::TexImage2D(uint32_t width, uint32_t height, void* data)
 	texture->SetBufferData(width, height, data);
 }
 
-void Renderer::TexParameter(uint32_t param, uint32_t value)
+void Renderer::TexParameter(TEXTURE_PARAMETER_TYPE param, uint32_t value)
 {
     if (!current_texture_) 
     {

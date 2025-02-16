@@ -43,40 +43,40 @@ public:
     // VBO
     uint32_t GenBuffer();
     void DeleteBuffer(uint32_t vbo);
-    void BindBuffer(uint32_t buffer_type, uint32_t buffer_id);
-	void BufferData(uint32_t buffer_type, size_t data_size, void* data);
+    void BindBuffer(Buffer_Type buffer_type, uint32_t buffer_id);
+	void BufferData(Buffer_Type buffer_type, size_t data_size, void* data);
 
     // VAO
     uint32_t GenVertexArray();
     void DeleteVertexArray(uint32_t vao);
     void BindVertexArray(uint32_t vao_id);
-	void VertexAttributePointer(uint32_t binding, uint32_t item_size, uint32_t stride, uint32_t offset);
+	void VertexAttributePointer(uint32_t vertex_attribute_id, uint32_t item_size, uint32_t stride, uint32_t offset);
+    //测试使用
     void PrintVao(uint32_t vao) const;
 
     // 使用shader
     void UseProgram(Shader* shader);
 
     // Draw Call
-    void DrawElement(uint32_t drawMode, uint32_t first, uint32_t count);
+    void DrawElement(DRAW_MODE drawMode, uint32_t first, uint32_t count);
 
-    
     // 深度测试、面片剔除、颜色混合
-    void Enable(uint32_t param);
-	void Disable(uint32_t param);
+    void Enable(ENABLE_TYPE param);
+	void Disable(ENABLE_TYPE param);
 
 	//面片剔除（Cull）参数设置
-	void SetFrontFaceLinkStyle(uint32_t front_face_link_style);
-	void SetCullWhichFace(uint32_t cull_which_face);
+	void SetFrontFaceType(FACE_FRONT_TYPE front_face_type);
+	void SetCullFaceType(CULL_FACE_TYPE cull_which_face);
 
     //深度测试参数设置
-    void SetDepthTestFunc(uint32_t depth_test_func);
+    void SetDepthTestFunc(DEPTH_TEST_FUNC depth_test_func);
 
     //纹理
 	uint32_t GenTexture();
 	void DeleteTexture(uint32_t tex_id);
 	void BindTexture(uint32_t tex_id);
 	void TexImage2D(uint32_t width, uint32_t height, void* data);
-	void TexParameter(uint32_t param, uint32_t value);
+	void TexParameter(TEXTURE_PARAMETER_TYPE param, uint32_t value);
 
 private:
     void VertexShaderApply(std::vector<VsOutput>& vsOutputs, const VertexArrayObject* vao,
@@ -132,12 +132,12 @@ private:
 
     //面片剔除相关
 	bool enable_cull_face_ { false };
-	uint32_t front_face_link_style_ { FRONT_FACE_CCW }; 
-	uint32_t cull_which_face_ { BACK_FACE };
+	FACE_FRONT_TYPE front_face_link_style_ { FRONT_FACE_CCW }; 
+	CULL_FACE_TYPE cull_which_face_ { BACK_FACE };
 
     //深度测试相关
 	bool enable_depth_test_ { true };
-	uint32_t depth_test_func_ { DEPTH_LESS };
+	DEPTH_TEST_FUNC depth_test_func_ { DEPTH_LESS };
 
     //颜色混合相关
     bool enable_blend_ { false };
