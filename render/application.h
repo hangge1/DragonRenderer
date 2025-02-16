@@ -10,7 +10,7 @@
 
 class Renderer;
 
-class Application 
+class Application final
 {
 public:
     static constexpr int32_t kDefaultWindowWidth = 800;
@@ -18,22 +18,29 @@ public:
     static constexpr TCHAR* kDefaultWindowTitle = TEXT("DragonRenderer");
 
     static Application* GetInstance();
-public:
-	Application() = default;
-	~Application();
 
     //注册、创建、显示窗口
     bool Init(HINSTANCE program_instance, 
         const TCHAR* main_window_title = kDefaultWindowTitle,
         int32_t main_window_width = kDefaultWindowWidth, 
         int32_t main_window_height = kDefaultWindowHeight);
-
+    
+    //运行渲染循环
     void Run();
 
     inline int32_t GetWidth() const { return width_; }
     inline int32_t GetHeight() const { return height_; }
 
+    //WindownProc使用
     void ProcessMessage(HWND window_handler, UINT message_id, WPARAM message_wparam, LPARAM message_lparam);
+private:
+	Application() = default;
+	~Application();  
+
+    Application(const Application&) = delete;
+    Application(Application&&) = delete;
+    Application& operator=(const Application&) = delete;
+    Application& operator=(Application&&) = delete;
 
 private:
     void InitDC();
@@ -48,7 +55,6 @@ private:
 
 	bool IsInLoop();
 private:
-    static Application* self_instance_;
     Renderer* renderer_;
 
     int32_t width_ { 0 };
@@ -61,8 +67,8 @@ private:
 
     bool has_destoryed_ = false;
 
-    HDC currentDC { nullptr };
-    HDC canvasDC { nullptr };
+    HDC currentDC_ { nullptr };
+    HDC canvasDC_ { nullptr };
     HBITMAP bitmap_ { nullptr };
     void* canvas_buffer_ { nullptr };
 };

@@ -20,8 +20,6 @@ LRESULT CALLBACK Wndproc(HWND window_handler, UINT message_id, WPARAM message_wp
 	return(DefWindowProc(window_handler, message_id, message_wparam, message_lparam));
 }
 
-Application* Application::self_instance_ = nullptr;
-
 Application::~Application()
 {
 	if(nullptr != bitmap_)
@@ -29,25 +27,21 @@ Application::~Application()
 		DeleteObject(bitmap_);
 	}
 
-	if(nullptr != canvasDC)
+	if(nullptr != canvasDC_)
 	{
-		DeleteDC(canvasDC);
+		DeleteDC(canvasDC_);
 	}
 
-	if(nullptr != currentDC && nullptr != hwnd_)
+	if(nullptr != currentDC_ && nullptr != hwnd_)
 	{
-		ReleaseDC(hwnd_, currentDC);
+		ReleaseDC(hwnd_, currentDC_);
 	}
 }
 
 Application* Application::GetInstance() 
 {
-	if (nullptr == self_instance_) 
-	{
-		self_instance_ = new Application();
-	}
-
-	return self_instance_;
+	static Application app;
+	return &app;
 }
 
 
@@ -171,7 +165,7 @@ bool Application::IsInLoop()
 
 void Application::SwapBuffer()
 {
-	BitBlt(currentDC, 0, 0, width_, height_, canvasDC, 0, 0, SRCCOPY);
+	BitBlt(currentDC_, 0, 0, width_, height_, canvasDC_, 0, 0, SRCCOPY);
 }
 
 bool Application::CreateMainWindow()
@@ -264,8 +258,8 @@ ATOM Application::RegisterMainWindowClass()
 
 void Application::InitDC()
 {
-	currentDC = GetDC(hwnd_);
-	canvasDC = CreateCompatibleDC(currentDC);
+	currentDC_ = GetDC(hwnd_);
+	canvasDC_ = CreateCompatibleDC(currentDC_);
 
 	BITMAPINFO  temp_bmp_info{};
 	temp_bmp_info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
@@ -275,11 +269,11 @@ void Application::InitDC()
 	temp_bmp_info.bmiHeader.biBitCount = 32;
 	temp_bmp_info.bmiHeader.biCompression = BI_RGB; //实际上存储方式为bgra
 
-	//创建与mhMem兼容的位图,其实实在mhMem指代的设备上划拨了一块内存，让mCanvasBuffer指向它
-	bitmap_ = CreateDIBSection(canvasDC, &temp_bmp_info, DIB_RGB_COLORS, (void**)&canvas_buffer_, 0, 0);//在这里创建buffer的内存
+	//创建与mhMem兼容的位图,其实实在mhMem指代的设备上划拨了一块内存，让canvas_buffer_指针指向它
+	bitmap_ = CreateDIBSection(canvasDC_, &temp_bmp_info, DIB_RGB_COLORS, (void**)&canvas_buffer_, 0, 0);
 
 	//一个设备可以创建多个位图，本设备使用mhBmp作为激活位图，对mCanvasDC的内存拷出，其实就是拷出了mhBmp的数据
-	SelectObject(canvasDC, bitmap_);
+	SelectObject(canvasDC_, bitmap_);
 
 	memset(canvas_buffer_, 0, width_ * height_ * 4); //清空buffer为0
 }

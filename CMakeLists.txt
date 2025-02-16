@@ -42,7 +42,7 @@ project(DragonRenderer
 include_directories(${CMAKE_SOURCE_DIR}/core)
 
 
-# 递归拷贝assets目录
+# 递归拷贝assets目录到bin目录
 set(SOURCE_DIR ${CMAKE_SOURCE_DIR}/assets)
 set(DEST_DIR ${BIN_DIR})
 file(COPY ${SOURCE_DIR} DESTINATION ${DEST_DIR})

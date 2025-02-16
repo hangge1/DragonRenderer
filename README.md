@@ -27,7 +27,7 @@
     ```
     (1) 生成配置:  cmake -S . -B build -D CMAKE_BUILD_TYPE=Release
     (2) 编译 cmake --build build --config Release
-    (3) 运行: .\build\Debug\bin\DragonRenderer.exe
+    (3) 运行: .\build\Release\bin\DragonRenderer.exe
     (4) 单元测试:  进入build目录， test -C Release -VV
     ```
 
@@ -106,4 +106,66 @@
 1、单独编译application文件夹，添加独立cmake文件
 2、移除根cmake对application头文件包含，只需要target_link_library即可
 ```
+
+
+
+
+
+**框架说明: **
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
