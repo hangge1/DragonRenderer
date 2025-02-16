@@ -23,7 +23,9 @@ public:
     Renderer() = default;
     ~Renderer();
     Renderer(const Renderer &) = delete;
+    Renderer(Renderer &&) = delete;
     Renderer &operator=(const Renderer &) = delete;
+    Renderer &operator=(Renderer &&) = delete;
 
     void Init(int32_t frame_width, int32_t frame_height, void *buffer = nullptr);
     void Clear();
@@ -94,8 +96,14 @@ private:
 
 private:
     void InitCamera();
+
+    void UpdateScreenMatrix(int32_t screen_width, int32_t screen_height);
+
+    void InitFrameBuffer(int32_t frame_width, int32_t frame_height, void* buffer);
+
+    void InitLayer();
 private:
-    FrameBuffer* current_frame_buffer_ = nullptr;
+    FrameBuffer* current_frame_buffer_ = nullptr; //帧缓冲
     AbstractCamera* camera_  = nullptr;
     TestLayer* test_layer_ = nullptr;
 

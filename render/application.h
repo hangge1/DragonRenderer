@@ -31,6 +31,8 @@ public:
     inline int32_t GetWidth() const { return width_; }
     inline int32_t GetHeight() const { return height_; }
 
+    void SetExit() { has_destoryed_ = true; }
+
     //WindownProc使用
     void ProcessMessage(HWND window_handler, UINT message_id, WPARAM message_wparam, LPARAM message_lparam);
 private:

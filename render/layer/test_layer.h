@@ -12,7 +12,7 @@ class TestLayer : public Layer
 {
 public:
     TestLayer(Renderer* renderer)
-        : renderer_(renderer)
+        : renderer_(renderer), lightShader_(nullptr), model(nullptr)
     {
         name_ = Name();
     }
@@ -26,10 +26,16 @@ public:
 
     virtual const char* Name() override { return "TestLayer"; }
 
+protected:
+    virtual void InitShader();
+    virtual void InitModel();
+
+
+
 private:
     Renderer* renderer_;
-    LambertLightShader* lightShader_ { nullptr };
-    Model* model { nullptr };
+    LambertLightShader* lightShader_;
+    Model* model;
 };
 
 #endif

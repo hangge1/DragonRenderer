@@ -4,17 +4,23 @@
 
 #include "glm/glm.hpp"
 
+//键码
+namespace KEY_CODE
+{
+	const uint32_t W = 0x57;
+	const uint32_t A = 0x41;
+	const uint32_t S = 0x53;
+	const uint32_t D = 0x44;
+}
 
-const uint32_t KEY_W = 0x57;
-const uint32_t KEY_A = 0x41;
-const uint32_t KEY_S = 0x53;
-const uint32_t KEY_D = 0x44;
-
-const int32_t NO_MOVE = 0;
-const int32_t MOVE_LEFT = 0x001;
-const int32_t MOVE_RIGHT = 0x002;
-const int32_t MOVE_FRONT = 0x004;
-const int32_t MOVE_BACK = 0x008;
+enum MOVE_STATE : int32_t
+{
+	NO_MOVE = 0,
+	MOVE_LEFT = 0x001,
+	MOVE_RIGHT = 0x002,
+	MOVE_FRONT = 0x004,
+	MOVE_BACK = 0x008
+};
 
 class AbstractCamera
 {

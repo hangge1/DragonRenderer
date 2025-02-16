@@ -238,7 +238,10 @@
 1 README文档修改, 修复release版本的运行命令
 2 优化Application类的成员变量命名
 3 完善Application类的单例实现, 改为局部静态变量方式
-
+4 完善AbstracCamera类的相关内容, KeyCode引入额外的命名空间, MOVE_STATE从单独int变成enum
+5 优化Render类的接口封装
+6 优化TestLayer层的接口封装
+7 增加ESC键退出
 
 
 

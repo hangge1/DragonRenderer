@@ -74,18 +74,21 @@ void Application::Run()
 {
     while(IsInLoop())
     {
-		//1、清空渲染帧
+		//1、清空渲染帧(重新设置背景色, 重置深度缓冲区)
         renderer_->Clear();
 
-		//2、计算逻辑
+		//2、计算逻辑(摄像机, 光照等)
 		renderer_->OnUpdate();
 
-        //3、离屏渲染
+        //3、离屏渲染(渲染到用户创建的内存绘图设备上下文)
 		renderer_->Render();
 
-		//4、交换到屏幕缓冲
+		//4、交换到屏幕缓冲(离屏渲染结果拷贝到屏幕缓冲)
 		SwapBuffer();
     }
+
+	delete renderer_;
+	renderer_ = nullptr;
 }
 
 
@@ -259,9 +262,9 @@ ATOM Application::RegisterMainWindowClass()
 void Application::InitDC()
 {
 	currentDC_ = GetDC(hwnd_);
-	canvasDC_ = CreateCompatibleDC(currentDC_);
+	canvasDC_ = CreateCompatibleDC(currentDC_); //创建内存绘图设备上下文, 主要用于双缓冲
 
-	BITMAPINFO  temp_bmp_info{};
+	BITMAPINFO  temp_bmp_info {};
 	temp_bmp_info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
 	temp_bmp_info.bmiHeader.biWidth = width_;
 	temp_bmp_info.bmiHeader.biHeight = height_;
@@ -269,10 +272,10 @@ void Application::InitDC()
 	temp_bmp_info.bmiHeader.biBitCount = 32;
 	temp_bmp_info.bmiHeader.biCompression = BI_RGB; //实际上存储方式为bgra
 
-	//创建与mhMem兼容的位图,其实实在mhMem指代的设备上划拨了一块内存，让canvas_buffer_指针指向它
+	//创建一个设备无关的位图,它可以在不同设备上下文共享，并且可以直接访问其位图数据! canvas_buffer_就是位图数据
 	bitmap_ = CreateDIBSection(canvasDC_, &temp_bmp_info, DIB_RGB_COLORS, (void**)&canvas_buffer_, 0, 0);
 
-	//一个设备可以创建多个位图，本设备使用mhBmp作为激活位图，对mCanvasDC的内存拷出，其实就是拷出了mhBmp的数据
+	//一个设备可以创建多个位图，本设备使用bitmap_作为激活位图，对canvasDC_的内存拷出，其实就是拷出了bitmap_的数据
 	SelectObject(canvasDC_, bitmap_);
 
 	memset(canvas_buffer_, 0, width_ * height_ * 4); //清空buffer为0

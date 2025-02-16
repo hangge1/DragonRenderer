@@ -56,31 +56,13 @@ Renderer::~Renderer()
 
 void Renderer::Init(int32_t frame_width, int32_t frame_height, void* buffer)
 {
-    if(nullptr != current_frame_buffer_)
-    {
-        delete current_frame_buffer_;
-    }
+    InitFrameBuffer(frame_width, frame_height, buffer);
 
-    current_frame_buffer_ = new FrameBuffer();
-    current_frame_buffer_->Init(frame_width, frame_height, (Color*)buffer);
-
-
-    int screen_width = frame_width;
-    int screen_height = frame_height;
-    screen_matrix_ = 
-    {
-        screen_width / 2, 0.0f, 0.0f, screen_width / 2,
-        0.0f, screen_height / 2, 0.0f, screen_height / 2,
-        0.0f, 0.0f, 0.5f, 0.5f, 
-        0.0f, 0.0f, 0.0f, 1.0f
-    };
-
-    screen_matrix_ = glm::transpose(screen_matrix_); //因为glm是列优先存储
+    UpdateScreenMatrix(frame_width, frame_height);
 
     InitCamera();
 
-    test_layer_ = new TestLayer(this);
-    test_layer_->Init();
+    InitLayer();
 }
 
 void Renderer::Clear()
@@ -107,6 +89,13 @@ void Renderer::OnEvent(Event& ev)
     if(ev.Name() == "KeyDownEvent")
     {
         KeyDownEvent& e = dynamic_cast<KeyDownEvent&>(ev);
+
+        if(e.keycode == VK_ESCAPE) //ESC退出
+        {
+            APP->SetExit();
+            return;
+        }
+
         if(camera_)
         {
             camera_->OnKeyDown(e.keycode);
@@ -160,18 +149,16 @@ void Renderer::OnEvent(Event& ev)
         }
         return;
     }
-
-
 }
 
 void Renderer::OnUpdate()
 {
     if(nullptr != camera_)
     {
-        camera_->Update();
+        camera_->Update(); //根据当前按键和鼠标，更新摄像机位置,方向,并重新计算View矩阵
     }
 
-    if(test_layer_ != nullptr)
+    if(nullptr != test_layer_)
     {
         test_layer_->Update();
     }
@@ -573,6 +560,40 @@ void Renderer::InitCamera()
 		camera_ = new PerspectiveCamera(glm::radians(60.0f), 
             (float)current_frame_buffer_->GetWidth() / (float)current_frame_buffer_->GetHeight(), 0.1f, 100.0f, { 0.0f, 1.0f, 0.0f });	
 	}
+}
+
+void Renderer::UpdateScreenMatrix(int32_t screen_width, int32_t screen_height)
+{
+    screen_matrix_ = 
+    {
+        screen_width / 2, 0.0f, 0.0f, screen_width / 2,
+        0.0f, screen_height / 2, 0.0f, screen_height / 2,
+        0.0f, 0.0f, 0.5f, 0.5f, 
+        0.0f, 0.0f, 0.0f, 1.0f
+    };
+
+    screen_matrix_ = glm::transpose(screen_matrix_); //glm是列优先存储, 需要转置
+}
+
+void Renderer::InitFrameBuffer(int32_t frame_width, int32_t frame_height, void* buffer)
+{
+    if(nullptr != current_frame_buffer_)
+    {
+        delete current_frame_buffer_;
+    }
+
+    current_frame_buffer_ = new FrameBuffer();
+    current_frame_buffer_->Init(frame_width, frame_height, (Color*)buffer);
+}
+
+void Renderer::InitLayer()
+{
+    if(nullptr != test_layer_)
+    {
+        delete test_layer_;
+    }
+    test_layer_ = new TestLayer(this);
+    test_layer_->Init();
 }
 
 void Renderer::Enable(uint32_t param)

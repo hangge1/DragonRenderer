@@ -40,16 +40,16 @@ void PerspectiveCamera::OnKeyDown(uint32_t key)
 {
 	switch (key) 
 	{
-	case KEY_W:
+	case KEY_CODE::W:
 		move_state_ |= MOVE_FRONT;
 		break;
-	case KEY_A:
+	case KEY_CODE::A:
 		move_state_ |= MOVE_LEFT;
 		break;
-	case KEY_S:
+	case KEY_CODE::S:
 		move_state_ |= MOVE_BACK;
 		break;
-	case KEY_D:
+	case KEY_CODE::D:
 		move_state_ |= MOVE_RIGHT;
 		break;
 	default:
@@ -61,16 +61,16 @@ void PerspectiveCamera::OnKeyUp(uint32_t key)
 {
 	switch (key) 
 	{
-	case KEY_W:
+	case KEY_CODE::W:
 		move_state_ &= ~MOVE_FRONT;
 		break;
-	case KEY_A:
+	case KEY_CODE::A:
 		move_state_ &= ~MOVE_LEFT;
 		break;
-	case KEY_S:
+	case KEY_CODE::S:
 		move_state_ &= ~MOVE_BACK;
 		break;
-	case KEY_D:
+	case KEY_CODE::D:
 		move_state_ &= ~MOVE_RIGHT;
 		break;
 	default:
