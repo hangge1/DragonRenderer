@@ -1,171 +1,119 @@
 # DragonRenderer
-一款全自主实现的模拟OpenGL渲染管线的API接口的软光栅渲染器，叫做：DragonSoftRenderer！
 
-![image-20240621144356189](README.assets/image-20240621144356189.png)
+DragonRenderer 是一个在 Windows 平台上运行的软件光栅化渲染器。项目目标是通过 C++ 手动实现一套近似 OpenGL 渲染管线的 API 和核心流程，用来学习图形学基础、渲染管线、光栅化、纹理采样、深度测试、模型加载和相机控制。
 
+![DragonRenderer preview](README.assets/image-20240621144356189.png)
 
+## 功能特性
 
-### DragonRenderer构建说明：
+- 软件光栅化渲染流程
+- 直线和三角形光栅化
+- 重心坐标插值
+- 纹理加载与采样
+- Alpha 混合
+- 背面剔除
+- Z-buffer 深度测试
+- Sutherland-Hodgman 裁剪
+- 透视相机与基础交互
+- Lambert 光照 Shader
+- 基于 Assimp 的模型加载实验
 
-项目采用CMake 3.20构建，仅支持Windows平台，自测编译器套件为Visual Studio 17 2022
+## 项目结构
 
-
-
-**方法1：手动命令行构建**
-
-- debug版本
-
-    ```
-    (1) 生成配置:  cmake -S . -B build -D CMAKE_BUILD_TYPE=Debug
-    (2) 编译 cmake --build build --config Debug
-    (3) 运行: .\build\Debug\bin\DragonRenderer.exe
-    (4) 单元测试:  进入build目录， test -C Debug -VV
-    ```
-    
-- release版本
-
-    ```
-    (1) 生成配置:  cmake -S . -B build -D CMAKE_BUILD_TYPE=Release
-    (2) 编译 cmake --build build --config Release
-    (3) 运行: .\build\Release\bin\DragonRenderer.exe
-    (4) 单元测试:  进入build目录， test -C Release -VV
-    ```
-
-
-
-**方法2：vscode + CMakePresets.json预设自动构建**
-
-安装CMake Tools插件，进入后会自动出现下图的左侧栏按钮，根据配置选择Debug或Release进行切换。
-
-左下角的三个箭头分别表示：编译、调试运行、非调试运行
-
-如下图：
-
-![image-20240621145137425](README.assets/image-20240621145137425.png)
-
-
-
-**编码规范：** 遵循Google C++代码规范（尽量遵循）
-
-**Git 提交记录规范格式说明：**
-
-```
-[<commit-type1>](<scope>):<subject>
-1、xxxxxx
-2、yyyyyy
-3、zzzzzz
-
-[<commit-type2>](<scope>):<subject>
-1、xxxxxx
-2、yyyyyy
-3、zzzzzz
-...
+```text
+core/          渲染管线基础数据结构
+render/        渲染器、缓冲区、相机、Shader、纹理、模型等核心实现
+render/layer/  测试渲染层
+render/shader/ 内置 Shader 实现
+test/          第三方库和基础模块测试
+assets/        运行时资源
+thirdparts/    第三方依赖
 ```
 
-**commit-type表示提交类型（必选），分类如下：**
+## 环境要求
 
-- feature
-    新功能
-- fix
-    修复bug，可以是QA的，也可以是自己发现的
-- docs
-    添加 or 修改文档等
-- refactor
-    重构（不是新增功能，也不是修复bug）
-- perf
-    优化性能、体验等
-- test
-    增加单元测试、集成测试等
-- chore
-    构建过程的变动
-- revert
-    回滚到上一版本
-- merge
-    代码合并
+- Windows
+- Visual Studio 17 2022
+- CMake >= 3.20
 
+当前项目主要在 Windows + Visual Studio 2022 环境下自测。
 
+## 构建与运行
 
-**scope表示此次commit影响的范围（可选）！**
+### 使用 CMake Presets
 
-比如：1、某文件夹  2、界面层  3、模型层  4、某个库  等等
-
-
-
-**subject表示此次commit提交的目的，一段简短的概述（可选）！**
-
-
-
-**举个例子：**
-
-```
-[fix](application.cc文件): 忘记初始化某成员变量
-1、补充成员变量main_window_width_的初始化
-2、补充成员变量main_window_height_的初始化
-
-[chore](application文件夹、根CMakeLists.txt): application单独编译成库，解耦
-1、单独编译application文件夹，添加独立cmake文件
-2、移除根cmake对application头文件包含，只需要target_link_library即可
+```powershell
+cmake --preset Debug
+cmake --build --preset x64-Windows-Build-Debug
+.\build\Debug\bin\DragonRenderer.exe
 ```
 
+Release 构建：
 
+```powershell
+cmake --preset Release
+cmake --build --preset x64-Windows-Build-Release
+.\build\Release\bin\DragonRenderer.exe
+```
 
+### 手动 CMake 构建
 
+Debug：
 
-**框架说明: **
+```powershell
+cmake -S . -B build -D CMAKE_BUILD_TYPE=Debug
+cmake --build build --config Debug
+.\build\Debug\bin\DragonRenderer.exe
+```
 
+Release：
 
+```powershell
+cmake -S . -B build -D CMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+.\build\Release\bin\DragonRenderer.exe
+```
 
+## 测试
 
+```powershell
+ctest --test-dir build -C Debug -VV
+```
 
+或使用 CMake Presets：
 
+```powershell
+ctest --preset x64-Windows-Test-Debug
+```
 
+## VS Code 使用方式
 
+安装 CMake Tools 插件后，打开项目根目录即可选择 `Debug`、`Release` 或 `RelWithDebInfo` preset 进行配置、构建和调试。
 
+![CMake Tools preview](README.assets/image-20240621145137425.png)
 
+## 开发约定
 
+- C++ 代码风格尽量遵循 Google C++ Style Guide。
+- 提交信息建议使用下面的格式：
 
+```text
+[type](scope): subject
 
+1. change detail
+2. change detail
+```
 
+常用 `type`：
 
+- `feature`: 新功能
+- `fix`: 修复问题
+- `docs`: 文档更新
+- `refactor`: 重构
+- `perf`: 性能优化
+- `test`: 测试相关
+- `chore`: 构建、工程或辅助任务
 
+## 学习记录
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+开发过程中的阶段性记录保存在 [DEVLOG.md](DEVLOG.md)。
