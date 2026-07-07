@@ -15,6 +15,7 @@ target_link_libraries(Test_StbImage PRIVATE thirdpart_lib_stb_image)
 
 add_test(NAME test_thirdpart_lib_stb_image COMMAND Test_StbImage) 
 set_tests_properties(test_thirdpart_lib_stb_image PROPERTIES PASS_REGULAR_EXPRESSION "thirdparts library stb_image Pass")
+set_tests_properties(test_thirdpart_lib_stb_image PROPERTIES WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 # =======================================================================================
 
 
@@ -42,4 +43,5 @@ endif()
 
 add_test(NAME thirdpart_lib_assimp COMMAND Test_Assimp) 
 set_tests_properties(thirdpart_lib_assimp PROPERTIES PASS_REGULAR_EXPRESSION "thirdparts library assimp Pass")
+set_tests_properties(thirdpart_lib_assimp PROPERTIES WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 # =======================================================================================

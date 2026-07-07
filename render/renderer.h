@@ -3,6 +3,7 @@
 
 #include <Windows.h>
 
+#include <functional>
 #include <map>
 #include <vector>
 
@@ -15,7 +16,8 @@
 
 class FrameBuffer;
 class AbstractCamera;
-class TestLayer;
+class Layer;
+class LayerStack;
 
 class Renderer
 {
@@ -34,6 +36,9 @@ public:
     void OnEvent(Event& ev);
     void OnUpdate();
 
+    void SetExitRequestedCallback(std::function<void()> callback);
+    void AddLayer(Layer* layer);
+    void ClearLayers();
 
     void SetCamera(AbstractCamera* camera);
     AbstractCamera* GetCamera() const;
@@ -105,7 +110,8 @@ private:
 private:
     FrameBuffer* current_frame_buffer_ = nullptr; //帧缓冲
     AbstractCamera* camera_  = nullptr;
-    TestLayer* test_layer_ = nullptr;
+    LayerStack* layer_stack_ = nullptr;
+    std::function<void()> exit_requested_callback_;
 
     //=================仿OpenGL数据结构==================
     // VBO相关/EBO也存在内部

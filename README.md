@@ -30,6 +30,8 @@ assets/        运行时资源
 thirdparts/    第三方依赖
 ```
 
+更详细的模块边界、运行流程和后续架构演进路线见 [ARCHITECTURE.md](ARCHITECTURE.md)。
+
 ## 环境要求
 
 - Windows

@@ -13,16 +13,22 @@
 #include "texture.h"
 #include "frame_buffer.h"
 #include "perspective_camera.h"
-
-#include "application.h"
+#include "layer_stack.h"
 
 #include "test_layer.h"
 
 Renderer::~Renderer()
 {
+    if(nullptr != layer_stack_)
+    {
+        delete layer_stack_;
+        layer_stack_ = nullptr;
+    }
+
     if(nullptr != current_frame_buffer_)
     {
         delete current_frame_buffer_;
+        current_frame_buffer_ = nullptr;
     }
 
     for (auto iter : buffer_map_) 
@@ -47,11 +53,6 @@ Renderer::~Renderer()
 		camera_ = nullptr;
 	}
 
-    if(nullptr != test_layer_)
-    {
-        delete test_layer_;
-        test_layer_ = nullptr;
-    }
 }
 
 void Renderer::Init(int32_t frame_width, int32_t frame_height, void* buffer)
@@ -76,9 +77,9 @@ void Renderer::Clear()
 
 void Renderer::Render()
 {
-    if(nullptr != test_layer_)
+    if(nullptr != layer_stack_)
     {
-        test_layer_->Render();
+        layer_stack_->Render();
     }
     
 }
@@ -92,7 +93,10 @@ void Renderer::OnEvent(Event& ev)
 
         if(e.keycode == VK_ESCAPE) //ESC退出
         {
-            APP->SetExit();
+            if(exit_requested_callback_)
+            {
+                exit_requested_callback_();
+            }
             return;
         }
 
@@ -158,10 +162,33 @@ void Renderer::OnUpdate()
         camera_->Update(); //根据当前按键和鼠标，更新摄像机位置,方向,并重新计算View矩阵
     }
 
-    if(nullptr != test_layer_)
+    if(nullptr != layer_stack_)
     {
-        test_layer_->Update();
+        layer_stack_->Update();
     }    
+}
+
+void Renderer::SetExitRequestedCallback(std::function<void()> callback)
+{
+    exit_requested_callback_ = callback;
+}
+
+void Renderer::AddLayer(Layer* layer)
+{
+    if(layer_stack_ == nullptr)
+    {
+        layer_stack_ = new LayerStack();
+    }
+
+    layer_stack_->PushLayer(layer);
+}
+
+void Renderer::ClearLayers()
+{
+    if(layer_stack_ != nullptr)
+    {
+        layer_stack_->Clear();
+    }
 }
 
 void Renderer::SetCamera(AbstractCamera* camera)
@@ -587,12 +614,8 @@ void Renderer::InitFrameBuffer(int32_t frame_width, int32_t frame_height, void* 
 
 void Renderer::InitLayer()
 {
-    if(nullptr != test_layer_)
-    {
-        delete test_layer_;
-    }
-    test_layer_ = new TestLayer(this);
-    test_layer_->Init();
+    ClearLayers();
+    AddLayer(new TestLayer(this));
 }
 
 void Renderer::Enable(ENABLE_TYPE param)

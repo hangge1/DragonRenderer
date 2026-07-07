@@ -65,6 +65,7 @@ bool Application::Init(HINSTANCE hinstance, const TCHAR* window_title,
 	InitDC();
 
 	renderer_ = new Renderer();
+	renderer_->SetExitRequestedCallback([this]() { SetExit(); });
 	renderer_->Init(width_, height_, canvas_buffer_);
 
 	return true;

@@ -23,10 +23,12 @@ Model::Model(Renderer* renderer)
 
 Model::~Model() 
 {
-	for (auto& mesh : meshes_) 
+	if(root_mesh_ != nullptr)
     {
-		delete mesh;
+		delete root_mesh_;
+		root_mesh_ = nullptr;
 	}
+	meshes_.clear();
 
 	for(auto& iter : texture_cache_) 
     {

@@ -12,6 +12,12 @@ Mesh::Mesh(Renderer* renderer)
 
 Mesh::~Mesh()
 {
+    for(auto child : children_)
+    {
+        delete child;
+    }
+    children_.clear();
+
     if (vao_) 
     {
         renderer_->DeleteVertexArray(vao_);
