@@ -119,3 +119,8 @@ ctest --preset x64-Windows-Test-Debug
 ## 学习记录
 
 开发过程中的阶段性记录保存在 [DEVLOG.md](DEVLOG.md)。
+## License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+
+Unless otherwise noted, third-party dependencies, assets, course/tutorial materials, and externally sourced resources remain under their original licenses.
