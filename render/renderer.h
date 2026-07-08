@@ -13,6 +13,7 @@
 #include "shader.h"
 #include "texture.h"
 #include "vertex_array_object.h"
+#include "runtime/frame_stats.h"
 
 class FrameBuffer;
 class AbstractCamera;
@@ -30,6 +31,10 @@ public:
     Renderer &operator=(Renderer &&) = delete;
 
     void Init(int32_t frame_width, int32_t frame_height, void *buffer = nullptr);
+    void BeginFrameStats();
+    void SetFrameTiming(double frame_ms, double update_ms, double render_ms, double present_ms);
+    const FrameStats& GetFrameStats() const;
+
     void Clear();
     void Render();
 
@@ -142,11 +147,13 @@ private:
 	CULL_FACE_TYPE cull_which_face_ { BACK_FACE };
 
     //深度测试相关
-	bool enable_depth_test_ { true };
+    bool enable_depth_test_ { true };
 	DEPTH_TEST_FUNC depth_test_func_ { DEPTH_LESS };
 
     //颜色混合相关
     bool enable_blend_ { false };
+
+    FrameStats frame_stats_;
 };
 
 #endif

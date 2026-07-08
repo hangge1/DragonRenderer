@@ -310,12 +310,17 @@ Goal:
 
 Make runtime behavior visible before deeper refactoring.
 
+Status:
+
+- Started. `FrameStats` and `ScopedTimer` now collect frame timing and basic workload counters.
+- Baseline entries should be recorded in [PERFORMANCE_LOG.md](PERFORMANCE_LOG.md).
+
 Tasks:
 
 - Keep current FPS title.
-- Add `FrameStats`.
-- Add `ScopedTimer`.
-- Count draw calls, triangles, fragments, and depth rejects.
+- Add `FrameStats`. Done.
+- Add `ScopedTimer`. Done.
+- Count draw calls, triangles, fragments, and depth rejects. Started.
 - Add a `--benchmark N` or `--smoke N` mode that runs N frames and exits.
 
 Definition of Done:

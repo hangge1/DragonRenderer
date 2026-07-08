@@ -13,6 +13,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 
 #include "renderer.h"
+#include "runtime/scoped_timer.h"
 
 #include "event.h"
 
@@ -84,17 +85,39 @@ void Application::Run()
 
     while(IsInLoop())
     {
-		//1、清空渲染帧(重新设置背景色, 重置深度缓冲区)
-        renderer_->Clear();
+        renderer_->BeginFrameStats();
 
-		//2、计算逻辑(摄像机, 光照等)
-		renderer_->OnUpdate();
+        double frame_ms = 0.0;
+        double update_ms = 0.0;
+        double render_ms = 0.0;
+        double present_ms = 0.0;
 
-        //3、离屏渲染(渲染到用户创建的内存绘图设备上下文)
-		renderer_->Render();
+        {
+            ScopedTimer frame_timer(frame_ms);
 
-		//4、交换到屏幕缓冲(离屏渲染结果拷贝到屏幕缓冲)
-		SwapBuffer();
+		    //1、清空渲染帧(重新设置背景色, 重置深度缓冲区)
+            renderer_->Clear();
+
+		    //2、计算逻辑(摄像机, 光照等)
+            {
+                ScopedTimer update_timer(update_ms);
+		        renderer_->OnUpdate();
+            }
+
+            //3、离屏渲染(渲染到用户创建的内存绘图设备上下文)
+            {
+                ScopedTimer render_timer(render_ms);
+		        renderer_->Render();
+            }
+
+		    //4、交换到屏幕缓冲(离屏渲染结果拷贝到屏幕缓冲)
+            {
+                ScopedTimer present_timer(present_ms);
+		        SwapBuffer();
+            }
+        }
+
+        renderer_->SetFrameTiming(frame_ms, update_ms, render_ms, present_ms);
 
         frame_count++;
         auto now = Clock::now();
@@ -102,12 +125,17 @@ void Application::Run()
         if(elapsed >= 1.0)
         {
             double fps = frame_count / elapsed;
-            double frame_ms = 1000.0 / fps;
+            const auto& stats = renderer_->GetFrameStats();
 
             std::wostringstream title_stream;
             title_stream << (title_ != nullptr ? title_ : TEXT("DragonRenderer"))
                 << TEXT(" | FPS: ") << std::fixed << std::setprecision(1) << fps
-                << TEXT(" | Frame: ") << std::fixed << std::setprecision(2) << frame_ms << TEXT(" ms");
+                << TEXT(" | Frame: ") << std::fixed << std::setprecision(2) << stats.frame_ms << TEXT(" ms")
+                << TEXT(" | U/R/P: ") << std::fixed << std::setprecision(2)
+                << stats.update_ms << TEXT("/") << stats.render_ms << TEXT("/") << stats.present_ms << TEXT(" ms")
+                << TEXT(" | DC: ") << stats.draw_calls
+                << TEXT(" | Tri: ") << stats.input_triangles
+                << TEXT(" | Frag: ") << stats.rasterized_fragments;
             SetWindowText(hwnd_, title_stream.str().c_str());
 
             frame_count = 0;

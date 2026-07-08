@@ -66,6 +66,24 @@ void Renderer::Init(int32_t frame_width, int32_t frame_height, void* buffer)
     InitLayer();
 }
 
+void Renderer::BeginFrameStats()
+{
+    frame_stats_.Reset();
+}
+
+void Renderer::SetFrameTiming(double frame_ms, double update_ms, double render_ms, double present_ms)
+{
+    frame_stats_.frame_ms = frame_ms;
+    frame_stats_.update_ms = update_ms;
+    frame_stats_.render_ms = render_ms;
+    frame_stats_.present_ms = present_ms;
+}
+
+const FrameStats& Renderer::GetFrameStats() const
+{
+    return frame_stats_;
+}
+
 void Renderer::Clear()
 {
     if(nullptr != current_frame_buffer_)
@@ -336,6 +354,12 @@ void Renderer::DrawElement(DRAW_MODE drawMode, uint32_t first, uint32_t count)
 
     const BufferObject* ebo = ebo_iter->second;
 
+    frame_stats_.draw_calls++;
+    if(drawMode == DRAW_TRIANGLES)
+    {
+        frame_stats_.input_triangles += count / 3;
+    }
+
     //3 执行VertexShader
     //按照ebo的index顺序，处理顶点，依次通过顶点着色器
     std::vector<VsOutput> vs_outputs {};
@@ -353,6 +377,11 @@ void Renderer::DrawElement(DRAW_MODE drawMode, uint32_t first, uint32_t count)
     if(clip_outputs.empty())
     {
         return;
+    }
+
+    if(drawMode == DRAW_TRIANGLES)
+    {
+        frame_stats_.clipped_triangles += static_cast<uint32_t>(clip_outputs.size() / 3);
     }
 
 
@@ -393,6 +422,7 @@ void Renderer::DrawElement(DRAW_MODE drawMode, uint32_t first, uint32_t count)
     //8 光栅化
     //离散出所有Fragment
     std::vector<VsOutput> raster_outputs = RasterTool::Rasterize(drawMode, cull_outputs);
+    frame_stats_.rasterized_fragments += static_cast<uint32_t>(raster_outputs.size());
 
     if(raster_outputs.empty()) 
     {
@@ -414,10 +444,12 @@ void Renderer::DrawElement(DRAW_MODE drawMode, uint32_t first, uint32_t count)
 	for (uint32_t i = 0; i < raster_outputs.size(); ++i) 
     {
 		current_shader_->FragmentShader(raster_outputs[i], fs_output, texture_map_);
+        frame_stats_.shaded_fragments++;
 
         //深度测试
 		if (enable_depth_test_ && !DepthTest(fs_output)) 
         {
+            frame_stats_.depth_rejected_fragments++;
 			continue;
 		}
 
