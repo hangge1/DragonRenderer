@@ -112,7 +112,8 @@ flowchart LR
 ```mermaid
 flowchart TB
     Draw["Renderer::DrawElement"]
-    Resolve["ResolveCurrentDrawInputs"]
+    Command["BuildDrawCommand<br/>validate current draw inputs"]
+    DrawCommand["DrawCommand<br/>mode, first, count, VAO, EBO"]
     Stats["RecordDrawCallStats"]
     Scratch["PipelineScratch::ResetForDraw"]
     Vertex["RunVertexStage"]
@@ -123,8 +124,9 @@ flowchart TB
     Raster["RunRasterStage"]
     Fragment["RunFragmentOutputStage"]
 
-    Draw --> Resolve
-    Resolve --> Stats
+    Draw --> Command
+    Command --> DrawCommand
+    DrawCommand --> Stats
     Stats --> Scratch
     Scratch --> Vertex
     Vertex --> Clip
@@ -145,6 +147,7 @@ flowchart TB
     VAOs["vao_map<br/>VertexArrayObject attribute bindings"]
     Textures["texture_map<br/>Texture image data and sampling state"]
     Shaders["Shader<br/>VertexShader and FragmentShader"]
+    Commands["DrawCommand<br/>resolved draw mode, range, VAO, EBO"]
     FrameBuffer["FrameBuffer<br/>color and depth buffers"]
     Scratch["PipelineScratch<br/>stage outputs and clip work buffers"]
     Stats["FrameStats<br/>timing and workload counters"]
@@ -154,6 +157,7 @@ flowchart TB
     Renderer --> VAOs
     Renderer --> Textures
     Renderer --> Shaders
+    Renderer --> Commands
     Renderer --> FrameBuffer
     Renderer --> Scratch
     Renderer --> Stats

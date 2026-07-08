@@ -85,3 +85,13 @@ target_link_libraries(Test_NdcPerspectiveSmoke PRIVATE Render)
 add_test(NAME ndc_perspective_smoke COMMAND Test_NdcPerspectiveSmoke)
 set_tests_properties(ndc_perspective_smoke PROPERTIES PASS_REGULAR_EXPRESSION "ndc perspective smoke Pass")
 # =======================================================================================
+
+# =======================================================================================
+# draw_command_validation_test.cc
+
+add_executable(Test_DrawCommandValidation "draw_command_validation_test.cc")
+target_link_libraries(Test_DrawCommandValidation PRIVATE Render)
+
+add_test(NAME draw_command_validation COMMAND Test_DrawCommandValidation)
+set_tests_properties(draw_command_validation PROPERTIES PASS_REGULAR_EXPRESSION "draw command validation Pass")
+# =======================================================================================

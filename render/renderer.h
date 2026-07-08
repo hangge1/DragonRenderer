@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "buffer_object.h"
+#include "draw_command.h"
 #include "event.h"
 
 #include "shader.h"
@@ -90,10 +91,9 @@ public:
 	void TexParameter(TEXTURE_PARAMETER_TYPE param, uint32_t value);
 
 private:
-    bool ResolveCurrentDrawInputs(VertexArrayObject*& vao, const BufferObject*& ebo) const;
-    void RecordDrawCallStats(DRAW_MODE drawMode, uint32_t count);
-    bool RunVertexStage(std::vector<VsOutput>& vsOutputs, const VertexArrayObject* vao,
-        const BufferObject* ebo, uint32_t first, uint32_t count);
+    bool BuildDrawCommand(DRAW_MODE drawMode, uint32_t first, uint32_t count, DrawCommand& command) const;
+    void RecordDrawCallStats(const DrawCommand& command);
+    bool RunVertexStage(std::vector<VsOutput>& vsOutputs, const DrawCommand& command);
     bool RunClipStage(DRAW_MODE drawMode, const std::vector<VsOutput>& vsOutputs,
         std::vector<VsOutput>& clipOutputs);
     void RunPerspectiveDivideStage(std::vector<VsOutput>& clipOutputs);

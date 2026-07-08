@@ -329,42 +329,36 @@ void Renderer::UseProgram(Shader* shader)
 
 void Renderer::DrawElement(DRAW_MODE drawMode, uint32_t first, uint32_t count)
 {
-    if(current_vao_ == 0 || nullptr == current_shader_ || count == 0)
+    DrawCommand command;
+    if(!BuildDrawCommand(drawMode, first, count, command))
     {
         return;
     }
 
-    VertexArrayObject* vao = nullptr;
-    const BufferObject* ebo = nullptr;
-    if(!ResolveCurrentDrawInputs(vao, ebo))
-    {
-        return;
-    }
-
-    RecordDrawCallStats(drawMode, count);
-    pipeline_scratch_.ResetForDraw(count);
+    RecordDrawCallStats(command);
+    pipeline_scratch_.ResetForDraw(command.count);
 
     auto& vs_outputs = pipeline_scratch_.vertex_outputs;
     auto& clip_outputs = pipeline_scratch_.clip_outputs;
     auto& cull_outputs = pipeline_scratch_.cull_outputs;
     auto& raster_outputs = pipeline_scratch_.raster_outputs;
 
-    if(!RunVertexStage(vs_outputs, vao, ebo, first, count))
+    if(!RunVertexStage(vs_outputs, command))
     {
         return;
     }
 
-    if(!RunClipStage(drawMode, vs_outputs, clip_outputs))
+    if(!RunClipStage(command.draw_mode, vs_outputs, clip_outputs))
     {
         return;
     }
 
     RunPerspectiveDivideStage(clip_outputs);
 
-    std::vector<VsOutput>* post_cull_outputs = RunCullStage(drawMode, clip_outputs, cull_outputs);
+    std::vector<VsOutput>* post_cull_outputs = RunCullStage(command.draw_mode, clip_outputs, cull_outputs);
     RunViewportStage(*post_cull_outputs);
 
-    if(!RunRasterStage(drawMode, *post_cull_outputs, raster_outputs))
+    if(!RunRasterStage(command.draw_mode, *post_cull_outputs, raster_outputs))
     {
         return;
     }
@@ -372,16 +366,19 @@ void Renderer::DrawElement(DRAW_MODE drawMode, uint32_t first, uint32_t count)
     RunFragmentOutputStage(raster_outputs);
 }
 
-bool Renderer::ResolveCurrentDrawInputs(VertexArrayObject*& vao, const BufferObject*& ebo) const
+bool Renderer::BuildDrawCommand(DRAW_MODE drawMode, uint32_t first, uint32_t count, DrawCommand& command) const
 {
+    if(current_vao_ == 0 || nullptr == current_shader_ || count == 0)
+    {
+        return false;
+    }
+
     auto vao_iter = vao_map_.find(current_vao_);
     if(vao_iter == vao_map_.end())
     {
         std::cout << "Error: current vao is invalid!" << std::endl;
         return false;
     }
-
-    vao = vao_iter->second;
 
     auto ebo_iter = buffer_map_.find(current_ebo_);
     if(ebo_iter == buffer_map_.end())
@@ -390,25 +387,28 @@ bool Renderer::ResolveCurrentDrawInputs(VertexArrayObject*& vao, const BufferObj
         return false;
     }
 
-    ebo = ebo_iter->second;
+    command.draw_mode = drawMode;
+    command.first = first;
+    command.count = count;
+    command.vao = vao_iter->second;
+    command.ebo = ebo_iter->second;
     return true;
 }
 
-void Renderer::RecordDrawCallStats(DRAW_MODE drawMode, uint32_t count)
+void Renderer::RecordDrawCallStats(const DrawCommand& command)
 {
     frame_stats_.draw_calls++;
-    if(drawMode == DRAW_TRIANGLES)
+    if(command.draw_mode == DRAW_TRIANGLES)
     {
-        frame_stats_.input_triangles += count / 3;
+        frame_stats_.input_triangles += command.count / 3;
     }
 }
 
-bool Renderer::RunVertexStage(std::vector<VsOutput>& vsOutputs, const VertexArrayObject* vao,
-    const BufferObject* ebo, uint32_t first, uint32_t count)
+bool Renderer::RunVertexStage(std::vector<VsOutput>& vsOutputs, const DrawCommand& command)
 {
     {
         ScopedTimer stage_timer(frame_stats_.vertex_stage_ms);
-	    VertexShaderApply(vsOutputs, vao, ebo, first, count);
+	    VertexShaderApply(vsOutputs, command.vao, command.ebo, command.first, command.count);
     }
 
     return !vsOutputs.empty();

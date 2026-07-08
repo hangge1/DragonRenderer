@@ -414,6 +414,7 @@ Status:
 - Started. `Renderer::DrawElement` now delegates to named private stage methods while keeping behavior and public API unchanged.
 - Stage timers and counters still live at the stage boundary.
 - `PipelineScratch` is now available to every extracted stage.
+- `DrawCommand` now captures draw mode, index range, VAO, and EBO after current binding validation.
 - `render_output_smoke` now provides a deterministic offscreen output guard before deeper raster or NDC changes.
 - `clip_tool` now provides narrow coverage for clip and cull edge behavior.
 - `depth_output_smoke` now provides a deterministic output-merge guard for depth testing and framebuffer writes.
@@ -421,7 +422,7 @@ Status:
 
 Tasks:
 
-- Extract `DrawCommand`.
+- Extract `DrawCommand`. Done for the current `DrawElement` path.
 - Extract `PipelineScratch`.
 - Extract stages in this order:
   - vertex fetch and vertex shader. Started.
@@ -429,7 +430,7 @@ Tasks:
   - viewport transform. Started.
   - raster. Started.
   - fragment and output merge. Started.
-- Add unit tests for each stage. Started with `render_output_smoke`, `clip_tool`, `depth_output_smoke`, and `ndc_perspective_smoke`.
+- Add unit tests for each stage. Started with `render_output_smoke`, `clip_tool`, `depth_output_smoke`, `ndc_perspective_smoke`, and `draw_command_validation`.
 
 Definition of Done:
 
@@ -568,6 +569,5 @@ This creates the scoreboard. Without the scoreboard, the engine cannot be improv
 
 Current next task after the scoreboard:
 
-1. Extract lightweight `DrawCommand` and command validation around current draw inputs.
-2. Add narrow tests for resource/state validation before changing command setup.
-3. Record another before/after benchmark before introducing tile rasterization.
+1. Add narrow tests for resource/state validation before changing command setup further.
+2. Record another before/after benchmark before introducing tile rasterization.
