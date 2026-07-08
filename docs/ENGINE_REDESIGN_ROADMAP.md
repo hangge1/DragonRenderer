@@ -313,6 +313,7 @@ Make runtime behavior visible before deeper refactoring.
 Status:
 
 - Started. `FrameStats` and `ScopedTimer` now collect frame timing and basic workload counters.
+- `--smoke N` and `--benchmark N` can run fixed-frame local verification and exit automatically.
 - Baseline entries should be recorded in [PERFORMANCE_LOG.md](PERFORMANCE_LOG.md).
 
 Tasks:
@@ -321,7 +322,7 @@ Tasks:
 - Add `FrameStats`. Done.
 - Add `ScopedTimer`. Done.
 - Count draw calls, triangles, fragments, and depth rejects. Started.
-- Add a `--benchmark N` or `--smoke N` mode that runs N frames and exits.
+- Add a `--benchmark N` or `--smoke N` mode that runs N frames and exits. Done.
 
 Definition of Done:
 

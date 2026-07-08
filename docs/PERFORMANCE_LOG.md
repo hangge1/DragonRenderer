@@ -36,5 +36,59 @@ Interpretation:
 
 Follow-up:
 
-- Release linking emitted `LNK4098` about default runtime library mismatch. The build still succeeds, but the CMake preset/build-directory setup should be cleaned up before using Release numbers as formal benchmark data.
+- Release linking emitted `LNK4098` about default runtime library mismatch. This was addressed in the next entry by separating build directories per configuration.
 - Next profiling step: split `render_ms` into vertex, clip/cull, raster, fragment, depth/output stages.
+
+## 2026-07-08 - Smoke and Benchmark Mode
+
+Change:
+
+- CMake presets now use separate build directories:
+  - `build/Debug`
+  - `build/Release`
+  - `build/RelWithDebInfo`
+- `x64-Windows-Test-Release` now uses the `Release` configure preset.
+- `DragonRenderer.exe --smoke N` runs N frames, prints a summary, and exits.
+- `DragonRenderer.exe --benchmark N` does the same and is intended for repeatable local baselines.
+
+Expected usage:
+
+```powershell
+cmake --preset Release
+cmake --build --preset x64-Windows-Build-Release
+.\build\Release\bin\DragonRenderer.exe --benchmark 600
+```
+
+Follow-up:
+
+- Record a fresh Release benchmark after the separate build directories have been verified.
+
+Verification:
+
+- Debug configure/build/test passed from `build/Debug`.
+- Release configure/build/test passed from `build/Release`.
+- Release build no longer emitted the previous `LNK4098` warning.
+- `--smoke 30` ran 30 frames and exited.
+- `--benchmark 120` ran 120 frames and exited.
+
+Release smoke sample:
+
+```text
+Frames: 30
+Average frame: 16.0452 ms
+Average update/render/present: 0.00116333 / 12.5183 / 3.01875 ms
+Average draw calls: 1
+Average input triangles: 11938
+Average rasterized fragments: 5639
+```
+
+Release benchmark sample:
+
+```text
+Frames: 120
+Average frame: 15.4613 ms
+Average update/render/present: 0.0010475 / 12.5268 / 2.41238 ms
+Average draw calls: 1
+Average input triangles: 11938
+Average rasterized fragments: 5639
+```

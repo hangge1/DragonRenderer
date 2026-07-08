@@ -10,6 +10,12 @@
 
 class Renderer;
 
+struct ApplicationRunOptions
+{
+    uint32_t max_frames { 0 };
+    bool print_summary { false };
+};
+
 class Application final
 {
 public:
@@ -26,7 +32,7 @@ public:
         int32_t main_window_height = kDefaultWindowHeight);
     
     //运行渲染循环
-    void Run();
+    void Run(const ApplicationRunOptions& options = {});
 
     inline int32_t GetWidth() const { return width_; }
     inline int32_t GetHeight() const { return height_; }

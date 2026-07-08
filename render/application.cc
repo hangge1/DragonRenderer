@@ -2,6 +2,7 @@
 
 
 #include <chrono>
+#include <iostream>
 #include <iomanip>
 #include <sstream>
 
@@ -76,12 +77,21 @@ bool Application::Init(HINSTANCE hinstance, const TCHAR* window_title,
 	return true;
 }
 
-void Application::Run()
+void Application::Run(const ApplicationRunOptions& options)
 {
     using Clock = std::chrono::steady_clock;
 
     auto fps_sample_start = Clock::now();
-    uint32_t frame_count = 0;
+    uint32_t sample_frame_count = 0;
+    uint32_t total_frame_count = 0;
+
+    double total_frame_ms = 0.0;
+    double total_update_ms = 0.0;
+    double total_render_ms = 0.0;
+    double total_present_ms = 0.0;
+    uint64_t total_draw_calls = 0;
+    uint64_t total_input_triangles = 0;
+    uint64_t total_rasterized_fragments = 0;
 
     while(IsInLoop())
     {
@@ -118,14 +128,23 @@ void Application::Run()
         }
 
         renderer_->SetFrameTiming(frame_ms, update_ms, render_ms, present_ms);
+        const auto& stats = renderer_->GetFrameStats();
 
-        frame_count++;
+        total_frame_count++;
+        total_frame_ms += stats.frame_ms;
+        total_update_ms += stats.update_ms;
+        total_render_ms += stats.render_ms;
+        total_present_ms += stats.present_ms;
+        total_draw_calls += stats.draw_calls;
+        total_input_triangles += stats.input_triangles;
+        total_rasterized_fragments += stats.rasterized_fragments;
+
+        sample_frame_count++;
         auto now = Clock::now();
         double elapsed = std::chrono::duration<double>(now - fps_sample_start).count();
         if(elapsed >= 1.0)
         {
-            double fps = frame_count / elapsed;
-            const auto& stats = renderer_->GetFrameStats();
+            double fps = sample_frame_count / elapsed;
 
             std::wostringstream title_stream;
             title_stream << (title_ != nullptr ? title_ : TEXT("DragonRenderer"))
@@ -138,9 +157,29 @@ void Application::Run()
                 << TEXT(" | Frag: ") << stats.rasterized_fragments;
             SetWindowText(hwnd_, title_stream.str().c_str());
 
-            frame_count = 0;
+            sample_frame_count = 0;
             fps_sample_start = now;
         }
+
+        if(options.max_frames > 0 && total_frame_count >= options.max_frames)
+        {
+            SetExit();
+        }
+    }
+
+    if(options.print_summary && total_frame_count > 0)
+    {
+        double count = static_cast<double>(total_frame_count);
+        std::cout << "DragonRenderer benchmark summary" << std::endl;
+        std::cout << "Frames: " << total_frame_count << std::endl;
+        std::cout << "Average frame: " << total_frame_ms / count << " ms" << std::endl;
+        std::cout << "Average update/render/present: "
+            << total_update_ms / count << " / "
+            << total_render_ms / count << " / "
+            << total_present_ms / count << " ms" << std::endl;
+        std::cout << "Average draw calls: " << total_draw_calls / count << std::endl;
+        std::cout << "Average input triangles: " << total_input_triangles / count << std::endl;
+        std::cout << "Average rasterized fragments: " << total_rasterized_fragments / count << std::endl;
     }
 
 	delete renderer_;

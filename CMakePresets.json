@@ -20,7 +20,7 @@
         {
             "name": "Debug",
             "inherits": "default",
-            "binaryDir": "${sourceDir}/build",
+            "binaryDir": "${sourceDir}/build/Debug",
             "description": "Use this preset for Debug builds",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug"
@@ -29,7 +29,7 @@
         {
             "name": "Release",
             "inherits": "default",
-            "binaryDir": "${sourceDir}/build",
+            "binaryDir": "${sourceDir}/build/Release",
             "description": "Use this preset for Release builds",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release"
@@ -38,7 +38,7 @@
         {
             "name": "RelWithDebInfo",
             "inherits": "default",
-            "binaryDir": "${sourceDir}/build",
+            "binaryDir": "${sourceDir}/build/RelWithDebInfo",
             "description": "Use this preset for RelWithDebInfo builds",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "RelWithDebInfo"
@@ -74,7 +74,7 @@
         },
         {
             "name": "x64-Windows-Test-Release",
-            "configurePreset": "Debug",
+            "configurePreset": "Release",
             "configuration": "Release",
 			"output": {"outputOnFailure": true, "quiet": true}
         },

@@ -5,9 +5,57 @@
 */
 #include <Windows.h>
 
+#include <cstdlib>
 #include <iostream>
+#include <string>
 
 #include "application.h"
+
+namespace
+{
+ApplicationRunOptions ParseRunOptions(const wchar_t* command_line)
+{
+    ApplicationRunOptions options;
+
+    if(command_line == nullptr)
+    {
+        return options;
+    }
+
+    std::wstring args(command_line);
+    auto parse_frame_count = [&args](const std::wstring& flag) -> uint32_t {
+        auto flag_pos = args.find(flag);
+        if(flag_pos == std::wstring::npos)
+        {
+            return 0;
+        }
+
+        auto value_pos = args.find_first_not_of(L" \t", flag_pos + flag.size());
+        if(value_pos == std::wstring::npos)
+        {
+            return 0;
+        }
+
+        return static_cast<uint32_t>(std::wcstoul(args.c_str() + value_pos, nullptr, 10));
+    };
+
+    uint32_t benchmark_frames = parse_frame_count(L"--benchmark");
+    uint32_t smoke_frames = parse_frame_count(L"--smoke");
+
+    if(benchmark_frames > 0)
+    {
+        options.max_frames = benchmark_frames;
+        options.print_summary = true;
+    }
+    else if(smoke_frames > 0)
+    {
+        options.max_frames = smoke_frames;
+        options.print_summary = true;
+    }
+
+    return options;
+}
+}
 
 int WINAPI wWinMain(HINSTANCE hInstance,
                     HINSTANCE hPrevInstance,
@@ -24,7 +72,7 @@ int WINAPI wWinMain(HINSTANCE hInstance,
         return -1;
     }
 
-	APP->Run();
+	APP->Run(ParseRunOptions(lpCmdLine));
 
     std::cout << "Application will exit!" << std::endl;
 

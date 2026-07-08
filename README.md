@@ -60,28 +60,37 @@ cmake --build --preset x64-Windows-Build-Release
 .\build\Release\bin\DragonRenderer.exe
 ```
 
+自动 smoke/benchmark：
+
+```powershell
+.\build\Release\bin\DragonRenderer.exe --smoke 120
+.\build\Release\bin\DragonRenderer.exe --benchmark 600
+```
+
+`--smoke` 和 `--benchmark` 会运行指定帧数后自动退出，并在控制台输出平均帧耗时、Update/Render/Present 分段耗时和基础渲染负载计数。
+
 ### 手动 CMake 构建
 
 Debug：
 
 ```powershell
-cmake -S . -B build -D CMAKE_BUILD_TYPE=Debug
-cmake --build build --config Debug
+cmake -S . -B build/Debug -D CMAKE_BUILD_TYPE=Debug
+cmake --build build/Debug --config Debug
 .\build\Debug\bin\DragonRenderer.exe
 ```
 
 Release：
 
 ```powershell
-cmake -S . -B build -D CMAKE_BUILD_TYPE=Release
-cmake --build build --config Release
+cmake -S . -B build/Release -D CMAKE_BUILD_TYPE=Release
+cmake --build build/Release --config Release
 .\build\Release\bin\DragonRenderer.exe
 ```
 
 ## 测试
 
 ```powershell
-ctest --test-dir build -C Debug -VV
+ctest --test-dir build/Debug -C Debug -VV
 ```
 
 或使用 CMake Presets：
