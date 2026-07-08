@@ -44,13 +44,25 @@ Rationale:
 - A single project log is easier to scan than separate management and historical log files.
 - Avoiding archive-style naming keeps early learning records connected to the current renderer evolution.
 
+## 2026-07-08 - Historical Log Encoding Repair
+
+Decision:
+
+- Rebuild the historical development entries from the clean `ad23012:DEVLOG.md` Git blob.
+- Replace the unreadable text introduced during the earlier log merge with valid UTF-8 Chinese.
+- Keep the older development notes inside this unified project log.
+
+Rationale:
+
+- The original `DEVLOG.md` content in Git history was already valid UTF-8.
+- The unreadable text came from an incorrect decode path during document consolidation, not from the original notes.
+- Restoring from the original blob preserves the project history without manually rewriting the old entries.
+
 ## Historical Development Entries
 
-The entries below were migrated from the old root-level `DEVLOG.md` and are kept as part of the continuous project record.
+The entries below were migrated from the old root-level `DEVLOG.md` and normalized as valid UTF-8 Chinese text. They remain part of the continuous project record.
 
-Note: parts of the older content already contained mojibake before this merge. The text is preserved instead of silently rewritten so historical material remains traceable.
-
-# 开发过程日志
+### 开发过程日志
 
 此MarkDown专门用于写一些开发过程的日志记录，防止前一天想到的东西，第二天忘记了
 
