@@ -2,6 +2,8 @@
 
 DragonRenderer is being organized as a small software rendering framework rather than a single hard-coded demo. The current architecture keeps the existing OpenGL-like API while separating platform, rendering, scene/demo, and resource lifetimes.
 
+For the next engineering redesign roadmap, see [docs/ENGINE_REDESIGN_ROADMAP.md](docs/ENGINE_REDESIGN_ROADMAP.md). This file describes the current architecture; the roadmap defines the target engine architecture and phased refactor plan.
+
 ## High-Level Layers
 
 ```text
