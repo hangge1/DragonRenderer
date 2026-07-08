@@ -1,0 +1,34 @@
+* text=auto
+
+*.c text eol=lf working-tree-encoding=UTF-8
+*.cc text eol=lf working-tree-encoding=UTF-8
+*.cpp text eol=lf working-tree-encoding=UTF-8
+*.cppm text eol=lf working-tree-encoding=UTF-8
+*.h text eol=lf working-tree-encoding=UTF-8
+*.hpp text eol=lf working-tree-encoding=UTF-8
+*.inl text eol=lf working-tree-encoding=UTF-8
+*.cmake text eol=lf working-tree-encoding=UTF-8
+CMakeLists.txt text eol=lf working-tree-encoding=UTF-8
+*.json text eol=lf working-tree-encoding=UTF-8
+*.md text eol=lf working-tree-encoding=UTF-8
+*.txt text eol=lf working-tree-encoding=UTF-8
+*.ps1 text eol=lf working-tree-encoding=UTF-8
+*.yml text eol=lf working-tree-encoding=UTF-8
+*.yaml text eol=lf working-tree-encoding=UTF-8
+*.gitignore text eol=lf working-tree-encoding=UTF-8
+*.editorconfig text eol=lf working-tree-encoding=UTF-8
+*.gitattributes text eol=lf working-tree-encoding=UTF-8
+LICENSE text eol=lf working-tree-encoding=UTF-8
+
+assets/** -text -working-tree-encoding
+README.assets/** -text -working-tree-encoding
+thirdparts/** -text -working-tree-encoding
+
+*.glb binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.fbx binary
+*.dll binary
+*.lib binary
+*.pdb binary

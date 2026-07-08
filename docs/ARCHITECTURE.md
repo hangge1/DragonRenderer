@@ -59,6 +59,16 @@ The current include style still uses short project headers such as `renderer.h`,
 
 `pipeline_data.h` used to live in a top-level `core/` folder. It is now owned by `render/pipeline/` because the types inside it are render-pipeline-facing contracts rather than a standalone engine core.
 
+## Encoding Policy
+
+All project-owned text files must be valid UTF-8. The repository enforces this in three places:
+
+- `.editorconfig` sets `charset = utf-8` for editors.
+- `.gitattributes` declares UTF-8 text normalization for source, CMake, docs, and scripts.
+- CMake builds with MSVC `/utf-8` and runs the `check_utf8` target plus the `utf8_encoding` CTest.
+
+Vendored dependencies, binary assets, generated build files, and image assets are excluded from the UTF-8 scan.
+
 ## Frame Lifecycle
 
 ```mermaid

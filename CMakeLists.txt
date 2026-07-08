@@ -39,6 +39,27 @@ project(DragonRenderer
     LANGUAGES CXX
 )
 
+add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
+
+find_program(POWERSHELL_EXECUTABLE
+    NAMES pwsh powershell
+    REQUIRED
+)
+
+add_custom_target(check_utf8 ALL
+    COMMAND ${POWERSHELL_EXECUTABLE} -NoProfile -ExecutionPolicy Bypass
+        -File "${CMAKE_SOURCE_DIR}/tools/check_utf8.ps1"
+        -Root "${CMAKE_SOURCE_DIR}"
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMENT "Checking project text files are valid UTF-8"
+)
+
+add_test(NAME utf8_encoding
+    COMMAND ${POWERSHELL_EXECUTABLE} -NoProfile -ExecutionPolicy Bypass
+        -File "${CMAKE_SOURCE_DIR}/tools/check_utf8.ps1"
+        -Root "${CMAKE_SOURCE_DIR}"
+)
+
 # 递归拷贝assets目录到bin目录
 set(SOURCE_DIR ${CMAKE_SOURCE_DIR}/assets)
 set(DEST_DIR ${BIN_DIR})
