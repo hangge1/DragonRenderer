@@ -414,6 +414,7 @@ Status:
 
 - Started. `Renderer::DrawElement` now delegates to named private stage methods while keeping behavior and public API unchanged.
 - First physical source split is complete under `render/app`, `render/camera`, `render/demo`, `render/pipeline`, `render/resource`, `render/runtime`, `render/scene`, and `render/shader`.
+- The old top-level `core/pipeline_data.h` has been moved into `render/pipeline/pipeline_data.h`; `core/` is no longer a separate source folder.
 - Stage timers and counters still live at the stage boundary.
 - `PipelineScratch` is now available to every extracted stage.
 - `DrawCommand` now captures draw mode, index range, VAO, and EBO after current binding validation.
@@ -428,6 +429,7 @@ Tasks:
 - Extract `DrawCommand`. Done for the current `DrawElement` path.
 - Extract `PipelineScratch`.
 - Split physical source folders by responsibility. Done for the current compact renderer layout.
+- Move `pipeline_data.h` out of top-level `core/`. Done; current owner is `render/pipeline`.
 - Extract stages in this order:
   - vertex fetch and vertex shader. Started.
   - clip and cull. Started.

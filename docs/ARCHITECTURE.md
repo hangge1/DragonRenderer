@@ -48,7 +48,7 @@ render/
   app/       Win32 application loop, events, layers, layer stack
   camera/    camera abstractions and perspective camera
   demo/      built-in demo layer
-  pipeline/  draw command, pipeline scratch, clipping, rasterization
+  pipeline/  draw command, pipeline data, pipeline scratch, clipping, rasterization
   resource/  buffer, vertex array, texture, image, framebuffer
   runtime/   frame statistics and scoped timing
   scene/     model and mesh loading/submission
@@ -56,6 +56,8 @@ render/
 ```
 
 The current include style still uses short project headers such as `renderer.h`, `clip_tool.h`, and `shader/default_shader.h`. CMake exposes each module directory through `target_include_directories` so this first physical split does not force broad include churn.
+
+`pipeline_data.h` used to live in a top-level `core/` folder. It is now owned by `render/pipeline/` because the types inside it are render-pipeline-facing contracts rather than a standalone engine core.
 
 ## Frame Lifecycle
 

@@ -39,9 +39,6 @@ project(DragonRenderer
     LANGUAGES CXX
 )
 
-include_directories(${CMAKE_SOURCE_DIR}/core)
-
-
 # 递归拷贝assets目录到bin目录
 set(SOURCE_DIR ${CMAKE_SOURCE_DIR}/assets)
 set(DEST_DIR ${BIN_DIR})
