@@ -238,3 +238,44 @@ Follow-up:
 - Move clip-stage internal ping-pong buffers into `PipelineScratch`.
 - Inspect NDC/perspective division and raster triangle interpolation next.
 - Start carving `Renderer::DrawElement` into named pipeline-stage functions once scratch ownership is stable.
+
+## 2026-07-08 - Clip Scratch Ownership Cleanup
+
+Change:
+
+- Added clip-stage work buffers to `PipelineScratch`.
+- Added a `ClipTool::Clip` overload that accepts caller-owned work buffers.
+- Updated `Renderer::DrawElement` to pass `PipelineScratch::clip_work_a` and `PipelineScratch::clip_work_b` into clipping.
+- Cached inside/outside checks inside `TriangleClip` and `LineClip`.
+- Read EBO indices as `uint32_t` values directly in `VertexShaderApply` instead of copying each index with `memcpy`.
+
+Observation:
+
+This pass is primarily an ownership and pipeline-boundary cleanup. The benchmark stays in the same general range as the previous scratch-buffer pass, but the single-run numbers are noisy enough that this entry should not be read as a material performance win.
+
+Latest 600-frame Release benchmark sample:
+
+```text
+Frames: 600
+Average frame: 7.19383 ms
+Average update/render/present: 0.000702667 / 5.82965 / 0.909178 ms
+Average pipeline vertex/clip/ndc/cull/viewport/raster/fragment-output: 1.43753 / 1.11549 / 1.03933 / 6.53333e-05 / 0.124464 / 1.44754 / 0.659463 ms
+Average draw calls: 1
+Average input triangles: 11938
+Average rasterized fragments: 5639
+```
+
+Verification:
+
+- `cmake --build --preset x64-Windows-Build-Debug`: passed with 0 warnings and 0 errors.
+- `ctest --preset x64-Windows-Test-Debug`: 3/3 tests passed.
+- `cmake --build --preset x64-Windows-Build-Release`: passed.
+- `ctest --preset x64-Windows-Test-Release`: passed.
+- `.\build\Release\bin\DragonRenderer.exe --benchmark 120`: completed and exited.
+- `.\build\Release\bin\DragonRenderer.exe --benchmark 600`: completed and exited.
+
+Follow-up:
+
+- Avoid claiming raster-stage wins until a raster unit test or image comparison exists.
+- Start extracting `DrawElement` into named stage methods without changing behavior.
+- Add a deterministic render-output smoke test before deeper raster changes.

@@ -4,6 +4,14 @@
 
 void ClipTool::Clip(uint32_t draw_mode, const std::vector<VsOutput>& input_primitive, std::vector<VsOutput>& output)
 {
+    std::vector<VsOutput> clip_buffer_a;
+    std::vector<VsOutput> clip_buffer_b;
+    Clip(draw_mode, input_primitive, output, clip_buffer_a, clip_buffer_b);
+}
+
+void ClipTool::Clip(uint32_t draw_mode, const std::vector<VsOutput>& input_primitive, std::vector<VsOutput>& output,
+    std::vector<VsOutput>& clip_buffer_a, std::vector<VsOutput>& clip_buffer_b)
+{
     static constexpr std::array<glm::vec4, 7> clip_planes =
     {
         glm::vec4{0, 0, 0, 1},
@@ -20,8 +28,6 @@ void ClipTool::Clip(uint32_t draw_mode, const std::vector<VsOutput>& input_primi
 
     if(draw_mode == DRAW_TRIANGLES)
     {
-        std::vector<VsOutput> clip_buffer_a;
-        std::vector<VsOutput> clip_buffer_b;
         clip_buffer_a.reserve(12);
         clip_buffer_b.reserve(12);
 
@@ -67,8 +73,6 @@ void ClipTool::Clip(uint32_t draw_mode, const std::vector<VsOutput>& input_primi
     }
     else if(draw_mode == DRAW_LINES)
     {
-        std::vector<VsOutput> clip_buffer_a;
-        std::vector<VsOutput> clip_buffer_b;
         clip_buffer_a.reserve(2);
         clip_buffer_b.reserve(2);
 
@@ -141,10 +145,12 @@ void ClipTool::TriangleClip(const glm::vec4& clip_plane, const std::vector<VsOut
     {
         const auto& last_vertex = input[i];
         const auto& current_vertex = input[(i + 1) % input.size()];
+        const bool last_inside = IsInSide(last_vertex, clip_plane);
+        const bool current_inside = IsInSide(current_vertex, clip_plane);
 
-        if(IsInSide(last_vertex, clip_plane))
+        if(last_inside)
         {
-            if(IsInSide(current_vertex, clip_plane))
+            if(current_inside)
             {
                 output.emplace_back(current_vertex);
             }
@@ -155,7 +161,7 @@ void ClipTool::TriangleClip(const glm::vec4& clip_plane, const std::vector<VsOut
         }
         else
         {
-            if(IsInSide(current_vertex, clip_plane))
+            if(current_inside)
             {
                 output.emplace_back(Intersect(current_vertex, last_vertex, clip_plane));
                 output.emplace_back(current_vertex);
@@ -176,10 +182,12 @@ void ClipTool::LineClip(const glm::vec4& clip_plane, const std::vector<VsOutput>
 
     const auto& last_vertex = input[0];
     const auto& current_vertex = input[1];
+    const bool last_inside = IsInSide(last_vertex, clip_plane);
+    const bool current_inside = IsInSide(current_vertex, clip_plane);
 
-    if(IsInSide(last_vertex, clip_plane))
+    if(last_inside)
     {
-        if(IsInSide(current_vertex, clip_plane))
+        if(current_inside)
         {
             output.emplace_back(last_vertex);
             output.emplace_back(current_vertex);
@@ -192,7 +200,7 @@ void ClipTool::LineClip(const glm::vec4& clip_plane, const std::vector<VsOutput>
     }
     else
     {
-        if(IsInSide(current_vertex, clip_plane))
+        if(current_inside)
         {
             output.emplace_back(Intersect(current_vertex, last_vertex, clip_plane));
             output.emplace_back(current_vertex);

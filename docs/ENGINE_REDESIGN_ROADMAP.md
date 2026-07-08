@@ -317,6 +317,7 @@ Status:
 - Pipeline stage timing now measures vertex, clip, NDC, cull, viewport, raster, and fragment/output stages.
 - First measured hot-path optimization reduced clip time from 5.9411 ms to 1.29716 ms by reusing clip-stage buffers.
 - `PipelineScratch` now owns reusable vertex, clip, cull, and raster stage buffers at the renderer level.
+- Clip-stage internal work buffers now also live behind `PipelineScratch`.
 - Baseline entries should be recorded in [PERFORMANCE_LOG.md](PERFORMANCE_LOG.md).
 
 Tasks:
@@ -329,6 +330,7 @@ Tasks:
 - Add a `--benchmark N` or `--smoke N` mode that runs N frames and exits. Done.
 - Start removing hot-path temporary allocations where profiling shows clear wins. Started with `ClipTool`.
 - Introduce named per-draw scratch storage. Started with `PipelineScratch`.
+- Move clip-stage scratch ownership out of `ClipTool`. Done.
 
 Definition of Done:
 
@@ -546,7 +548,7 @@ This creates the scoreboard. Without the scoreboard, the engine cannot be improv
 
 Current next task after the scoreboard:
 
-1. Move clip-stage internal ping-pong buffers behind `PipelineScratch`.
-2. Inspect NDC/perspective division and raster triangle interpolation.
-3. Start carving `Renderer::DrawElement` into named pipeline-stage functions.
+1. Start carving `Renderer::DrawElement` into named pipeline-stage functions.
+2. Add a deterministic render-output smoke test before deeper raster changes.
+3. Inspect NDC/perspective division with behavior-preserving tests.
 4. Record another before/after benchmark before introducing tile rasterization.

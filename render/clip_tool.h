@@ -10,6 +10,8 @@ class ClipTool
 {
 public:
     static void Clip(uint32_t draw_mode, const std::vector<VsOutput>& input_primitive, std::vector<VsOutput>& output);
+    static void Clip(uint32_t draw_mode, const std::vector<VsOutput>& input_primitive, std::vector<VsOutput>& output,
+        std::vector<VsOutput>& clip_buffer_a, std::vector<VsOutput>& clip_buffer_b);
 
     // Returns true when the face should be culled.
     static bool CullFace(uint32_t front_face_link_style, uint32_t cull_which_face, const VsOutput& p1, const VsOutput& p2, const VsOutput& p3);

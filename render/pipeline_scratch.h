@@ -11,6 +11,8 @@ struct PipelineScratch
     std::vector<VsOutput> clip_outputs;
     std::vector<VsOutput> cull_outputs;
     std::vector<VsOutput> raster_outputs;
+    std::vector<VsOutput> clip_work_a;
+    std::vector<VsOutput> clip_work_b;
 
     void ResetForDraw(size_t vertex_count_hint)
     {
@@ -18,11 +20,15 @@ struct PipelineScratch
         clip_outputs.clear();
         cull_outputs.clear();
         raster_outputs.clear();
+        clip_work_a.clear();
+        clip_work_b.clear();
 
         vertex_outputs.reserve(vertex_count_hint);
         clip_outputs.reserve(vertex_count_hint);
         cull_outputs.reserve(vertex_count_hint);
         raster_outputs.reserve(vertex_count_hint);
+        clip_work_a.reserve(12);
+        clip_work_b.reserve(12);
     }
 };
 

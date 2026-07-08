@@ -366,6 +366,8 @@ void Renderer::DrawElement(DRAW_MODE drawMode, uint32_t first, uint32_t count)
     auto& clip_outputs = pipeline_scratch_.clip_outputs;
     auto& cull_outputs = pipeline_scratch_.cull_outputs;
     auto& raster_outputs = pipeline_scratch_.raster_outputs;
+    auto& clip_work_a = pipeline_scratch_.clip_work_a;
+    auto& clip_work_b = pipeline_scratch_.clip_work_b;
 
     //3 执行VertexShader
     //按照ebo的index顺序，处理顶点，依次通过顶点着色器
@@ -382,7 +384,7 @@ void Renderer::DrawElement(DRAW_MODE drawMode, uint32_t first, uint32_t count)
     //4 Clip剪裁
     {
         ScopedTimer stage_timer(frame_stats_.clip_stage_ms);
-        ClipTool::Clip(drawMode, vs_outputs, clip_outputs);
+        ClipTool::Clip(drawMode, vs_outputs, clip_outputs, clip_work_a, clip_work_b);
     }
 
     if(clip_outputs.empty())
@@ -411,7 +413,7 @@ void Renderer::DrawElement(DRAW_MODE drawMode, uint32_t first, uint32_t count)
         ScopedTimer stage_timer(frame_stats_.cull_stage_ms);
         if(drawMode == DRAW_TRIANGLES && enable_cull_face_)
         {
-            for (int i = 0; i < clip_outputs.size() - 2; i += 3) 
+            for(size_t i = 0; i + 2 < clip_outputs.size(); i += 3)
             {
 			    if (!ClipTool::CullFace(front_face_link_style_, cull_which_face_, clip_outputs[i], clip_outputs[i + 1], clip_outputs[i + 2])) {
 				    auto start = clip_outputs.begin() + i;
@@ -526,19 +528,15 @@ void Renderer::VertexShaderApply(
 		uint32_t count)
 {
     const auto& binding_map = vao->GetVertexAttrDescMap();
-	const uint8_t* indicesData = ebo->GetBuffer();
+	const uint32_t* indices_data = reinterpret_cast<const uint32_t*>(ebo->GetBuffer());
 
     vsOutputs.clear();
     vsOutputs.reserve(count);
 
-	uint32_t index = 0;
-	for (uint32_t i = first; i < first + count; ++i) {
-		//获取Ebo中第i个index
-		size_t indicesOffset = i * sizeof(uint32_t);
-		memcpy(&index, indicesData + indicesOffset, sizeof(uint32_t));
-
-		VsOutput output = current_shader_->VertexShader(binding_map, buffer_map_, index);
-		vsOutputs.push_back(output);
+	for(uint32_t i = first; i < first + count; ++i)
+    {
+		const uint32_t index = indices_data[i];
+		vsOutputs.emplace_back(current_shader_->VertexShader(binding_map, buffer_map_, index));
 	}
 }
 
