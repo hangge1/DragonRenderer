@@ -23,6 +23,11 @@ Main problems:
 | Observability | FPS is visible now, but there is no per-stage timing, draw-call count, triangle count, pixel count, or allocation count. | Performance work would be guesswork. |
 | Testability | Tests cover third-party basics, but not render state, resources, pipeline stages, or frame output. | Refactoring the pipeline has weak safety rails. |
 
+Current testability note:
+
+- `render_output_smoke` now covers one deterministic offscreen draw through `Renderer::DrawElement`.
+- It checks framebuffer checksum, red pixel count, draw call count, input triangle count, and rasterized fragment count.
+
 ## 2. North Star Architecture
 
 The engine should be split into stable layers. Each layer can depend downward, but not upward.
@@ -406,6 +411,7 @@ Status:
 - Started. `Renderer::DrawElement` now delegates to named private stage methods while keeping behavior and public API unchanged.
 - Stage timers and counters still live at the stage boundary.
 - `PipelineScratch` is now available to every extracted stage.
+- `render_output_smoke` now provides a deterministic offscreen output guard before deeper raster or NDC changes.
 
 Tasks:
 
@@ -417,7 +423,7 @@ Tasks:
   - viewport transform. Started.
   - raster. Started.
   - fragment and output merge. Started.
-- Add unit tests for each stage.
+- Add unit tests for each stage. Started with `render_output_smoke`.
 
 Definition of Done:
 
@@ -556,7 +562,7 @@ This creates the scoreboard. Without the scoreboard, the engine cannot be improv
 
 Current next task after the scoreboard:
 
-1. Add a deterministic render-output smoke test before deeper raster changes.
-2. Inspect NDC/perspective division with behavior-preserving tests.
-3. Extract lightweight `DrawCommand` and command validation once tests exist.
+1. Inspect NDC/perspective division with behavior-preserving tests.
+2. Extract lightweight `DrawCommand` and command validation once tests exist.
+3. Add narrow tests for clip and cull edge cases.
 4. Record another before/after benchmark before introducing tile rasterization.

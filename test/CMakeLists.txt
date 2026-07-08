@@ -45,3 +45,13 @@ add_test(NAME thirdpart_lib_assimp COMMAND Test_Assimp)
 set_tests_properties(thirdpart_lib_assimp PROPERTIES PASS_REGULAR_EXPRESSION "thirdparts library assimp Pass")
 set_tests_properties(thirdpart_lib_assimp PROPERTIES WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 # =======================================================================================
+
+# =======================================================================================
+# render_output_smoke_test.cc
+
+add_executable(Test_RenderOutputSmoke "render_output_smoke_test.cc")
+target_link_libraries(Test_RenderOutputSmoke PRIVATE Render)
+
+add_test(NAME render_output_smoke COMMAND Test_RenderOutputSmoke)
+set_tests_properties(render_output_smoke PROPERTIES PASS_REGULAR_EXPRESSION "render output smoke Pass")
+# =======================================================================================
