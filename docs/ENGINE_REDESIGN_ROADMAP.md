@@ -27,6 +27,7 @@ Current testability note:
 
 - `render_output_smoke` now covers one deterministic offscreen draw through `Renderer::DrawElement`.
 - It checks framebuffer checksum, red pixel count, draw call count, input triangle count, and rasterized fragment count.
+- `clip_tool` now covers clip-volume acceptance/rejection, clipped line/triangle output, and cull-face semantics.
 
 ## 2. North Star Architecture
 
@@ -412,6 +413,7 @@ Status:
 - Stage timers and counters still live at the stage boundary.
 - `PipelineScratch` is now available to every extracted stage.
 - `render_output_smoke` now provides a deterministic offscreen output guard before deeper raster or NDC changes.
+- `clip_tool` now provides narrow coverage for clip and cull edge behavior.
 
 Tasks:
 
@@ -423,7 +425,7 @@ Tasks:
   - viewport transform. Started.
   - raster. Started.
   - fragment and output merge. Started.
-- Add unit tests for each stage. Started with `render_output_smoke`.
+- Add unit tests for each stage. Started with `render_output_smoke` and `clip_tool`.
 
 Definition of Done:
 
@@ -564,5 +566,5 @@ Current next task after the scoreboard:
 
 1. Inspect NDC/perspective division with behavior-preserving tests.
 2. Extract lightweight `DrawCommand` and command validation once tests exist.
-3. Add narrow tests for clip and cull edge cases.
+3. Add narrow tests for depth/output merge behavior.
 4. Record another before/after benchmark before introducing tile rasterization.

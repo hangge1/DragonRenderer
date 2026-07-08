@@ -191,6 +191,7 @@ flowchart TB
 - Keep the demo running after every architecture step.
 - Add tests before changing rasterization, clipping, or depth behavior.
 - `render_output_smoke` draws a deterministic 16x16 offscreen triangle and checks pixel count, framebuffer checksum, draw calls, input triangles, and rasterized fragments.
+- `clip_tool` covers clip-volume acceptance/rejection, line and triangle clipping, and front/back face culling semantics.
 - Keep performance claims tied to `docs/PERFORMANCE_LOG.md`.
 - Prefer extracting named boundaries before moving files.
 - Avoid introducing a broad abstraction until a stage has a stable contract.

@@ -55,3 +55,13 @@ target_link_libraries(Test_RenderOutputSmoke PRIVATE Render)
 add_test(NAME render_output_smoke COMMAND Test_RenderOutputSmoke)
 set_tests_properties(render_output_smoke PROPERTIES PASS_REGULAR_EXPRESSION "render output smoke Pass")
 # =======================================================================================
+
+# =======================================================================================
+# clip_tool_test.cc
+
+add_executable(Test_ClipTool "clip_tool_test.cc")
+target_link_libraries(Test_ClipTool PRIVATE Render)
+
+add_test(NAME clip_tool COMMAND Test_ClipTool)
+set_tests_properties(clip_tool PROPERTIES PASS_REGULAR_EXPRESSION "clip tool test Pass")
+# =======================================================================================
