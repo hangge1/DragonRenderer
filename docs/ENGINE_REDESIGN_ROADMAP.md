@@ -4,7 +4,7 @@ This document is the long-term engineering roadmap for turning DragonRenderer fr
 
 The goal is not to make the code look abstract. The goal is to make every subsystem easier to replace, test, profile, and optimize without breaking the rest of the renderer.
 
-For the current architecture diagrams and render data flow, see [ARCHITECTURE.md](ARCHITECTURE.md).
+For the current architecture diagrams and render data flow, see [ARCHITECTURE.md](ARCHITECTURE.md). For documentation ownership rules, see [README.md](README.md).
 
 ## 1. Current Engineering Diagnosis
 

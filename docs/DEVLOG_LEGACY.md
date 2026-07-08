@@ -249,3 +249,10 @@
 
 
 
+# Legacy Development Log
+
+This file is an archive of the old root-level `DEVLOG.md`.
+
+It is kept for historical context only. New project-management decisions should go to [PROJECT_LOG.md](PROJECT_LOG.md), measurable performance records should go to [PERFORMANCE_LOG.md](PERFORMANCE_LOG.md), and architecture facts should go to [ARCHITECTURE.md](ARCHITECTURE.md).
+
+Note: parts of the legacy content below were already mojibake before this archive move. The content is preserved instead of rewritten so historical material is not silently altered.

@@ -237,5 +237,7 @@ flowchart TB
 
 ## Related Documents
 
+- [Documentation index and governance](README.md)
 - [Engine redesign roadmap](ENGINE_REDESIGN_ROADMAP.md)
 - [Performance log](PERFORMANCE_LOG.md)
+- [Project log](PROJECT_LOG.md)
