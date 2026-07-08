@@ -13,6 +13,7 @@
 #include "shader.h"
 #include "texture.h"
 #include "vertex_array_object.h"
+#include "pipeline_scratch.h"
 #include "runtime/frame_stats.h"
 
 class FrameBuffer;
@@ -153,6 +154,7 @@ private:
     //颜色混合相关
     bool enable_blend_ { false };
 
+    PipelineScratch pipeline_scratch_;
     FrameStats frame_stats_;
 };
 

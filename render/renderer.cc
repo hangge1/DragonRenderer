@@ -343,7 +343,6 @@ void Renderer::DrawElement(DRAW_MODE drawMode, uint32_t first, uint32_t count)
     }
 
     VertexArrayObject* vao = vao_iter->second;
-    auto& binding_map = vao->GetVertexAttrDescMap();
 
     //2 获取ebo
     auto ebo_iter = buffer_map_.find(current_ebo_);
@@ -361,9 +360,15 @@ void Renderer::DrawElement(DRAW_MODE drawMode, uint32_t first, uint32_t count)
         frame_stats_.input_triangles += count / 3;
     }
 
+    pipeline_scratch_.ResetForDraw(count);
+
+    auto& vs_outputs = pipeline_scratch_.vertex_outputs;
+    auto& clip_outputs = pipeline_scratch_.clip_outputs;
+    auto& cull_outputs = pipeline_scratch_.cull_outputs;
+    auto& raster_outputs = pipeline_scratch_.raster_outputs;
+
     //3 执行VertexShader
     //按照ebo的index顺序，处理顶点，依次通过顶点着色器
-    std::vector<VsOutput> vs_outputs {};
     {
         ScopedTimer stage_timer(frame_stats_.vertex_stage_ms);
 	    VertexShaderApply(vs_outputs, vao, ebo, first, count);
@@ -375,7 +380,6 @@ void Renderer::DrawElement(DRAW_MODE drawMode, uint32_t first, uint32_t count)
     }
 
     //4 Clip剪裁
-    std::vector<VsOutput> clip_outputs {};
     {
         ScopedTimer stage_timer(frame_stats_.clip_stage_ms);
         ClipTool::Clip(drawMode, vs_outputs, clip_outputs);
@@ -402,7 +406,7 @@ void Renderer::DrawElement(DRAW_MODE drawMode, uint32_t first, uint32_t count)
     }
 
     //6 背面剔除
-    std::vector<VsOutput> cull_outputs {};
+    std::vector<VsOutput>* post_cull_outputs = &clip_outputs;
     {
         ScopedTimer stage_timer(frame_stats_.cull_stage_ms);
         if(drawMode == DRAW_TRIANGLES && enable_cull_face_)
@@ -415,10 +419,7 @@ void Renderer::DrawElement(DRAW_MODE drawMode, uint32_t first, uint32_t count)
 				    cull_outputs.insert(cull_outputs.end(), start, end);
 			    }
 		    }
-        }
-        else
-        {
-            cull_outputs = clip_outputs;
+            post_cull_outputs = &cull_outputs;
         }
     }
 
@@ -428,7 +429,7 @@ void Renderer::DrawElement(DRAW_MODE drawMode, uint32_t first, uint32_t count)
     //转化坐标到屏幕空间
     {
         ScopedTimer stage_timer(frame_stats_.viewport_stage_ms);
-        for (auto& output : cull_outputs) 
+        for (auto& output : *post_cull_outputs)
         {
 		    ScreenMapping(output);
 	    }
@@ -437,10 +438,9 @@ void Renderer::DrawElement(DRAW_MODE drawMode, uint32_t first, uint32_t count)
 
     //8 光栅化
     //离散出所有Fragment
-    std::vector<VsOutput> raster_outputs;
     {
         ScopedTimer stage_timer(frame_stats_.raster_stage_ms);
-        raster_outputs = RasterTool::Rasterize(drawMode, cull_outputs);
+        RasterTool::Rasterize(drawMode, *post_cull_outputs, raster_outputs);
     }
     frame_stats_.rasterized_fragments += static_cast<uint32_t>(raster_outputs.size());
 
@@ -525,8 +525,11 @@ void Renderer::VertexShaderApply(
 		uint32_t first,
 		uint32_t count)
 {
-    auto binding_map = vao->GetVertexAttrDescMap();
-	uint8_t* indicesData = ebo->GetBuffer();
+    const auto& binding_map = vao->GetVertexAttrDescMap();
+	const uint8_t* indicesData = ebo->GetBuffer();
+
+    vsOutputs.clear();
+    vsOutputs.reserve(count);
 
 	uint32_t index = 0;
 	for (uint32_t i = first; i < first + count; ++i) {

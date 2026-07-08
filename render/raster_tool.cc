@@ -37,26 +37,25 @@ bool IsPointInTriangle(const VsOutput& p1, const VsOutput& p2, const VsOutput& p
     return false;
 }
 
-std::vector<VsOutput> RasterTool::Rasterize(uint32_t draw_mode, std::vector<VsOutput>& inputs)
+void RasterTool::Rasterize(uint32_t draw_mode, const std::vector<VsOutput>& inputs, std::vector<VsOutput>& output)
 {
-    std::vector<VsOutput> results;
+    output.clear();
+    output.reserve(inputs.size());
 
 	if (draw_mode == DRAW_LINES) 
     {
 		for (uint32_t i = 0; i < inputs.size(); i += 2) 
         {
-			RasterizeLine(results, inputs[i], inputs[i + 1]);
+			RasterizeLine(output, inputs[i], inputs[i + 1]);
 		}
 	}
 	else if (draw_mode == DRAW_TRIANGLES) 
     {
 		for (uint32_t i = 0; i < inputs.size(); i += 3) 
         {
-			RasterizeTriangle(results, inputs[i], inputs[i + 1], inputs[i + 2]);
+			RasterizeTriangle(output, inputs[i], inputs[i + 1], inputs[i + 2]);
 		}
 	}
-
-    return results;
 }
 
 void RasterTool::RasterizeLine(std::vector<VsOutput>& result, const VsOutput& p1, const VsOutput& p2)

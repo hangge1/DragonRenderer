@@ -20,7 +20,7 @@ public:
 	void BindVertexAttribute(uint32_t vertexAttrId, uint32_t vbo_id, size_t item_size, size_t stride, size_t offset);
 	void BindVertexAttribute(uint32_t vertexAttrId, VertexAttrDescription desc);
 
-	std::map<uint32_t, VertexAttrDescription> GetVertexAttrDescMap() const;
+	const std::map<uint32_t, VertexAttrDescription>& GetVertexAttrDescMap() const;
 
 	//测试使用
     void Print() const;

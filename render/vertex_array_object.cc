@@ -24,7 +24,7 @@ void VertexArrayObject::BindVertexAttribute(uint32_t vertexAttrId, VertexAttrDes
     BindVertexAttribute(vertexAttrId, desc.vbo_id, desc.item_size, desc.stride, desc.offset);
 }
 
-std::map<uint32_t, VertexAttrDescription> VertexArrayObject::GetVertexAttrDescMap() const
+const std::map<uint32_t, VertexAttrDescription>& VertexArrayObject::GetVertexAttrDescMap() const
 {
     return binding_map_;
 }

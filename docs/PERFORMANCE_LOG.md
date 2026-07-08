@@ -188,3 +188,53 @@ Follow-up:
 - Inspect `VertexShaderApply` for repeated output allocation and vertex attribute copy cost.
 - Introduce a named `PipelineScratch` object before moving more hot-stage buffers out of `Renderer::DrawElement`.
 - Keep comparing against this entry until the next stage-timed baseline is recorded.
+
+## 2026-07-08 - Pipeline Scratch and Vertex Input Reuse
+
+Change:
+
+- Added `PipelineScratch` as a named owner for per-draw stage buffers.
+- Reused vertex, clip, cull, and raster output vectors across draw calls.
+- Changed `VertexArrayObject::GetVertexAttrDescMap` to return a const reference instead of copying the binding map.
+- Changed `RasterTool::Rasterize` to write into a caller-provided output buffer.
+- Avoided copying clip output into cull output when culling is disabled.
+
+Before:
+
+```text
+Frames: 120
+Average frame: 9.55003 ms
+Average update/render/present: 0.00100333 / 8.22623 / 0.823923 ms
+Average pipeline vertex/clip/ndc/cull/viewport/raster/fragment-output: 2.70228 / 1.29716 / 1.0095 / 0.243705 / 0.170273 / 1.84246 / 0.747304 ms
+```
+
+After:
+
+```text
+Frames: 120
+Average frame: 7.07221 ms
+Average update/render/present: 0.00087 / 5.4372 / 1.16541 ms
+Average pipeline vertex/clip/ndc/cull/viewport/raster/fragment-output: 1.42027 / 1.12547 / 1.04932 / 5.25e-05 / 0.124387 / 1.02837 / 0.683267 ms
+```
+
+Interpretation:
+
+- Average frame time dropped from 9.55003 ms to 7.07221 ms.
+- Average render time dropped from 8.22623 ms to 5.4372 ms.
+- Vertex stage time dropped from 2.70228 ms to 1.42027 ms.
+- Raster stage time dropped from 1.84246 ms to 1.02837 ms because the raster output vector is now reused instead of returned by value.
+- The hot path now has an explicit scratch-memory boundary that can be moved into a future `SoftwarePipeline`.
+
+Verification:
+
+- `cmake --build --preset x64-Windows-Build-Debug`: passed with 0 warnings and 0 errors.
+- `ctest --preset x64-Windows-Test-Debug`: 3/3 tests passed.
+- `cmake --build --preset x64-Windows-Build-Release`: passed.
+- `ctest --preset x64-Windows-Test-Release`: passed.
+- `.\build\Release\bin\DragonRenderer.exe --benchmark 120`: completed and exited.
+
+Follow-up:
+
+- Move clip-stage internal ping-pong buffers into `PipelineScratch`.
+- Inspect NDC/perspective division and raster triangle interpolation next.
+- Start carving `Renderer::DrawElement` into named pipeline-stage functions once scratch ownership is stable.

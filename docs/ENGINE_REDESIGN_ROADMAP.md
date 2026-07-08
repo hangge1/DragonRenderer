@@ -316,6 +316,7 @@ Status:
 - `--smoke N` and `--benchmark N` can run fixed-frame local verification and exit automatically.
 - Pipeline stage timing now measures vertex, clip, NDC, cull, viewport, raster, and fragment/output stages.
 - First measured hot-path optimization reduced clip time from 5.9411 ms to 1.29716 ms by reusing clip-stage buffers.
+- `PipelineScratch` now owns reusable vertex, clip, cull, and raster stage buffers at the renderer level.
 - Baseline entries should be recorded in [PERFORMANCE_LOG.md](PERFORMANCE_LOG.md).
 
 Tasks:
@@ -327,6 +328,7 @@ Tasks:
 - Split `render_ms` into coarse pipeline-stage timings. Done.
 - Add a `--benchmark N` or `--smoke N` mode that runs N frames and exits. Done.
 - Start removing hot-path temporary allocations where profiling shows clear wins. Started with `ClipTool`.
+- Introduce named per-draw scratch storage. Started with `PipelineScratch`.
 
 Definition of Done:
 
@@ -441,8 +443,8 @@ Improve interactivity based on measured hot spots.
 
 Tasks:
 
-- Replace per-draw temporary vectors with scratch buffers.
-- Pre-reserve stage buffers.
+- Replace per-draw temporary vectors with scratch buffers. Started.
+- Pre-reserve stage buffers. Started.
 - Add bounding-box rasterization limits.
 - Add tile-based raster path.
 - Add optional parallel tile execution.
@@ -544,7 +546,7 @@ This creates the scoreboard. Without the scoreboard, the engine cannot be improv
 
 Current next task after the scoreboard:
 
-1. Inspect `VertexShaderApply` allocation and vertex attribute copy behavior.
-2. Introduce `PipelineScratch` as a named owner for reusable stage buffers.
-3. Move clip buffers behind that scratch object after the interface is clear.
-4. Record another before/after benchmark before touching rasterization.
+1. Move clip-stage internal ping-pong buffers behind `PipelineScratch`.
+2. Inspect NDC/perspective division and raster triangle interpolation.
+3. Start carving `Renderer::DrawElement` into named pipeline-stage functions.
+4. Record another before/after benchmark before introducing tile rasterization.
