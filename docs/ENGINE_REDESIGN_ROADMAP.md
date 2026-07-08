@@ -413,6 +413,7 @@ Turn `DrawElement` into orchestration over named stages.
 Status:
 
 - Started. `Renderer::DrawElement` now delegates to named private stage methods while keeping behavior and public API unchanged.
+- First physical source split is complete under `render/app`, `render/camera`, `render/demo`, `render/pipeline`, `render/resource`, `render/runtime`, `render/scene`, and `render/shader`.
 - Stage timers and counters still live at the stage boundary.
 - `PipelineScratch` is now available to every extracted stage.
 - `DrawCommand` now captures draw mode, index range, VAO, and EBO after current binding validation.
@@ -426,6 +427,7 @@ Tasks:
 
 - Extract `DrawCommand`. Done for the current `DrawElement` path.
 - Extract `PipelineScratch`.
+- Split physical source folders by responsibility. Done for the current compact renderer layout.
 - Extract stages in this order:
   - vertex fetch and vertex shader. Started.
   - clip and cull. Started.
@@ -572,4 +574,5 @@ This creates the scoreboard. Without the scoreboard, the engine cannot be improv
 Current next task after the scoreboard:
 
 1. Move growing command validation rules into a small validation helper if they keep expanding.
-2. Record another before/after benchmark before introducing tile rasterization.
+2. Continue extracting pipeline/resource helpers inside the new physical folders.
+3. Record another before/after benchmark before introducing tile rasterization.

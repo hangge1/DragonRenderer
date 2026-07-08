@@ -11,22 +11,24 @@ flowchart TB
     Entry["entry_point.cc"]
     App["Application<br/>Win32 window, message loop, frame loop, benchmark mode"]
     Renderer["Renderer<br/>OpenGL-like API, render state, resources, draw execution"]
-    Layers["LayerStack / TestLayer<br/>demo setup and update"]
-    Camera["PerspectiveCamera<br/>view/projection control"]
-    Model["Model / Mesh<br/>Assimp loading and draw submission"]
-    Shader["Shader implementations<br/>Default / Texture / Lambert"]
-    Resources["Render resources<br/>BufferObject, VertexArrayObject, Texture"]
-    Pipeline["Software pipeline stages<br/>vertex, clip, NDC, cull, viewport, raster, fragment/output"]
+    AppLayer["app<br/>events, layer stack, frame loop"]
+    Demo["demo<br/>TestLayer setup and update"]
+    Camera["camera<br/>PerspectiveCamera view/projection control"]
+    Model["scene<br/>Model / Mesh Assimp loading and draw submission"]
+    Shader["shader<br/>Default / Texture / Lambert"]
+    Resources["resource<br/>BufferObject, VertexArrayObject, Texture, FrameBuffer"]
+    Pipeline["pipeline<br/>DrawCommand, scratch, clip, raster"]
     FrameBuffer["FrameBuffer<br/>color and depth storage"]
     Present["GDI present<br/>Application::SwapBuffer"]
     Stats["FrameStats<br/>timing and workload counters"]
 
     Entry --> App
     App --> Renderer
-    App --> Layers
-    Layers --> Camera
-    Layers --> Model
-    Layers --> Renderer
+    App --> AppLayer
+    AppLayer --> Demo
+    Demo --> Camera
+    Demo --> Model
+    Demo --> Renderer
     Model --> Renderer
     Renderer --> Resources
     Renderer --> Shader
@@ -36,6 +38,24 @@ flowchart TB
     App --> Stats
     FrameBuffer --> Present
 ```
+
+## Physical Source Layout
+
+The `render` library is physically split by responsibility while keeping the public build target as `Render`.
+
+```text
+render/
+  app/       Win32 application loop, events, layers, layer stack
+  camera/    camera abstractions and perspective camera
+  demo/      built-in demo layer
+  pipeline/  draw command, pipeline scratch, clipping, rasterization
+  resource/  buffer, vertex array, texture, image, framebuffer
+  runtime/   frame statistics and scoped timing
+  scene/     model and mesh loading/submission
+  shader/    shader base class and built-in shader implementations
+```
+
+The current include style still uses short project headers such as `renderer.h`, `clip_tool.h`, and `shader/default_shader.h`. CMake exposes each module directory through `target_include_directories` so this first physical split does not force broad include churn.
 
 ## Frame Lifecycle
 
