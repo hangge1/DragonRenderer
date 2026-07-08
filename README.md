@@ -30,7 +30,7 @@ assets/        运行时资源
 thirdparts/    第三方依赖
 ```
 
-更详细的当前模块边界和运行流程见 [ARCHITECTURE.md](ARCHITECTURE.md)。后续引擎化重构、管线拆分和性能优化路线见 [docs/ENGINE_REDESIGN_ROADMAP.md](docs/ENGINE_REDESIGN_ROADMAP.md)。
+更详细的当前模块边界和运行流程见 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)。后续引擎化重构、管线拆分和性能优化路线见 [docs/ENGINE_REDESIGN_ROADMAP.md](docs/ENGINE_REDESIGN_ROADMAP.md)。
 
 ## 环境要求
 

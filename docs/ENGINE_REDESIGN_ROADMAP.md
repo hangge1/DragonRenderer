@@ -4,6 +4,8 @@ This document is the long-term engineering roadmap for turning DragonRenderer fr
 
 The goal is not to make the code look abstract. The goal is to make every subsystem easier to replace, test, profile, and optimize without breaking the rest of the renderer.
 
+For the current architecture diagrams and render data flow, see [ARCHITECTURE.md](ARCHITECTURE.md).
+
 ## 1. Current Engineering Diagnosis
 
 DragonRenderer already has the right learning value: it exposes a software rasterization pipeline, owns a Win32/GDI back buffer, loads models through Assimp, and mimics part of the OpenGL-style API. The current shape is still not good enough as an engine framework.
