@@ -21,7 +21,7 @@ Main problems:
 | Scene/demo boundary | `TestLayer` is still the only default scene path and is wired from `Renderer::InitLayer`. | The framework cannot select, compose, or benchmark demos cleanly. |
 | Performance | The hot path allocates temporary vectors per draw call and processes the whole pipeline serially. | Debug interaction is extremely slow and Release performance has no clear optimization map. |
 | Observability | FPS is visible now, but there is no per-stage timing, draw-call count, triangle count, pixel count, or allocation count. | Performance work would be guesswork. |
-| Testability | Tests now cover deterministic frame output, clip/cull behavior, and depth/output merge, but resource/state and NDC contracts are still partial. | Refactoring the pipeline is safer than before, but command extraction still needs more stage-level safety rails. |
+| Testability | Tests now cover deterministic frame output, clip/cull behavior, NDC/perspective behavior, and depth/output merge, but resource/state contracts are still partial. | Refactoring the pipeline is safer than before, but command extraction still needs more stage-level safety rails. |
 
 Current testability note:
 
@@ -29,6 +29,7 @@ Current testability note:
 - It checks framebuffer checksum, red pixel count, draw call count, input triangle count, and rasterized fragment count.
 - `clip_tool` now covers clip-volume acceptance/rejection, clipped line/triangle output, and cull-face semantics.
 - `depth_output_smoke` now covers overlapping triangles with `DEPTH_LESS`, deterministic output color, framebuffer checksum, raster/shade counts, and depth rejection count.
+- `ndc_perspective_smoke` now covers varied clip-space `w`, deterministic perspective-correct color output, viewport mapping, and raster/shade counts.
 
 ## 2. North Star Architecture
 
@@ -416,6 +417,7 @@ Status:
 - `render_output_smoke` now provides a deterministic offscreen output guard before deeper raster or NDC changes.
 - `clip_tool` now provides narrow coverage for clip and cull edge behavior.
 - `depth_output_smoke` now provides a deterministic output-merge guard for depth testing and framebuffer writes.
+- `ndc_perspective_smoke` now provides a deterministic guard for perspective divide, viewport mapping, and perspective recovery.
 
 Tasks:
 
@@ -427,7 +429,7 @@ Tasks:
   - viewport transform. Started.
   - raster. Started.
   - fragment and output merge. Started.
-- Add unit tests for each stage. Started with `render_output_smoke`, `clip_tool`, and `depth_output_smoke`.
+- Add unit tests for each stage. Started with `render_output_smoke`, `clip_tool`, `depth_output_smoke`, and `ndc_perspective_smoke`.
 
 Definition of Done:
 
@@ -566,7 +568,6 @@ This creates the scoreboard. Without the scoreboard, the engine cannot be improv
 
 Current next task after the scoreboard:
 
-1. Inspect NDC/perspective division with behavior-preserving tests.
-2. Extract lightweight `DrawCommand` and command validation once tests exist.
-3. Add narrow tests for resource/state validation before changing command setup.
-4. Record another before/after benchmark before introducing tile rasterization.
+1. Extract lightweight `DrawCommand` and command validation around current draw inputs.
+2. Add narrow tests for resource/state validation before changing command setup.
+3. Record another before/after benchmark before introducing tile rasterization.

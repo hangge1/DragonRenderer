@@ -75,3 +75,13 @@ target_link_libraries(Test_DepthOutputSmoke PRIVATE Render)
 add_test(NAME depth_output_smoke COMMAND Test_DepthOutputSmoke)
 set_tests_properties(depth_output_smoke PROPERTIES PASS_REGULAR_EXPRESSION "depth output smoke Pass")
 # =======================================================================================
+
+# =======================================================================================
+# ndc_perspective_smoke_test.cc
+
+add_executable(Test_NdcPerspectiveSmoke "ndc_perspective_smoke_test.cc")
+target_link_libraries(Test_NdcPerspectiveSmoke PRIVATE Render)
+
+add_test(NAME ndc_perspective_smoke COMMAND Test_NdcPerspectiveSmoke)
+set_tests_properties(ndc_perspective_smoke PROPERTIES PASS_REGULAR_EXPRESSION "ndc perspective smoke Pass")
+# =======================================================================================
