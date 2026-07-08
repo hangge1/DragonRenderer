@@ -90,6 +90,20 @@ public:
 	void TexParameter(TEXTURE_PARAMETER_TYPE param, uint32_t value);
 
 private:
+    bool ResolveCurrentDrawInputs(VertexArrayObject*& vao, const BufferObject*& ebo) const;
+    void RecordDrawCallStats(DRAW_MODE drawMode, uint32_t count);
+    bool RunVertexStage(std::vector<VsOutput>& vsOutputs, const VertexArrayObject* vao,
+        const BufferObject* ebo, uint32_t first, uint32_t count);
+    bool RunClipStage(DRAW_MODE drawMode, const std::vector<VsOutput>& vsOutputs,
+        std::vector<VsOutput>& clipOutputs);
+    void RunPerspectiveDivideStage(std::vector<VsOutput>& clipOutputs);
+    std::vector<VsOutput>* RunCullStage(DRAW_MODE drawMode, std::vector<VsOutput>& clipOutputs,
+        std::vector<VsOutput>& cullOutputs);
+    void RunViewportStage(std::vector<VsOutput>& postCullOutputs);
+    bool RunRasterStage(DRAW_MODE drawMode, const std::vector<VsOutput>& postCullOutputs,
+        std::vector<VsOutput>& rasterOutputs);
+    void RunFragmentOutputStage(std::vector<VsOutput>& rasterOutputs);
+
     void VertexShaderApply(std::vector<VsOutput>& vsOutputs, const VertexArrayObject* vao,
 		const BufferObject* ebo, uint32_t first, uint32_t count);
 

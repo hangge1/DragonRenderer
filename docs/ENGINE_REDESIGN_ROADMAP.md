@@ -399,16 +399,22 @@ Goal:
 
 Turn `DrawElement` into orchestration over named stages.
 
+Status:
+
+- Started. `Renderer::DrawElement` now delegates to named private stage methods while keeping behavior and public API unchanged.
+- Stage timers and counters still live at the stage boundary.
+- `PipelineScratch` is now available to every extracted stage.
+
 Tasks:
 
 - Extract `DrawCommand`.
 - Extract `PipelineScratch`.
 - Extract stages in this order:
-  - vertex fetch and vertex shader
-  - clip and cull
-  - viewport transform
-  - raster
-  - fragment and output merge
+  - vertex fetch and vertex shader. Started.
+  - clip and cull. Started.
+  - viewport transform. Started.
+  - raster. Started.
+  - fragment and output merge. Started.
 - Add unit tests for each stage.
 
 Definition of Done:
@@ -548,7 +554,7 @@ This creates the scoreboard. Without the scoreboard, the engine cannot be improv
 
 Current next task after the scoreboard:
 
-1. Start carving `Renderer::DrawElement` into named pipeline-stage functions.
-2. Add a deterministic render-output smoke test before deeper raster changes.
-3. Inspect NDC/perspective division with behavior-preserving tests.
+1. Add a deterministic render-output smoke test before deeper raster changes.
+2. Inspect NDC/perspective division with behavior-preserving tests.
+3. Extract lightweight `DrawCommand` and command validation once tests exist.
 4. Record another before/after benchmark before introducing tile rasterization.

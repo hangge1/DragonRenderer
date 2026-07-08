@@ -334,129 +334,173 @@ void Renderer::DrawElement(DRAW_MODE drawMode, uint32_t first, uint32_t count)
         return;
     }
 
-    //1 获取vao
-    auto vao_iter = vao_map_.find(current_vao_);
-    if(vao_iter == vao_map_.end())
+    VertexArrayObject* vao = nullptr;
+    const BufferObject* ebo = nullptr;
+    if(!ResolveCurrentDrawInputs(vao, ebo))
     {
-        std::cout << "Error: current vao is invalid!" << std::endl;
         return;
     }
 
-    VertexArrayObject* vao = vao_iter->second;
-
-    //2 获取ebo
-    auto ebo_iter = buffer_map_.find(current_ebo_);
-    if(ebo_iter == buffer_map_.end())
-    {
-        std::cout << "Error: current ebo is invalid!" << std::endl;
-        return;
-    }
-
-    const BufferObject* ebo = ebo_iter->second;
-
-    frame_stats_.draw_calls++;
-    if(drawMode == DRAW_TRIANGLES)
-    {
-        frame_stats_.input_triangles += count / 3;
-    }
-
+    RecordDrawCallStats(drawMode, count);
     pipeline_scratch_.ResetForDraw(count);
 
     auto& vs_outputs = pipeline_scratch_.vertex_outputs;
     auto& clip_outputs = pipeline_scratch_.clip_outputs;
     auto& cull_outputs = pipeline_scratch_.cull_outputs;
     auto& raster_outputs = pipeline_scratch_.raster_outputs;
-    auto& clip_work_a = pipeline_scratch_.clip_work_a;
-    auto& clip_work_b = pipeline_scratch_.clip_work_b;
 
-    //3 执行VertexShader
-    //按照ebo的index顺序，处理顶点，依次通过顶点着色器
+    if(!RunVertexStage(vs_outputs, vao, ebo, first, count))
+    {
+        return;
+    }
+
+    if(!RunClipStage(drawMode, vs_outputs, clip_outputs))
+    {
+        return;
+    }
+
+    RunPerspectiveDivideStage(clip_outputs);
+
+    std::vector<VsOutput>* post_cull_outputs = RunCullStage(drawMode, clip_outputs, cull_outputs);
+    RunViewportStage(*post_cull_outputs);
+
+    if(!RunRasterStage(drawMode, *post_cull_outputs, raster_outputs))
+    {
+        return;
+    }
+
+    RunFragmentOutputStage(raster_outputs);
+}
+
+bool Renderer::ResolveCurrentDrawInputs(VertexArrayObject*& vao, const BufferObject*& ebo) const
+{
+    auto vao_iter = vao_map_.find(current_vao_);
+    if(vao_iter == vao_map_.end())
+    {
+        std::cout << "Error: current vao is invalid!" << std::endl;
+        return false;
+    }
+
+    vao = vao_iter->second;
+
+    auto ebo_iter = buffer_map_.find(current_ebo_);
+    if(ebo_iter == buffer_map_.end())
+    {
+        std::cout << "Error: current ebo is invalid!" << std::endl;
+        return false;
+    }
+
+    ebo = ebo_iter->second;
+    return true;
+}
+
+void Renderer::RecordDrawCallStats(DRAW_MODE drawMode, uint32_t count)
+{
+    frame_stats_.draw_calls++;
+    if(drawMode == DRAW_TRIANGLES)
+    {
+        frame_stats_.input_triangles += count / 3;
+    }
+}
+
+bool Renderer::RunVertexStage(std::vector<VsOutput>& vsOutputs, const VertexArrayObject* vao,
+    const BufferObject* ebo, uint32_t first, uint32_t count)
+{
     {
         ScopedTimer stage_timer(frame_stats_.vertex_stage_ms);
-	    VertexShaderApply(vs_outputs, vao, ebo, first, count);
+	    VertexShaderApply(vsOutputs, vao, ebo, first, count);
     }
 
-    if(vs_outputs.empty())
-    {
-        return;
-    }
+    return !vsOutputs.empty();
+}
 
-    //4 Clip剪裁
+bool Renderer::RunClipStage(DRAW_MODE drawMode, const std::vector<VsOutput>& vsOutputs,
+    std::vector<VsOutput>& clipOutputs)
+{
     {
         ScopedTimer stage_timer(frame_stats_.clip_stage_ms);
-        ClipTool::Clip(drawMode, vs_outputs, clip_outputs, clip_work_a, clip_work_b);
+        ClipTool::Clip(drawMode, vsOutputs, clipOutputs, pipeline_scratch_.clip_work_a, pipeline_scratch_.clip_work_b);
     }
 
-    if(clip_outputs.empty())
+    if(clipOutputs.empty())
     {
-        return;
+        return false;
     }
 
     if(drawMode == DRAW_TRIANGLES)
     {
-        frame_stats_.clipped_triangles += static_cast<uint32_t>(clip_outputs.size() / 3);
+        frame_stats_.clipped_triangles += static_cast<uint32_t>(clipOutputs.size() / 3);
     }
 
+    return true;
+}
 
-    //5 NDC处理：坐标转换为NDC
+void Renderer::RunPerspectiveDivideStage(std::vector<VsOutput>& clipOutputs)
+{
     {
         ScopedTimer stage_timer(frame_stats_.ndc_stage_ms);
-        for (auto& output : clip_outputs) 
+        for(auto& output : clipOutputs)
         {
 		    PerspectiveDivision(output);
 	    }
     }
+}
 
-    //6 背面剔除
-    std::vector<VsOutput>* post_cull_outputs = &clip_outputs;
+std::vector<VsOutput>* Renderer::RunCullStage(DRAW_MODE drawMode, std::vector<VsOutput>& clipOutputs,
+    std::vector<VsOutput>& cullOutputs)
+{
+    std::vector<VsOutput>* post_cull_outputs = &clipOutputs;
     {
         ScopedTimer stage_timer(frame_stats_.cull_stage_ms);
         if(drawMode == DRAW_TRIANGLES && enable_cull_face_)
         {
-            for(size_t i = 0; i + 2 < clip_outputs.size(); i += 3)
+            for(size_t i = 0; i + 2 < clipOutputs.size(); i += 3)
             {
-			    if (!ClipTool::CullFace(front_face_link_style_, cull_which_face_, clip_outputs[i], clip_outputs[i + 1], clip_outputs[i + 2])) {
-				    auto start = clip_outputs.begin() + i;
-				    auto end = clip_outputs.begin() + i + 3;
-				    cull_outputs.insert(cull_outputs.end(), start, end);
+			    if(!ClipTool::CullFace(front_face_link_style_, cull_which_face_, clipOutputs[i], clipOutputs[i + 1], clipOutputs[i + 2]))
+                {
+				    auto start = clipOutputs.begin() + i;
+				    auto end = clipOutputs.begin() + i + 3;
+				    cullOutputs.insert(cullOutputs.end(), start, end);
 			    }
 		    }
-            post_cull_outputs = &cull_outputs;
+            post_cull_outputs = &cullOutputs;
         }
     }
 
+    return post_cull_outputs;
+}
 
-
-    //7 屏幕映射
-    //转化坐标到屏幕空间
+void Renderer::RunViewportStage(std::vector<VsOutput>& postCullOutputs)
+{
     {
         ScopedTimer stage_timer(frame_stats_.viewport_stage_ms);
-        for (auto& output : *post_cull_outputs)
+        for(auto& output : postCullOutputs)
         {
 		    ScreenMapping(output);
 	    }
     }
+}
 
-
-    //8 光栅化
-    //离散出所有Fragment
+bool Renderer::RunRasterStage(DRAW_MODE drawMode, const std::vector<VsOutput>& postCullOutputs,
+    std::vector<VsOutput>& rasterOutputs)
+{
     {
         ScopedTimer stage_timer(frame_stats_.raster_stage_ms);
-        RasterTool::Rasterize(drawMode, *post_cull_outputs, raster_outputs);
+        RasterTool::Rasterize(drawMode, postCullOutputs, rasterOutputs);
     }
-    frame_stats_.rasterized_fragments += static_cast<uint32_t>(raster_outputs.size());
+    frame_stats_.rasterized_fragments += static_cast<uint32_t>(rasterOutputs.size());
 
-    if(raster_outputs.empty()) 
-    {
-        return;
-    }
+    return !rasterOutputs.empty();
+}
 
+void Renderer::RunFragmentOutputStage(std::vector<VsOutput>& rasterOutputs)
+{
     {
         ScopedTimer stage_timer(frame_stats_.fragment_output_stage_ms);
 
         //9 透视恢复处理阶段
         //离散出来的像素插值结果，需要乘以w_0值恢复到正常态
-        for (auto& output : raster_outputs) 
+        for(auto& output : rasterOutputs)
         {
 		    PerspectiveRecover(output);
 	    }
@@ -464,9 +508,9 @@ void Renderer::DrawElement(DRAW_MODE drawMode, uint32_t first, uint32_t count)
         //10 FragmentShader
         //颜色输出处理
         FsOutput fs_output;
-	    for (uint32_t i = 0; i < raster_outputs.size(); ++i) 
+	    for(uint32_t i = 0; i < rasterOutputs.size(); ++i)
         {
-		    current_shader_->FragmentShader(raster_outputs[i], fs_output, texture_map_);
+		    current_shader_->FragmentShader(rasterOutputs[i], fs_output, texture_map_);
             frame_stats_.shaded_fragments++;
 
             //深度测试

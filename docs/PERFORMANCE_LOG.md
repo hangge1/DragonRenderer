@@ -279,3 +279,49 @@ Follow-up:
 - Avoid claiming raster-stage wins until a raster unit test or image comparison exists.
 - Start extracting `DrawElement` into named stage methods without changing behavior.
 - Add a deterministic render-output smoke test before deeper raster changes.
+
+## 2026-07-08 - DrawElement Stage Method Extraction
+
+Change:
+
+- Split `Renderer::DrawElement` into named private stage methods:
+  - `RunVertexStage`
+  - `RunClipStage`
+  - `RunPerspectiveDivideStage`
+  - `RunCullStage`
+  - `RunViewportStage`
+  - `RunRasterStage`
+  - `RunFragmentOutputStage`
+- Added `ResolveCurrentDrawInputs` and `RecordDrawCallStats` helpers.
+- Kept stage timers, counters, scratch buffers, and public renderer API unchanged.
+
+Observation:
+
+This pass is intended to reduce orchestration complexity, not to optimize the algorithm. The benchmark remains in the same range as the previous cleanup pass and the rasterized fragment count remains stable.
+
+Latest 600-frame Release benchmark sample:
+
+```text
+Frames: 600
+Average frame: 7.21183 ms
+Average update/render/present: 0.000782833 / 5.87034 / 0.892229 ms
+Average pipeline vertex/clip/ndc/cull/viewport/raster/fragment-output: 1.43831 / 1.13879 / 1.0411 / 4.71667e-05 / 0.121745 / 1.46719 / 0.657229 ms
+Average draw calls: 1
+Average input triangles: 11938
+Average rasterized fragments: 5639
+```
+
+Verification:
+
+- `cmake --build --preset x64-Windows-Build-Debug`: passed with 0 warnings and 0 errors.
+- `ctest --preset x64-Windows-Test-Debug`: 3/3 tests passed.
+- `cmake --build --preset x64-Windows-Build-Release`: passed.
+- `ctest --preset x64-Windows-Test-Release`: passed.
+- `.\build\Release\bin\DragonRenderer.exe --benchmark 120`: completed and exited.
+- `.\build\Release\bin\DragonRenderer.exe --benchmark 600`: completed and exited.
+
+Follow-up:
+
+- Introduce a deterministic render-output smoke test before changing raster behavior.
+- Extract lightweight command/state structs only after the current stage methods settle.
+- Keep benchmark entries separated from structural refactors unless the change is explicitly performance-oriented.
