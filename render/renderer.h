@@ -92,6 +92,7 @@ public:
 
 private:
     bool BuildDrawCommand(DRAW_MODE drawMode, uint32_t first, uint32_t count, DrawCommand& command) const;
+    bool ValidateDrawCommandResources(const DrawCommand& command) const;
     void RecordDrawCallStats(const DrawCommand& command);
     bool RunVertexStage(std::vector<VsOutput>& vsOutputs, const DrawCommand& command);
     bool RunClipStage(DRAW_MODE drawMode, const std::vector<VsOutput>& vsOutputs,

@@ -8,6 +8,20 @@
 #include "renderer.h"
 #include "shader/default_shader.h"
 
+struct ValidationVertex
+{
+    float px;
+    float py;
+    float pz;
+    float pw;
+    float r;
+    float g;
+    float b;
+    float a;
+    float u;
+    float v;
+};
+
 int main()
 {
     constexpr int32_t kWidth = 8;
@@ -35,6 +49,28 @@ int main()
     renderer.BindVertexArray(vao);
     renderer.DrawElement(DRAW_TRIANGLES, 0, 3);
     renderer.DrawElement(DRAW_TRIANGLES, 0, 0);
+
+    const uint32_t short_ebo = renderer.GenBuffer();
+    const uint32_t short_indices[] = {0};
+    renderer.BindBuffer(ELEMENT_ARRAY_BUFFER, short_ebo);
+    renderer.BufferData(ELEMENT_ARRAY_BUFFER, sizeof(short_indices), const_cast<uint32_t*>(short_indices));
+    renderer.DrawElement(DRAW_TRIANGLES, 0, 3);
+
+    const uint32_t ebo = renderer.GenBuffer();
+    const uint32_t indices[] = {0, 1, 2};
+    renderer.BindBuffer(ELEMENT_ARRAY_BUFFER, ebo);
+    renderer.BufferData(ELEMENT_ARRAY_BUFFER, sizeof(indices), const_cast<uint32_t*>(indices));
+
+    const uint32_t short_vbo = renderer.GenBuffer();
+    const ValidationVertex vertices[] = {
+        {-0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f},
+    };
+    renderer.BindBuffer(ARRAY_BUFFER, short_vbo);
+    renderer.BufferData(ARRAY_BUFFER, sizeof(vertices), const_cast<ValidationVertex*>(vertices));
+    renderer.VertexAttributePointer(0, 4, sizeof(ValidationVertex), offsetof(ValidationVertex, px));
+    renderer.VertexAttributePointer(1, 4, sizeof(ValidationVertex), offsetof(ValidationVertex, r));
+    renderer.VertexAttributePointer(2, 2, sizeof(ValidationVertex), offsetof(ValidationVertex, u));
+    renderer.DrawElement(DRAW_TRIANGLES, 0, 3);
 
     const auto& stats = renderer.GetFrameStats();
     std::cout << "draw command validation draw_calls=" << stats.draw_calls

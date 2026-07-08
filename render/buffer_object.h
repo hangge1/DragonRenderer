@@ -14,6 +14,7 @@ public:
 
     void SetBuffer(void* buffer, size_t buffer_size);
     uint8_t* GetBuffer() const;
+    size_t GetBufferSize() const;
 private:
     uint8_t* buffer_ { nullptr };
     size_t buffer_size_ { 0 };

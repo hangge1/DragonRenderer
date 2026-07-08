@@ -373,6 +373,13 @@ bool Renderer::BuildDrawCommand(DRAW_MODE drawMode, uint32_t first, uint32_t cou
         return false;
     }
 
+    if((drawMode == DRAW_TRIANGLES && count % 3 != 0) ||
+       (drawMode == DRAW_LINES && count % 2 != 0))
+    {
+        std::cout << "Error: draw count does not match draw mode!" << std::endl;
+        return false;
+    }
+
     auto vao_iter = vao_map_.find(current_vao_);
     if(vao_iter == vao_map_.end())
     {
@@ -392,6 +399,68 @@ bool Renderer::BuildDrawCommand(DRAW_MODE drawMode, uint32_t first, uint32_t cou
     command.count = count;
     command.vao = vao_iter->second;
     command.ebo = ebo_iter->second;
+    return ValidateDrawCommandResources(command);
+}
+
+bool Renderer::ValidateDrawCommandResources(const DrawCommand& command) const
+{
+    if(nullptr == command.vao || nullptr == command.ebo || nullptr == command.ebo->GetBuffer())
+    {
+        std::cout << "Error: draw command references empty resources!" << std::endl;
+        return false;
+    }
+
+    const size_t index_count = command.ebo->GetBufferSize() / sizeof(uint32_t);
+    const size_t first = command.first;
+    const size_t count = command.count;
+    if(first > index_count || count > index_count - first)
+    {
+        std::cout << "Error: draw command index range exceeds EBO data!" << std::endl;
+        return false;
+    }
+
+    const auto& binding_map = command.vao->GetVertexAttrDescMap();
+    if(binding_map.empty())
+    {
+        std::cout << "Error: draw command has no vertex attributes!" << std::endl;
+        return false;
+    }
+
+    const uint32_t* indices_data = reinterpret_cast<const uint32_t*>(command.ebo->GetBuffer());
+    uint32_t max_index = 0;
+    for(size_t i = first; i < first + count; ++i)
+    {
+        if(indices_data[i] > max_index)
+        {
+            max_index = indices_data[i];
+        }
+    }
+
+    for(const auto& item : binding_map)
+    {
+        const auto& desc = item.second;
+        if(desc.item_size == 0 || desc.stride == 0)
+        {
+            std::cout << "Error: vertex attribute has invalid layout!" << std::endl;
+            return false;
+        }
+
+        auto vbo_iter = buffer_map_.find(desc.vbo_id);
+        if(vbo_iter == buffer_map_.end() || nullptr == vbo_iter->second || nullptr == vbo_iter->second->GetBuffer())
+        {
+            std::cout << "Error: vertex attribute references invalid VBO!" << std::endl;
+            return false;
+        }
+
+        const size_t required_bytes = static_cast<size_t>(desc.stride) * max_index +
+            desc.offset + desc.item_size * sizeof(float);
+        if(required_bytes > vbo_iter->second->GetBufferSize())
+        {
+            std::cout << "Error: vertex attribute range exceeds VBO data!" << std::endl;
+            return false;
+        }
+    }
+
     return true;
 }
 

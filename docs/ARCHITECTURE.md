@@ -198,6 +198,7 @@ flowchart TB
 - `clip_tool` covers clip-volume acceptance/rejection, line and triangle clipping, and front/back face culling semantics.
 - `depth_output_smoke` draws overlapping offscreen triangles and checks color output, framebuffer checksum, fragment counts, and depth rejection behavior.
 - `ndc_perspective_smoke` draws a clip-space triangle with varied `w` values and checks perspective divide, viewport mapping, perspective recovery, and deterministic color output.
+- `draw_command_validation` checks that incomplete draw bindings, zero counts, short EBO data, and short VBO data do not enter the pipeline or record draw calls.
 - Keep performance claims tied to `docs/PERFORMANCE_LOG.md`.
 - Prefer extracting named boundaries before moving files.
 - Avoid introducing a broad abstraction until a stage has a stable contract.

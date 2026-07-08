@@ -21,7 +21,7 @@ Main problems:
 | Scene/demo boundary | `TestLayer` is still the only default scene path and is wired from `Renderer::InitLayer`. | The framework cannot select, compose, or benchmark demos cleanly. |
 | Performance | The hot path allocates temporary vectors per draw call and processes the whole pipeline serially. | Debug interaction is extremely slow and Release performance has no clear optimization map. |
 | Observability | FPS is visible now, but there is no per-stage timing, draw-call count, triangle count, pixel count, or allocation count. | Performance work would be guesswork. |
-| Testability | Tests now cover deterministic frame output, clip/cull behavior, NDC/perspective behavior, and depth/output merge, but resource/state contracts are still partial. | Refactoring the pipeline is safer than before, but command extraction still needs more stage-level safety rails. |
+| Testability | Tests now cover deterministic frame output, clip/cull behavior, NDC/perspective behavior, depth/output merge, and basic draw-command validation, but broader resource/state contracts are still partial. | Refactoring the pipeline is safer than before, but command extraction still needs more stage-level safety rails. |
 
 Current testability note:
 
@@ -30,6 +30,7 @@ Current testability note:
 - `clip_tool` now covers clip-volume acceptance/rejection, clipped line/triangle output, and cull-face semantics.
 - `depth_output_smoke` now covers overlapping triangles with `DEPTH_LESS`, deterministic output color, framebuffer checksum, raster/shade counts, and depth rejection count.
 - `ndc_perspective_smoke` now covers varied clip-space `w`, deterministic perspective-correct color output, viewport mapping, and raster/shade counts.
+- `draw_command_validation` now covers incomplete draw bindings, zero counts, short EBO data, and short VBO data.
 
 ## 2. North Star Architecture
 
@@ -415,6 +416,7 @@ Status:
 - Stage timers and counters still live at the stage boundary.
 - `PipelineScratch` is now available to every extracted stage.
 - `DrawCommand` now captures draw mode, index range, VAO, and EBO after current binding validation.
+- `BuildDrawCommand` now validates primitive count shape, EBO index range, VAO attribute layout, and VBO byte ranges before vertex fetch.
 - `render_output_smoke` now provides a deterministic offscreen output guard before deeper raster or NDC changes.
 - `clip_tool` now provides narrow coverage for clip and cull edge behavior.
 - `depth_output_smoke` now provides a deterministic output-merge guard for depth testing and framebuffer writes.
@@ -569,5 +571,5 @@ This creates the scoreboard. Without the scoreboard, the engine cannot be improv
 
 Current next task after the scoreboard:
 
-1. Add narrow tests for resource/state validation before changing command setup further.
+1. Move growing command validation rules into a small validation helper if they keep expanding.
 2. Record another before/after benchmark before introducing tile rasterization.

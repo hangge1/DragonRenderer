@@ -325,3 +325,41 @@ Follow-up:
 - Introduce a deterministic render-output smoke test before changing raster behavior.
 - Extract lightweight command/state structs only after the current stage methods settle.
 - Keep benchmark entries separated from structural refactors unless the change is explicitly performance-oriented.
+
+## 2026-07-08 - DrawCommand Resource Validation
+
+Change:
+
+- Added `BufferObject::GetBufferSize`.
+- Updated `BufferObject::SetBuffer` to keep `buffer_size_` aligned with the latest uploaded byte count.
+- Extended `BuildDrawCommand` with draw-mode count validation, EBO range validation, VAO attribute validation, and VBO byte-range validation.
+- Extended `draw_command_validation` to cover invalid or incomplete draw inputs, short EBO data, and short VBO data.
+
+Observation:
+
+The validation pass makes invalid draw inputs fail before vertex fetch. The latest benchmark remains in the same range as the previous stage extraction sample while keeping the same draw call, input triangle, and rasterized fragment counts.
+
+Latest 600-frame Release benchmark sample:
+
+```text
+Frames: 600
+Average frame: 7.13653 ms
+Average update/render/present: 0.000840667 / 5.88936 / 0.769781 ms
+Average pipeline vertex/clip/ndc/cull/viewport/raster/fragment-output: 1.44933 / 1.12822 / 1.03161 / 7.51667e-05 / 0.116153 / 1.44683 / 0.703768 ms
+Average draw calls: 1
+Average input triangles: 11938
+Average rasterized fragments: 5639
+```
+
+Verification:
+
+- `cmake --build --preset x64-Windows-Build-Debug`: passed with 0 warnings and 0 errors.
+- `ctest --test-dir build/Debug -C Debug --output-on-failure`: 8/8 tests passed.
+- `cmake --build --preset x64-Windows-Build-Release`: passed.
+- `ctest --test-dir build/Release -C Release --output-on-failure`: 8/8 tests passed.
+- `.\build\Release\bin\DragonRenderer.exe --benchmark 600`: completed and exited.
+
+Follow-up:
+
+- Keep command validation narrow and cheap until a real render queue exists.
+- Start moving resource/state checks toward a small validation helper if the rule set keeps growing.
