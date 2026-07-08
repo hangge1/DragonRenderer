@@ -140,3 +140,51 @@ Follow-up:
 - Inspect `ClipTool::Clip` for avoidable allocations, copies, and per-triangle work.
 - Inspect vertex fetch/shader output allocation in `VertexShaderApply`.
 - Start replacing per-draw temporary vectors with reusable scratch buffers after one more code-level pass.
+
+## 2026-07-08 - Clip Stage Buffer Reuse
+
+Change:
+
+- Replaced per-plane clip result copies with two reusable ping-pong buffers.
+- Moved clip planes to a static constant table instead of rebuilding them for every draw.
+- Fan-triangulated clipped polygons directly into the draw output buffer.
+- Kept the public `ClipTool::Clip` contract unchanged so the rest of the renderer can continue to run while the pipeline is gradually extracted.
+
+Before:
+
+```text
+Frames: 120
+Average frame: 16.5906 ms
+Average update/render/present: 0.001105 / 13.1389 / 2.85548 ms
+Average pipeline vertex/clip/ndc/cull/viewport/raster/fragment-output: 2.69057 / 5.9411 / 1.01591 / 0.236309 / 0.172617 / 1.94293 / 0.879841 ms
+```
+
+After:
+
+```text
+Frames: 120
+Average frame: 9.55003 ms
+Average update/render/present: 0.00100333 / 8.22623 / 0.823923 ms
+Average pipeline vertex/clip/ndc/cull/viewport/raster/fragment-output: 2.70228 / 1.29716 / 1.0095 / 0.243705 / 0.170273 / 1.84246 / 0.747304 ms
+```
+
+Interpretation:
+
+- Clip time dropped from 5.9411 ms to 1.29716 ms on the current dinosaur benchmark.
+- Average render time dropped from 13.1389 ms to 8.22623 ms.
+- Average frame time dropped from 16.5906 ms to 9.55003 ms.
+- The next largest measured stage is now vertex processing, followed by rasterization, clip, and NDC/perspective division.
+
+Verification:
+
+- `cmake --build --preset x64-Windows-Build-Debug`: passed with 0 warnings and 0 errors.
+- `ctest --preset x64-Windows-Test-Debug`: 3/3 tests passed.
+- `cmake --build --preset x64-Windows-Build-Release`: passed.
+- `ctest --preset x64-Windows-Test-Release`: passed.
+- `.\build\Release\bin\DragonRenderer.exe --benchmark 120`: completed and exited.
+
+Follow-up:
+
+- Inspect `VertexShaderApply` for repeated output allocation and vertex attribute copy cost.
+- Introduce a named `PipelineScratch` object before moving more hot-stage buffers out of `Renderer::DrawElement`.
+- Keep comparing against this entry until the next stage-timed baseline is recorded.

@@ -1,93 +1,104 @@
-﻿#include "clip_tool.h"
+#include "clip_tool.h"
 
+#include <array>
 
-
-void ClipTool::Clip(uint32_t draw_mode, const std::vector<VsOutput> &input_primitive, std::vector<VsOutput> &output)
+void ClipTool::Clip(uint32_t draw_mode, const std::vector<VsOutput>& input_primitive, std::vector<VsOutput>& output)
 {
-    std::vector<glm::vec4> clip_planes = 
+    static constexpr std::array<glm::vec4, 7> clip_planes =
     {
-        {0,0,0,1},
-        {-1,0,0,1},
-        {1,0,0,1},
-        {0,-1,0,1},
-        {0,1,0,1},
-        {0,0,-1,1},
-        {0,0,1,1}
+        glm::vec4{0, 0, 0, 1},
+        glm::vec4{-1, 0, 0, 1},
+        glm::vec4{1, 0, 0, 1},
+        glm::vec4{0, -1, 0, 1},
+        glm::vec4{0, 1, 0, 1},
+        glm::vec4{0, 0, -1, 1},
+        glm::vec4{0, 0, 1, 1}
     };
 
     output.clear();
+    output.reserve(input_primitive.size());
 
     if(draw_mode == DRAW_TRIANGLES)
     {
-        for (int i = 0; i < input_primitive.size(); i += 3)
+        std::vector<VsOutput> clip_buffer_a;
+        std::vector<VsOutput> clip_buffer_b;
+        clip_buffer_a.reserve(12);
+        clip_buffer_b.reserve(12);
+
+        for(size_t i = 0; i < input_primitive.size(); i += 3)
         {
-            //获取当前三角形
             if(i + 2 >= input_primitive.size())
             {
                 break;
             }
 
-            //初始化为三角形的三个顶点
-            std::vector<VsOutput> current_tri_clip_result 
-            { 
-                input_primitive[i], 
-                input_primitive[i + 1], 
-                input_primitive[i + 2] 
-            };
+            clip_buffer_a.clear();
+            clip_buffer_b.clear();
+            clip_buffer_a.emplace_back(input_primitive[i]);
+            clip_buffer_a.emplace_back(input_primitive[i + 1]);
+            clip_buffer_a.emplace_back(input_primitive[i + 2]);
 
-            //逐面裁剪三角形
-            for (int j = 0; j < clip_planes.size(); j++)
+            auto* input = &clip_buffer_a;
+            auto* clipped = &clip_buffer_b;
+
+            for(const auto& clip_plane : clip_planes)
             {
-                TriangleClip(clip_planes[j], current_tri_clip_result);
+                TriangleClip(clip_plane, *input, *clipped);
+                std::swap(input, clipped);
+
+                if(input->empty())
+                {
+                    break;
+                }
             }
 
-            if(current_tri_clip_result.empty())
+            if(input->empty())
             {
                 continue;
             }
 
-            //三角形重建
-            std::vector<VsOutput> current_tri_final_result;
-            for (int k = 1; k < current_tri_clip_result.size() - 1; k++)
+            for(size_t k = 1; k + 1 < input->size(); k++)
             {
-                current_tri_final_result.emplace_back(current_tri_clip_result[0]);
-                current_tri_final_result.emplace_back(current_tri_clip_result[k]);
-                current_tri_final_result.emplace_back(current_tri_clip_result[k + 1]);
-            }
-
-            //加入结果集
-            for(const auto& v : current_tri_final_result)
-            {
-                output.emplace_back(v);
+                output.emplace_back((*input)[0]);
+                output.emplace_back((*input)[k]);
+                output.emplace_back((*input)[k + 1]);
             }
         }
     }
     else if(draw_mode == DRAW_LINES)
     {
-        for (int i = 0; i < input_primitive.size(); i += 2)
+        std::vector<VsOutput> clip_buffer_a;
+        std::vector<VsOutput> clip_buffer_b;
+        clip_buffer_a.reserve(2);
+        clip_buffer_b.reserve(2);
+
+        for(size_t i = 0; i < input_primitive.size(); i += 2)
         {
-            //获取当前直线
             if(i + 1 >= input_primitive.size())
             {
                 break;
             }
 
-            //初始化为直线的2个顶点
-            std::vector<VsOutput> current_line_clip_result { input_primitive[i], input_primitive[i + 1] };
+            clip_buffer_a.clear();
+            clip_buffer_b.clear();
+            clip_buffer_a.emplace_back(input_primitive[i]);
+            clip_buffer_a.emplace_back(input_primitive[i + 1]);
 
-            //逐面裁剪直线
-            for (int j = 0; j < clip_planes.size(); j++)
+            auto* input = &clip_buffer_a;
+            auto* clipped = &clip_buffer_b;
+
+            for(const auto& clip_plane : clip_planes)
             {
-                LineClip(clip_planes[j], current_line_clip_result);
+                LineClip(clip_plane, *input, *clipped);
+                std::swap(input, clipped);
+
+                if(input->empty())
+                {
+                    break;
+                }
             }
 
-            if(current_line_clip_result.empty())
-            {
-                continue;
-            }
-
-            //加入结果集
-            for(const auto& v : current_line_clip_result)
+            for(const auto& v : *input)
             {
                 output.emplace_back(v);
             }
@@ -96,124 +107,105 @@ void ClipTool::Clip(uint32_t draw_mode, const std::vector<VsOutput> &input_primi
 }
 
 bool ClipTool::CullFace(uint32_t front_face_link_style, uint32_t cull_which_face, 
-                        const VsOutput &p1, const VsOutput &p2, const VsOutput &p3)
+                        const VsOutput& p1, const VsOutput& p2, const VsOutput& p3)
 {
     glm::vec3 v1 = p2.position - p1.position;
     glm::vec3 v2 = p3.position - p1.position;
 
     glm::vec3 cross = glm::cross(v1, v2);
 
-    if(cull_which_face == FRONT_FACE) //剔除正面
+    if(cull_which_face == FRONT_FACE)
     {
-        if(front_face_link_style == FRONT_FACE_CW) //顺时针表示正面
+        if(front_face_link_style == FRONT_FACE_CW)
         {
             return cross.z < 0;
         }
-        else
-        {
-            return cross.z > 0;
-        }
+
+        return cross.z > 0;
     }
-    else //剔除背面
+
+    if(front_face_link_style == FRONT_FACE_CW)
     {
-        if(front_face_link_style == FRONT_FACE_CW) //顺时针表示正面
-        {
-            return cross.z > 0;
-        }
-        else
-        {
-            return cross.z < 0;
-        }
+        return cross.z > 0;
     }
+
+    return cross.z < 0;
 }
 
-void ClipTool::TriangleClip(const glm::vec4 &clip_plane, std::vector<VsOutput> &clip_result)
+void ClipTool::TriangleClip(const glm::vec4& clip_plane, const std::vector<VsOutput>& input, std::vector<VsOutput>& output)
 {
-    std::vector<VsOutput> targetVertexList = clip_result;
+    output.clear();
+    output.reserve(input.size() + 1);
 
-    clip_result.clear();
-
-    for (int i = 0; i < targetVertexList.size(); i++)
+    for(size_t i = 0; i < input.size(); i++)
     {
-        auto last_vertex = targetVertexList[i];
-        auto current_vertex = targetVertexList[(i + 1) % targetVertexList.size()];
+        const auto& last_vertex = input[i];
+        const auto& current_vertex = input[(i + 1) % input.size()];
 
         if(IsInSide(last_vertex, clip_plane))
         {
-            //（1）last内侧,current在内侧 => 添加current
             if(IsInSide(current_vertex, clip_plane))
             {
-                clip_result.emplace_back(current_vertex);
+                output.emplace_back(current_vertex);
             }
-            else //（2）last内侧,current在外侧 => 计算交点，添加交点
+            else
             {
-                clip_result.emplace_back(Intersect(last_vertex, current_vertex, clip_plane));
-            }          
+                output.emplace_back(Intersect(last_vertex, current_vertex, clip_plane));
+            }
         }
         else
         {
-            //(3) last外侧, current 在内侧 => 添加交点和current
             if(IsInSide(current_vertex, clip_plane))
             {
-                //计算交点，添加交点
-                clip_result.emplace_back(Intersect(current_vertex, last_vertex, clip_plane));
-                //添加current
-                clip_result.emplace_back(current_vertex);
+                output.emplace_back(Intersect(current_vertex, last_vertex, clip_plane));
+                output.emplace_back(current_vertex);
             }
-            //(4) last外侧, current 外侧 => 不添加
         }
     }
 }
 
-void ClipTool::LineClip(const glm::vec4& clip_plane, std::vector<VsOutput>& clip_result)
+void ClipTool::LineClip(const glm::vec4& clip_plane, const std::vector<VsOutput>& input, std::vector<VsOutput>& output)
 {
-    std::vector<VsOutput> targetVertexList = clip_result;
+    output.clear();
+    output.reserve(2);
 
-    clip_result.clear();
-
-    if(targetVertexList.size() < 2)
+    if(input.size() < 2)
     {
         return;
     }
 
-    auto last_vertex = targetVertexList[0];
-    auto current_vertex = targetVertexList[1];
+    const auto& last_vertex = input[0];
+    const auto& current_vertex = input[1];
 
     if(IsInSide(last_vertex, clip_plane))
     {
-        //（1）last内侧,current在内侧 => 先添加last，再current
         if(IsInSide(current_vertex, clip_plane))
         {
-            clip_result.emplace_back(last_vertex);
-            clip_result.emplace_back(current_vertex);
+            output.emplace_back(last_vertex);
+            output.emplace_back(current_vertex);
         }
-        else //（2）last内侧,current在外侧 => 计算交点，先添加last，再添加交点
+        else
         {
-            clip_result.emplace_back(last_vertex);
-            clip_result.emplace_back(Intersect(last_vertex, current_vertex, clip_plane));
-        }          
+            output.emplace_back(last_vertex);
+            output.emplace_back(Intersect(last_vertex, current_vertex, clip_plane));
+        }
     }
     else
     {
-        //(3) last外侧, current 在内侧 => 添加交点和current
         if(IsInSide(current_vertex, clip_plane))
         {
-            //计算交点，添加交点
-            clip_result.emplace_back(Intersect(current_vertex, last_vertex, clip_plane));
-            //添加current
-            clip_result.emplace_back(current_vertex);
+            output.emplace_back(Intersect(current_vertex, last_vertex, clip_plane));
+            output.emplace_back(current_vertex);
         }
-        //(4) last外侧, current 外侧 => 不添加
     }
 }
 
-
-bool ClipTool::IsInSide(const VsOutput& v, const glm::vec4 &clip_plane)
+bool ClipTool::IsInSide(const VsOutput& v, const glm::vec4& clip_plane)
 {
-    return glm::dot(v.position, clip_plane) >= 0.0f; 
+    return glm::dot(v.position, clip_plane) >= 0.0f;
 }
 
-VsOutput ClipTool::Intersect(const VsOutput& inside_v, const VsOutput& outside_v, const glm::vec4 &clip_plane)
+VsOutput ClipTool::Intersect(const VsOutput& inside_v, const VsOutput& outside_v, const glm::vec4& clip_plane)
 {
     VsOutput result;
 
