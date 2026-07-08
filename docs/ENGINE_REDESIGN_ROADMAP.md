@@ -21,13 +21,14 @@ Main problems:
 | Scene/demo boundary | `TestLayer` is still the only default scene path and is wired from `Renderer::InitLayer`. | The framework cannot select, compose, or benchmark demos cleanly. |
 | Performance | The hot path allocates temporary vectors per draw call and processes the whole pipeline serially. | Debug interaction is extremely slow and Release performance has no clear optimization map. |
 | Observability | FPS is visible now, but there is no per-stage timing, draw-call count, triangle count, pixel count, or allocation count. | Performance work would be guesswork. |
-| Testability | Tests cover third-party basics, but not render state, resources, pipeline stages, or frame output. | Refactoring the pipeline has weak safety rails. |
+| Testability | Tests now cover deterministic frame output, clip/cull behavior, and depth/output merge, but resource/state and NDC contracts are still partial. | Refactoring the pipeline is safer than before, but command extraction still needs more stage-level safety rails. |
 
 Current testability note:
 
 - `render_output_smoke` now covers one deterministic offscreen draw through `Renderer::DrawElement`.
 - It checks framebuffer checksum, red pixel count, draw call count, input triangle count, and rasterized fragment count.
 - `clip_tool` now covers clip-volume acceptance/rejection, clipped line/triangle output, and cull-face semantics.
+- `depth_output_smoke` now covers overlapping triangles with `DEPTH_LESS`, deterministic output color, framebuffer checksum, raster/shade counts, and depth rejection count.
 
 ## 2. North Star Architecture
 
@@ -414,6 +415,7 @@ Status:
 - `PipelineScratch` is now available to every extracted stage.
 - `render_output_smoke` now provides a deterministic offscreen output guard before deeper raster or NDC changes.
 - `clip_tool` now provides narrow coverage for clip and cull edge behavior.
+- `depth_output_smoke` now provides a deterministic output-merge guard for depth testing and framebuffer writes.
 
 Tasks:
 
@@ -425,7 +427,7 @@ Tasks:
   - viewport transform. Started.
   - raster. Started.
   - fragment and output merge. Started.
-- Add unit tests for each stage. Started with `render_output_smoke` and `clip_tool`.
+- Add unit tests for each stage. Started with `render_output_smoke`, `clip_tool`, and `depth_output_smoke`.
 
 Definition of Done:
 
@@ -566,5 +568,5 @@ Current next task after the scoreboard:
 
 1. Inspect NDC/perspective division with behavior-preserving tests.
 2. Extract lightweight `DrawCommand` and command validation once tests exist.
-3. Add narrow tests for depth/output merge behavior.
+3. Add narrow tests for resource/state validation before changing command setup.
 4. Record another before/after benchmark before introducing tile rasterization.

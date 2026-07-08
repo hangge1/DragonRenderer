@@ -65,3 +65,13 @@ target_link_libraries(Test_ClipTool PRIVATE Render)
 add_test(NAME clip_tool COMMAND Test_ClipTool)
 set_tests_properties(clip_tool PROPERTIES PASS_REGULAR_EXPRESSION "clip tool test Pass")
 # =======================================================================================
+
+# =======================================================================================
+# depth_output_smoke_test.cc
+
+add_executable(Test_DepthOutputSmoke "depth_output_smoke_test.cc")
+target_link_libraries(Test_DepthOutputSmoke PRIVATE Render)
+
+add_test(NAME depth_output_smoke COMMAND Test_DepthOutputSmoke)
+set_tests_properties(depth_output_smoke PROPERTIES PASS_REGULAR_EXPRESSION "depth output smoke Pass")
+# =======================================================================================
