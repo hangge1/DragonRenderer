@@ -11,8 +11,7 @@ The repository root keeps only lightweight project entry files such as `README.m
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Current architecture, physical source layout, render data flow, encoding policy, and diagrams. | Update whenever module boundaries, runtime flow, data flow, or engineering invariants change. |
 | [ENGINE_REDESIGN_ROADMAP.md](ENGINE_REDESIGN_ROADMAP.md) | Target architecture and phased refactor plan. | Update when a milestone starts, completes, or changes scope. |
 | [PERFORMANCE_LOG.md](PERFORMANCE_LOG.md) | Benchmark evidence and before/after performance records. | Update only with measurable build/test/benchmark evidence. |
-| [PROJECT_LOG.md](PROJECT_LOG.md) | Project management log for documentation governance and high-level iteration decisions. | Update after governance, planning, or cross-document coordination changes. |
-| [DEVLOG_LEGACY.md](DEVLOG_LEGACY.md) | Historical root `DEVLOG.md` archive. | Do not use for new project management entries. Preserve as historical context only. |
+| [PROJECT_LOG.md](PROJECT_LOG.md) | Unified project and development log for governance decisions, iteration notes, and historical development entries. | Update after governance, planning, or cross-document coordination changes. |
 
 ## Governance Rules
 
@@ -21,8 +20,7 @@ The repository root keeps only lightweight project entry files such as `README.m
 - Use `ARCHITECTURE.md` for current facts about the codebase.
 - Use `ENGINE_REDESIGN_ROADMAP.md` for desired future shape and staged refactor work.
 - Use `PERFORMANCE_LOG.md` for claims that need numbers.
-- Use `PROJECT_LOG.md` for cross-cutting decisions, documentation cleanup, and iteration notes.
-- Use `DEVLOG_LEGACY.md` only as historical archive material.
+- Use `PROJECT_LOG.md` for cross-cutting decisions, documentation cleanup, iteration notes, and historical development entries.
 
 ## Naming Rules
 

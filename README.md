@@ -59,8 +59,7 @@ tools/        工程辅助脚本
 - [当前架构与数据流](docs/ARCHITECTURE.md)
 - [引擎化重构路线图](docs/ENGINE_REDESIGN_ROADMAP.md)
 - [性能日志](docs/PERFORMANCE_LOG.md)
-- [项目管理日志](docs/PROJECT_LOG.md)
-- [历史开发日志归档](docs/DEVLOG_LEGACY.md)
+- [项目与开发日志](docs/PROJECT_LOG.md)
 
 根目录不再维护重复的架构文档或开发日志正文，避免同一事实出现多个版本。
 
