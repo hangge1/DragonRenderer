@@ -14,6 +14,7 @@
 #include "frame_buffer.h"
 #include "perspective_camera.h"
 #include "layer_stack.h"
+#include "runtime/scoped_timer.h"
 
 #include "test_layer.h"
 
@@ -363,7 +364,10 @@ void Renderer::DrawElement(DRAW_MODE drawMode, uint32_t first, uint32_t count)
     //3 执行VertexShader
     //按照ebo的index顺序，处理顶点，依次通过顶点着色器
     std::vector<VsOutput> vs_outputs {};
-	VertexShaderApply(vs_outputs, vao, ebo, first, count);
+    {
+        ScopedTimer stage_timer(frame_stats_.vertex_stage_ms);
+	    VertexShaderApply(vs_outputs, vao, ebo, first, count);
+    }
 
     if(vs_outputs.empty())
     {
@@ -372,7 +376,10 @@ void Renderer::DrawElement(DRAW_MODE drawMode, uint32_t first, uint32_t count)
 
     //4 Clip剪裁
     std::vector<VsOutput> clip_outputs {};
-    ClipTool::Clip(drawMode, vs_outputs, clip_outputs);
+    {
+        ScopedTimer stage_timer(frame_stats_.clip_stage_ms);
+        ClipTool::Clip(drawMode, vs_outputs, clip_outputs);
+    }
 
     if(clip_outputs.empty())
     {
@@ -386,42 +393,55 @@ void Renderer::DrawElement(DRAW_MODE drawMode, uint32_t first, uint32_t count)
 
 
     //5 NDC处理：坐标转换为NDC
-    for (auto& output : clip_outputs) 
     {
-		PerspectiveDivision(output);
-	}
+        ScopedTimer stage_timer(frame_stats_.ndc_stage_ms);
+        for (auto& output : clip_outputs) 
+        {
+		    PerspectiveDivision(output);
+	    }
+    }
 
     //6 背面剔除
     std::vector<VsOutput> cull_outputs {};
-    if(drawMode == DRAW_TRIANGLES && enable_cull_face_)
     {
-        for (int i = 0; i < clip_outputs.size() - 2; i += 3) 
+        ScopedTimer stage_timer(frame_stats_.cull_stage_ms);
+        if(drawMode == DRAW_TRIANGLES && enable_cull_face_)
         {
-			if (!ClipTool::CullFace(front_face_link_style_, cull_which_face_, clip_outputs[i], clip_outputs[i + 1], clip_outputs[i + 2])) {
-				auto start = clip_outputs.begin() + i;
-				auto end = clip_outputs.begin() + i + 3;
-				cull_outputs.insert(cull_outputs.end(), start, end);
-			}
-		}
-    }
-    else
-    {
-        cull_outputs = clip_outputs;
+            for (int i = 0; i < clip_outputs.size() - 2; i += 3) 
+            {
+			    if (!ClipTool::CullFace(front_face_link_style_, cull_which_face_, clip_outputs[i], clip_outputs[i + 1], clip_outputs[i + 2])) {
+				    auto start = clip_outputs.begin() + i;
+				    auto end = clip_outputs.begin() + i + 3;
+				    cull_outputs.insert(cull_outputs.end(), start, end);
+			    }
+		    }
+        }
+        else
+        {
+            cull_outputs = clip_outputs;
+        }
     }
 
 
 
     //7 屏幕映射
     //转化坐标到屏幕空间
-    for (auto& output : cull_outputs) 
     {
-		ScreenMapping(output);
-	}
+        ScopedTimer stage_timer(frame_stats_.viewport_stage_ms);
+        for (auto& output : cull_outputs) 
+        {
+		    ScreenMapping(output);
+	    }
+    }
 
 
     //8 光栅化
     //离散出所有Fragment
-    std::vector<VsOutput> raster_outputs = RasterTool::Rasterize(drawMode, cull_outputs);
+    std::vector<VsOutput> raster_outputs;
+    {
+        ScopedTimer stage_timer(frame_stats_.raster_stage_ms);
+        raster_outputs = RasterTool::Rasterize(drawMode, cull_outputs);
+    }
     frame_stats_.rasterized_fragments += static_cast<uint32_t>(raster_outputs.size());
 
     if(raster_outputs.empty()) 
@@ -429,39 +449,41 @@ void Renderer::DrawElement(DRAW_MODE drawMode, uint32_t first, uint32_t count)
         return;
     }
 
-    //9 透视恢复处理阶段
-    //离散出来的像素插值结果，需要乘以w_0值恢复到正常态
-    for (auto& output : raster_outputs) 
     {
-		PerspectiveRecover(output);
-	}
+        ScopedTimer stage_timer(frame_stats_.fragment_output_stage_ms);
 
-
-    //10 FragmentShader
-    //颜色输出处理
-    FsOutput fs_output;
-	uint32_t pixel_pos = 0;
-	for (uint32_t i = 0; i < raster_outputs.size(); ++i) 
-    {
-		current_shader_->FragmentShader(raster_outputs[i], fs_output, texture_map_);
-        frame_stats_.shaded_fragments++;
-
-        //深度测试
-		if (enable_depth_test_ && !DepthTest(fs_output)) 
+        //9 透视恢复处理阶段
+        //离散出来的像素插值结果，需要乘以w_0值恢复到正常态
+        for (auto& output : raster_outputs) 
         {
-            frame_stats_.depth_rejected_fragments++;
-			continue;
-		}
+		    PerspectiveRecover(output);
+	    }
 
-        //混合判断
-        Color color = fs_output.color;
-        if(enable_blend_)
+        //10 FragmentShader
+        //颜色输出处理
+        FsOutput fs_output;
+	    for (uint32_t i = 0; i < raster_outputs.size(); ++i) 
         {
-            color = BlendColor(fs_output.pixelPos.x, fs_output.pixelPos.y, color);
-        }
+		    current_shader_->FragmentShader(raster_outputs[i], fs_output, texture_map_);
+            frame_stats_.shaded_fragments++;
 
-		current_frame_buffer_->SetPixelColor(fs_output.pixelPos.x, fs_output.pixelPos.y, color);
-	}
+            //深度测试
+		    if (enable_depth_test_ && !DepthTest(fs_output)) 
+            {
+                frame_stats_.depth_rejected_fragments++;
+			    continue;
+		    }
+
+            //混合判断
+            Color color = fs_output.color;
+            if(enable_blend_)
+            {
+                color = BlendColor(fs_output.pixelPos.x, fs_output.pixelPos.y, color);
+            }
+
+		    current_frame_buffer_->SetPixelColor(fs_output.pixelPos.x, fs_output.pixelPos.y, color);
+	    }
+    }
 }
 
 void Renderer::PrintVao(uint32_t vao) const

@@ -10,6 +10,14 @@ struct FrameStats
     double render_ms { 0.0 };
     double present_ms { 0.0 };
 
+    double vertex_stage_ms { 0.0 };
+    double clip_stage_ms { 0.0 };
+    double ndc_stage_ms { 0.0 };
+    double cull_stage_ms { 0.0 };
+    double viewport_stage_ms { 0.0 };
+    double raster_stage_ms { 0.0 };
+    double fragment_output_stage_ms { 0.0 };
+
     uint32_t draw_calls { 0 };
     uint32_t input_triangles { 0 };
     uint32_t clipped_triangles { 0 };

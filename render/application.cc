@@ -89,6 +89,13 @@ void Application::Run(const ApplicationRunOptions& options)
     double total_update_ms = 0.0;
     double total_render_ms = 0.0;
     double total_present_ms = 0.0;
+    double total_vertex_stage_ms = 0.0;
+    double total_clip_stage_ms = 0.0;
+    double total_ndc_stage_ms = 0.0;
+    double total_cull_stage_ms = 0.0;
+    double total_viewport_stage_ms = 0.0;
+    double total_raster_stage_ms = 0.0;
+    double total_fragment_output_stage_ms = 0.0;
     uint64_t total_draw_calls = 0;
     uint64_t total_input_triangles = 0;
     uint64_t total_rasterized_fragments = 0;
@@ -135,6 +142,13 @@ void Application::Run(const ApplicationRunOptions& options)
         total_update_ms += stats.update_ms;
         total_render_ms += stats.render_ms;
         total_present_ms += stats.present_ms;
+        total_vertex_stage_ms += stats.vertex_stage_ms;
+        total_clip_stage_ms += stats.clip_stage_ms;
+        total_ndc_stage_ms += stats.ndc_stage_ms;
+        total_cull_stage_ms += stats.cull_stage_ms;
+        total_viewport_stage_ms += stats.viewport_stage_ms;
+        total_raster_stage_ms += stats.raster_stage_ms;
+        total_fragment_output_stage_ms += stats.fragment_output_stage_ms;
         total_draw_calls += stats.draw_calls;
         total_input_triangles += stats.input_triangles;
         total_rasterized_fragments += stats.rasterized_fragments;
@@ -152,6 +166,9 @@ void Application::Run(const ApplicationRunOptions& options)
                 << TEXT(" | Frame: ") << std::fixed << std::setprecision(2) << stats.frame_ms << TEXT(" ms")
                 << TEXT(" | U/R/P: ") << std::fixed << std::setprecision(2)
                 << stats.update_ms << TEXT("/") << stats.render_ms << TEXT("/") << stats.present_ms << TEXT(" ms")
+                << TEXT(" | Pipe: ") << std::fixed << std::setprecision(2)
+                << stats.vertex_stage_ms << TEXT("/") << stats.clip_stage_ms << TEXT("/")
+                << stats.raster_stage_ms << TEXT("/") << stats.fragment_output_stage_ms << TEXT(" ms")
                 << TEXT(" | DC: ") << stats.draw_calls
                 << TEXT(" | Tri: ") << stats.input_triangles
                 << TEXT(" | Frag: ") << stats.rasterized_fragments;
@@ -177,6 +194,14 @@ void Application::Run(const ApplicationRunOptions& options)
             << total_update_ms / count << " / "
             << total_render_ms / count << " / "
             << total_present_ms / count << " ms" << std::endl;
+        std::cout << "Average pipeline vertex/clip/ndc/cull/viewport/raster/fragment-output: "
+            << total_vertex_stage_ms / count << " / "
+            << total_clip_stage_ms / count << " / "
+            << total_ndc_stage_ms / count << " / "
+            << total_cull_stage_ms / count << " / "
+            << total_viewport_stage_ms / count << " / "
+            << total_raster_stage_ms / count << " / "
+            << total_fragment_output_stage_ms / count << " ms" << std::endl;
         std::cout << "Average draw calls: " << total_draw_calls / count << std::endl;
         std::cout << "Average input triangles: " << total_input_triangles / count << std::endl;
         std::cout << "Average rasterized fragments: " << total_rasterized_fragments / count << std::endl;

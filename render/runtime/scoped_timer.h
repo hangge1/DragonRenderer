@@ -13,7 +13,7 @@ public:
 
     ~ScopedTimer()
     {
-        output_ms_ = std::chrono::duration<double, std::milli>(Clock::now() - start_).count();
+        output_ms_ += std::chrono::duration<double, std::milli>(Clock::now() - start_).count();
     }
 
     ScopedTimer(const ScopedTimer&) = delete;

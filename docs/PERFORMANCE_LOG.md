@@ -92,3 +92,51 @@ Average draw calls: 1
 Average input triangles: 11938
 Average rasterized fragments: 5639
 ```
+
+## 2026-07-08 - Pipeline Stage Timing
+
+Change:
+
+- Added per-frame pipeline stage timing to `FrameStats`.
+- Added coarse timers inside `Renderer::DrawElement`.
+- Benchmark output now includes:
+  - vertex
+  - clip
+  - NDC/perspective division
+  - cull
+  - viewport transform
+  - raster
+  - fragment/output
+
+Verification:
+
+- `cmake --build --preset x64-Windows-Build-Debug`: passed with 0 warnings and 0 errors.
+- `ctest --preset x64-Windows-Test-Debug`: 3/3 tests passed.
+- `cmake --build --preset x64-Windows-Build-Release`: passed.
+- `ctest --preset x64-Windows-Test-Release`: passed.
+- `.\build\Release\bin\DragonRenderer.exe --benchmark 120`: completed and exited.
+
+Release benchmark sample:
+
+```text
+Frames: 120
+Average frame: 16.5906 ms
+Average update/render/present: 0.001105 / 13.1389 / 2.85548 ms
+Average pipeline vertex/clip/ndc/cull/viewport/raster/fragment-output: 2.69057 / 5.9411 / 1.01591 / 0.236309 / 0.172617 / 1.94293 / 0.879841 ms
+Average draw calls: 1
+Average input triangles: 11938
+Average rasterized fragments: 5639
+```
+
+Interpretation:
+
+- Clip is currently the largest measured pipeline stage.
+- Vertex processing is the second-largest measured stage.
+- Raster and fragment/output are not the first optimization targets for the current dinosaur baseline.
+- The added measurement overhead slightly changes the baseline; future comparisons should use this stage-timed version as the new baseline.
+
+Follow-up:
+
+- Inspect `ClipTool::Clip` for avoidable allocations, copies, and per-triangle work.
+- Inspect vertex fetch/shader output allocation in `VertexShaderApply`.
+- Start replacing per-draw temporary vectors with reusable scratch buffers after one more code-level pass.
