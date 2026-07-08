@@ -1,6 +1,10 @@
 ﻿#include "application.h"
 
 
+#include <chrono>
+#include <iomanip>
+#include <sstream>
+
 #include <windowsx.h>
 
 #include "shader/lambert_light_shader.h"
@@ -73,6 +77,11 @@ bool Application::Init(HINSTANCE hinstance, const TCHAR* window_title,
 
 void Application::Run()
 {
+    using Clock = std::chrono::steady_clock;
+
+    auto fps_sample_start = Clock::now();
+    uint32_t frame_count = 0;
+
     while(IsInLoop())
     {
 		//1、清空渲染帧(重新设置背景色, 重置深度缓冲区)
@@ -86,6 +95,24 @@ void Application::Run()
 
 		//4、交换到屏幕缓冲(离屏渲染结果拷贝到屏幕缓冲)
 		SwapBuffer();
+
+        frame_count++;
+        auto now = Clock::now();
+        double elapsed = std::chrono::duration<double>(now - fps_sample_start).count();
+        if(elapsed >= 1.0)
+        {
+            double fps = frame_count / elapsed;
+            double frame_ms = 1000.0 / fps;
+
+            std::wostringstream title_stream;
+            title_stream << (title_ != nullptr ? title_ : TEXT("DragonRenderer"))
+                << TEXT(" | FPS: ") << std::fixed << std::setprecision(1) << fps
+                << TEXT(" | Frame: ") << std::fixed << std::setprecision(2) << frame_ms << TEXT(" ms");
+            SetWindowText(hwnd_, title_stream.str().c_str());
+
+            frame_count = 0;
+            fps_sample_start = now;
+        }
     }
 
 	delete renderer_;

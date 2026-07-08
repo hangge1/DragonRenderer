@@ -50,6 +50,8 @@ cmake --build --preset x64-Windows-Build-Debug
 .\build\Debug\bin\DragonRenderer.exe
 ```
 
+Debug 版本适合断点调试和排查渲染状态，但软件光栅化在 Debug 下交互帧率会明显偏低。如果主要想体验相机交互和渲染效果，建议使用 Release 版本。窗口标题栏会显示当前 FPS 和单帧耗时，便于对比 Debug/Release 表现。
+
 Release 构建：
 
 ```powershell
