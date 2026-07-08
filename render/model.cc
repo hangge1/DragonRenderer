@@ -2,6 +2,7 @@
 #include "model.h"
 
 #include <map>
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -49,7 +50,7 @@ bool Model::Read(const std::string& path)
 
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{
-		//std::cout << "Error:model read fail!" << std::endl;
+		std::cout << "Error: model read failed: " << path << std::endl;
 		return false;
 	}
 
@@ -62,11 +63,21 @@ bool Model::Read(const std::string& path)
 
 void Model::Draw(LambertLightShader* shader) 
 {
+	if(root_mesh_ == nullptr || shader == nullptr)
+	{
+		return;
+	}
+
 	root_mesh_->Draw({ 1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1 }, shader);
 }
 
 void Model::SetModelMatrix(const glm::mat4& m) 
 {
+	if(root_mesh_ == nullptr)
+	{
+		return;
+	}
+
     root_mesh_->SetLocalMatrix(m);
 }
 
@@ -204,6 +215,11 @@ uint32_t Model::ProcessTexture(const aiMaterial* material, const aiTextureType& 
 
 uint32_t Model::CreateTexture(Image* image) 
 {
+	if(image == nullptr || image->get_data() == nullptr)
+	{
+		return 0;
+	}
+
 	uint32_t texture = renderer_->GenTexture();
 	renderer_->BindTexture(texture);
 	renderer_->TexImage2D(image->get_width(), image->get_height(), image->get_data());

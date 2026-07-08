@@ -40,7 +40,7 @@ private:
 	uint32_t texture_ { 0 };
 	uint32_t indices_count_ { 0 };
 
-	glm::mat4 local_matrix_;
+	glm::mat4 local_matrix_ { 1.0f };
 
 	std::vector<Mesh*> children_;
 };

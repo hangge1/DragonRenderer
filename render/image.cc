@@ -35,6 +35,10 @@ Image* Image::createImage(const std::string& path)
 
 	//由于我们是BGRA的格式，图片是RGBA的格式，所以得交换下R&B
 	unsigned char* bits = stbi_load(path.c_str(), &width, &height, &picType, STBI_rgb_alpha);
+	if(bits == nullptr)
+	{
+		return nullptr;
+	}
 
 	//数据层面直接操作，产生bgra序列的数据结构
 	for (int i = 0; i < width * height * 4; i += 4)
@@ -83,6 +87,11 @@ Image* Image::CreateImageFromMemory(
 
 	//我们现在拿到的dataIn，并不是展开的位图数据，有可能是一个jpg png等格式的图片数据流
 	unsigned char* bits = stbi_load_from_memory(dataIn, dataInSize, &width, &height, &picType, STBI_rgb_alpha);
+	if(bits == nullptr)
+	{
+		return nullptr;
+	}
+
 	for (int i = 0; i < width * height * 4; i += 4)
 	{
 		unsigned char tmp = bits[i];
@@ -91,6 +100,7 @@ Image* Image::CreateImageFromMemory(
 	}
 
 	Image* image = new Image(width, height, (Color*)bits);
+	stbi_image_free(bits);
 
 	return image;
 }

@@ -35,6 +35,8 @@ public:
 
 	void SetModelMatrix(const glm::mat4& m);
 
+	bool IsLoaded() const { return root_mesh_ != nullptr; }
+
 private:
 	void ProcessNode(Mesh* parent, aiNode* ainode, const aiScene* scene);
 	

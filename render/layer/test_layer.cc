@@ -34,12 +34,22 @@ void TestLayer::Destroy()
 
 void TestLayer::Update()
 {
+    if(lightShader_ == nullptr || model == nullptr || !model->IsLoaded() || renderer_->GetCamera() == nullptr)
+    {
+        return;
+    }
+
     lightShader_->view_matrix = renderer_->GetCamera()->GetViewMatrix();
 	lightShader_->project_matrix = renderer_->GetCamera()->GetProjectionMatrix();
 }
 
 void TestLayer::Render()
 {
+    if(lightShader_ == nullptr || model == nullptr || !model->IsLoaded())
+    {
+        return;
+    }
+
     renderer_->UseProgram(lightShader_);
     model->Draw(lightShader_);
 }
@@ -66,7 +76,12 @@ void TestLayer::InitModel()
 
     const char* model_path = "assets/model/dinosaur/source/Rampaging T-Rex.glb";
     model = new Model(renderer_);
-	model->Read(model_path);
+	if(!model->Read(model_path))
+    {
+        delete model;
+        model = nullptr;
+        return;
+    }
 
     auto rotateMatrix = glm::rotate(glm::identity<glm::mat4>(), 0.0f , glm::vec3(0.0f, 1.0f, 0.0f));
 	auto translateMatrix = glm::translate(glm::identity<glm::mat4>(), glm::vec3(0.0f, 0.0f, -5.0f));

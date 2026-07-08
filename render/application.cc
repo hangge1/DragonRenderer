@@ -99,30 +99,50 @@ void Application::ProcessMessage(HWND window_handler, UINT message_id, WPARAM me
 	{
 		case WM_KEYDOWN:
 		{
+			if(renderer_ == nullptr)
+			{
+				break;
+			}
 			KeyDownEvent ev(message_wparam);
 			renderer_->OnEvent(ev);
 		}
 		break;
 		case WM_KEYUP:
 		{
+			if(renderer_ == nullptr)
+			{
+				break;
+			}
 			KeyUpEvent ev(message_wparam);
 			renderer_->OnEvent(ev);
 		}
 		break;
 		case WM_RBUTTONDOWN:
 		{
+			if(renderer_ == nullptr)
+			{
+				break;
+			}
 			MouseDownEvent ev(GET_X_LPARAM(message_lparam), GET_Y_LPARAM(message_lparam),2);
 			renderer_->OnEvent(ev);
 		}
 		break;
 		case WM_RBUTTONUP:
 		{
+			if(renderer_ == nullptr)
+			{
+				break;
+			}
 			MouseUpEvent ev(GET_X_LPARAM(message_lparam), GET_Y_LPARAM(message_lparam),2);
 			renderer_->OnEvent(ev);
 		}
 		break;
 		case WM_MOUSEMOVE:
 		{
+			if(renderer_ == nullptr)
+			{
+				break;
+			}
 			MouseMoveEvent ev(GET_X_LPARAM(message_lparam), GET_Y_LPARAM(message_lparam));
 			renderer_->OnEvent(ev);
 		}

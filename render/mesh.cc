@@ -37,13 +37,13 @@ Mesh::~Mesh()
 void Mesh::Init(const std::vector<Vertex>& vertices, const std::vector<unsigned int> indices, 
             uint32_t diffuse_texture, const glm::mat4& local_matrix)
 {
+	local_matrix_ = local_matrix;
+
 	if (vertices.empty() || indices.empty()) 
     {
 		return;
 	}
 
-    //至少作为一个节点
-	local_matrix_ = local_matrix;
 	texture_ = diffuse_texture;
 
 	vao_ = renderer_->GenVertexArray();
