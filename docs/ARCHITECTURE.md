@@ -13,6 +13,7 @@ flowchart TB
     App["Application<br/>platform-neutral lifecycle interface"]
     AppConfig["ApplicationConfigRegistry<br/>user application window config"]
     Win32App["WindowsApplication<br/>Win32 window, message loop, GDI present"]
+    InputState["InputState<br/>per-frame coalesced input"]
     LayerRegistry["LayerRegistry<br/>startup layer factories"]
     DinosaurDemo["DinosaurDemo<br/>static layer auto-registration"]
     Renderer["Renderer<br/>OpenGL-like API, render state, resources, draw execution"]
@@ -33,6 +34,8 @@ flowchart TB
     App --> Win32App
     Win32App --> AppConfig
     Win32App --> Renderer
+    Win32App --> InputState
+    InputState --> Renderer
     Win32App --> LayerSystem
     Win32App --> LayerRegistry
     DinosaurDemo --> LayerRegistry
@@ -68,7 +71,7 @@ engine/
 
 render/
   camera/    camera abstractions and perspective camera
-  layer/     events, layer interface, layer stack
+  layer/     events, per-frame input state, layer interface, layer stack
   pipeline/  draw command, pipeline data, pipeline scratch, clipping, rasterization
   resource/  buffer, vertex array, texture, image, framebuffer
   runtime/   frame statistics and scoped timing
@@ -86,6 +89,8 @@ The current include style still uses short project headers such as `renderer.h`,
 `DinosaurDemo` now lives outside the `Render` library. `DragonRenderer.exe` includes the demo module object files, and the demo module registers its own layer factory through a static `LayerAutoRegistrar`. The demo module also declares its desired application window through `ApplicationConfigAutoRegistrar`. The entry point does not mention demos, layers, renderer registration, window title, or window size; `WindowsApplication` reads the application config and attaches all registered startup layers after creating the renderer.
 
 `ApplicationConfig` already supports a list of `WindowConfig` values. The current Win32 host consumes the primary window because the renderer still has one back buffer and one active GDI window. Multi-window creation should be implemented in a future platform/window manager layer without moving ownership back into the entry point.
+
+Win32 input is no longer dispatched directly into `Renderer::OnEvent` from `WndProc`. `WindowsApplication` drains all pending OS messages once per frame, coalesces keyboard and mouse state into `InputState`, and then calls `Renderer::OnInput` once before update/render work. This keeps high-frequency `WM_MOUSEMOVE` messages from synchronously driving renderer/camera work.
 
 ## Build Target Layout
 
@@ -128,13 +133,18 @@ Vendored dependencies, binary assets, generated build files, and image assets ar
 sequenceDiagram
     participant OS as Win32
     participant App as WindowsApplication
+    participant Input as InputState
     participant Layer as LayerStack
+    participant Camera as Camera
     participant Renderer as Renderer
     participant Stats as FrameStats
     participant FB as FrameBuffer
 
     OS->>App: Window messages
+    App->>Input: Drain and coalesce pending input
     App->>Renderer: BeginFrameStats()
+    App->>Renderer: OnInput(InputState)
+    Renderer->>Camera: Consume input once per frame
     App->>Layer: OnUpdate()
     Layer->>Renderer: API calls and DrawElement()
     Renderer->>Renderer: RunVertexStage()
@@ -286,6 +296,7 @@ flowchart TB
 - `depth_output_smoke` draws overlapping offscreen triangles and checks color output, framebuffer checksum, fragment counts, and depth rejection behavior.
 - `ndc_perspective_smoke` draws a clip-space triangle with varied `w` values and checks perspective divide, viewport mapping, perspective recovery, and deterministic color output.
 - `draw_command_validation` checks that incomplete draw bindings, zero counts, short EBO data, and short VBO data do not enter the pipeline or record draw calls.
+- `input_state` checks per-frame input coalescing, transient pressed/released flags, and persistent held state.
 - Keep performance claims tied to `docs/PERFORMANCE_LOG.md`.
 - Prefer extracting named boundaries before moving files.
 - Avoid introducing a broad abstraction until a stage has a stable contract.

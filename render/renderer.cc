@@ -14,6 +14,7 @@
 #include "frame_buffer.h"
 #include "perspective_camera.h"
 #include "layer_stack.h"
+#include "input_state.h"
 #include "runtime/scoped_timer.h"
 
 Renderer::~Renderer()
@@ -168,6 +169,23 @@ void Renderer::OnEvent(Event& ev)
             camera_->OnMouseMove(e.posx, e.posy);
         }
         return;
+    }
+}
+
+void Renderer::OnInput(const InputState& input)
+{
+    if(input.IsKeyPressed(VK_ESCAPE))
+    {
+        if(exit_requested_callback_)
+        {
+            exit_requested_callback_();
+        }
+        return;
+    }
+
+    if(camera_ != nullptr)
+    {
+        camera_->OnInput(input);
     }
 }
 

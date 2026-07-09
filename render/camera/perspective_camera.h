@@ -16,6 +16,7 @@ public:
 	virtual void OnMouseMove(int x, int y) override;
 	virtual void OnKeyDown(uint32_t key) override;
 	virtual void OnKeyUp(uint32_t key) override;
+	virtual void OnInput(const InputState& input) override;
 
 	virtual void Update() override;
 

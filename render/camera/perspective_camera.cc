@@ -2,6 +2,8 @@
 
 #include "glm/ext.hpp"
 
+#include "input_state.h"
+
 PerspectiveCamera::PerspectiveCamera(float fovy, float aspect, float n, float f, const glm::vec3& top)
 {
 	top_ = top;
@@ -75,6 +77,45 @@ void PerspectiveCamera::OnKeyUp(uint32_t key)
 		break;
 	default:
 		break;
+	}
+}
+
+void PerspectiveCamera::OnInput(const InputState& input)
+{
+	int32_t next_move_state = NO_MOVE;
+	if(input.IsKeyDown(KEY_CODE::W))
+	{
+		next_move_state |= MOVE_FRONT;
+	}
+	if(input.IsKeyDown(KEY_CODE::A))
+	{
+		next_move_state |= MOVE_LEFT;
+	}
+	if(input.IsKeyDown(KEY_CODE::S))
+	{
+		next_move_state |= MOVE_BACK;
+	}
+	if(input.IsKeyDown(KEY_CODE::D))
+	{
+		next_move_state |= MOVE_RIGHT;
+	}
+	move_state_ = next_move_state;
+
+	if(input.IsMouseButtonPressed(InputState::MouseRight) && input.HasMousePosition())
+	{
+		is_mouse_moving_ = true;
+		last_mouse_x_ = input.GetMouseX() - input.GetMouseDeltaX();
+		last_mouse_y_ = input.GetMouseY() - input.GetMouseDeltaY();
+	}
+
+	if(input.IsMouseMoved() && is_mouse_moving_)
+	{
+		OnMouseMove(input.GetMouseX(), input.GetMouseY());
+	}
+
+	if(input.IsMouseButtonReleased(InputState::MouseRight))
+	{
+		OnRightMouseUp(input.GetMouseX(), input.GetMouseY());
 	}
 }
 

@@ -4,6 +4,8 @@
 
 #include "glm/glm.hpp"
 
+class InputState;
+
 //键码
 namespace KEY_CODE
 {
@@ -38,6 +40,7 @@ public:
 	virtual void OnMouseMove(int x, int y) {}
 	virtual void OnKeyDown(uint32_t key) {}
 	virtual void OnKeyUp(uint32_t key) {}
+	virtual void OnInput(const InputState& input) {}
 
 	virtual void Update() = 0;
 

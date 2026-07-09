@@ -95,3 +95,13 @@ target_link_libraries(Test_DrawCommandValidation PRIVATE Render)
 add_test(NAME draw_command_validation COMMAND Test_DrawCommandValidation)
 set_tests_properties(draw_command_validation PROPERTIES PASS_REGULAR_EXPRESSION "draw command validation Pass")
 # =======================================================================================
+
+# =======================================================================================
+# input_state_test.cc
+
+add_executable(Test_InputState "input_state_test.cc")
+target_link_libraries(Test_InputState PRIVATE Render)
+
+add_test(NAME input_state COMMAND Test_InputState)
+set_tests_properties(input_state PROPERTIES PASS_REGULAR_EXPRESSION "input state test Pass")
+# =======================================================================================

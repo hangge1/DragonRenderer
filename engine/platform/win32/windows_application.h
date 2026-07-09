@@ -2,6 +2,7 @@
 #define _ENGINE_PLATFORM_WIN32_WINDOWS_APPLICATION_H_
 
 #include "application.h"
+#include "input_state.h"
 
 #include <Windows.h>
 
@@ -34,7 +35,7 @@ private:
     void MoveWindow2DesktopCenter();
     ATOM RegisterMainWindowClass();
     void SwapBuffer();
-    bool IsInLoop();
+    bool ProcessPendingMessages();
 
 private:
     Renderer* renderer_ { nullptr };
@@ -48,6 +49,7 @@ private:
     HWND hwnd_ { nullptr };
 
     bool has_destoryed_ { false };
+    InputState input_state_;
 
     HDC currentDC_ { nullptr };
     HDC canvasDC_ { nullptr };

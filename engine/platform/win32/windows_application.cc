@@ -8,7 +8,6 @@
 #include <windowsx.h>
 
 #include "application_config.h"
-#include "event.h"
 #include "layer_registry.h"
 #include "renderer.h"
 #include "runtime/scoped_timer.h"
@@ -102,8 +101,14 @@ void WindowsApplication::Run(const ApplicationRunOptions& options)
     uint64_t total_input_triangles = 0;
     uint64_t total_rasterized_fragments = 0;
 
-    while(IsInLoop())
+    while(!has_destoryed_)
     {
+        input_state_.BeginFrame();
+        if(!ProcessPendingMessages())
+        {
+            break;
+        }
+
         renderer_->BeginFrameStats();
 
         double frame_ms = 0.0;
@@ -118,6 +123,7 @@ void WindowsApplication::Run(const ApplicationRunOptions& options)
 
             {
                 ScopedTimer update_timer(update_ms);
+                renderer_->OnInput(input_state_);
                 renderer_->OnUpdate();
             }
 
@@ -219,8 +225,7 @@ void WindowsApplication::ProcessMessage(HWND window_handler, UINT message_id, WP
             {
                 break;
             }
-            KeyDownEvent ev(message_wparam);
-            renderer_->OnEvent(ev);
+            input_state_.SetKeyDown(static_cast<uint32_t>(message_wparam), true);
         }
         break;
         case WM_KEYUP:
@@ -229,38 +234,54 @@ void WindowsApplication::ProcessMessage(HWND window_handler, UINT message_id, WP
             {
                 break;
             }
-            KeyUpEvent ev(message_wparam);
-            renderer_->OnEvent(ev);
+            input_state_.SetKeyDown(static_cast<uint32_t>(message_wparam), false);
+        }
+        break;
+        case WM_LBUTTONDOWN:
+        {
+            input_state_.SetMousePosition(GET_X_LPARAM(message_lparam), GET_Y_LPARAM(message_lparam));
+            input_state_.SetMouseButtonDown(InputState::MouseLeft, true);
+            SetCapture(window_handler);
+        }
+        break;
+        case WM_LBUTTONUP:
+        {
+            input_state_.SetMousePosition(GET_X_LPARAM(message_lparam), GET_Y_LPARAM(message_lparam));
+            input_state_.SetMouseButtonDown(InputState::MouseLeft, false);
+            ReleaseCapture();
+        }
+        break;
+        case WM_MBUTTONDOWN:
+        {
+            input_state_.SetMousePosition(GET_X_LPARAM(message_lparam), GET_Y_LPARAM(message_lparam));
+            input_state_.SetMouseButtonDown(InputState::MouseMiddle, true);
+            SetCapture(window_handler);
+        }
+        break;
+        case WM_MBUTTONUP:
+        {
+            input_state_.SetMousePosition(GET_X_LPARAM(message_lparam), GET_Y_LPARAM(message_lparam));
+            input_state_.SetMouseButtonDown(InputState::MouseMiddle, false);
+            ReleaseCapture();
         }
         break;
         case WM_RBUTTONDOWN:
         {
-            if(renderer_ == nullptr)
-            {
-                break;
-            }
-            MouseDownEvent ev(GET_X_LPARAM(message_lparam), GET_Y_LPARAM(message_lparam), 2);
-            renderer_->OnEvent(ev);
+            input_state_.SetMousePosition(GET_X_LPARAM(message_lparam), GET_Y_LPARAM(message_lparam));
+            input_state_.SetMouseButtonDown(InputState::MouseRight, true);
+            SetCapture(window_handler);
         }
         break;
         case WM_RBUTTONUP:
         {
-            if(renderer_ == nullptr)
-            {
-                break;
-            }
-            MouseUpEvent ev(GET_X_LPARAM(message_lparam), GET_Y_LPARAM(message_lparam), 2);
-            renderer_->OnEvent(ev);
+            input_state_.SetMousePosition(GET_X_LPARAM(message_lparam), GET_Y_LPARAM(message_lparam));
+            input_state_.SetMouseButtonDown(InputState::MouseRight, false);
+            ReleaseCapture();
         }
         break;
         case WM_MOUSEMOVE:
         {
-            if(renderer_ == nullptr)
-            {
-                break;
-            }
-            MouseMoveEvent ev(GET_X_LPARAM(message_lparam), GET_Y_LPARAM(message_lparam));
-            renderer_->OnEvent(ev);
+            input_state_.SetMousePosition(GET_X_LPARAM(message_lparam), GET_Y_LPARAM(message_lparam));
         }
         break;
         case WM_CLOSE:
@@ -284,7 +305,7 @@ void WindowsApplication::ProcessMessage(HWND window_handler, UINT message_id, WP
     }
 }
 
-bool WindowsApplication::IsInLoop()
+bool WindowsApplication::ProcessPendingMessages()
 {
     if(has_destoryed_)
     {
@@ -292,10 +313,14 @@ bool WindowsApplication::IsInLoop()
     }
 
     MSG msg;
-    if(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+    while(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
     {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
+        if(has_destoryed_)
+        {
+            return false;
+        }
     }
 
     return true;

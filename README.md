@@ -43,7 +43,7 @@ engine/
 
 render/
   camera/     相机抽象与透视相机
-  layer/      Event、Layer、LayerStack 扩展点
+  layer/      Event、InputState、Layer、LayerStack 扩展点
   pipeline/   DrawCommand、PipelineScratch、裁剪、光栅化、管线数据
   resource/   Buffer、VAO、Texture、Image、FrameBuffer
   runtime/    FrameStats、ScopedTimer 等运行时诊断

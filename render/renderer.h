@@ -19,6 +19,7 @@
 
 class FrameBuffer;
 class AbstractCamera;
+class InputState;
 class Layer;
 class LayerStack;
 
@@ -41,6 +42,7 @@ public:
     void Render();
 
     void OnEvent(Event& ev);
+    void OnInput(const InputState& input);
     void OnUpdate();
 
     void SetExitRequestedCallback(std::function<void()> callback);

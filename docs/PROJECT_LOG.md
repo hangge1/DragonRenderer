@@ -6,6 +6,22 @@ Use this file for project-management decisions, documentation governance, and hi
 
 ## Project Management Entries
 
+## 2026-07-09 - Per-Frame Input State
+
+Decision:
+
+- Add `InputState` as a per-frame input snapshot for keyboard and mouse state.
+- Change `WindowsApplication` to drain all pending Win32 messages once per frame.
+- Stop dispatching `WM_MOUSEMOVE` directly into `Renderer::OnEvent` from `WndProc`.
+- Add `Renderer::OnInput` and `Camera::OnInput` so camera input is consumed once per frame.
+- Keep the older event path available while platform input is migrated toward the new runtime boundary.
+
+Rationale:
+
+- High-frequency mouse messages should not synchronously drive renderer or camera work.
+- The platform layer should collect OS input, while renderer/camera systems consume an engine input state.
+- This is a stepping stone toward a dedicated `InputSystem` and `Runtime` loop.
+
 ## 2026-07-09 - Application Window Config Registration
 
 Decision:
