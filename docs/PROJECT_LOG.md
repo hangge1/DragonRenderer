@@ -65,13 +65,27 @@ Decision:
 - Move the built-in dinosaur demo out of `render/` and into `demos/dinosaur/`.
 - Build the demo as a separate `DinosaurDemo` static library.
 - Link `DragonRenderer.exe` against both `Render` and `DinosaurDemo`.
-- Remove `Renderer::InitLayer()` and let the executable register `DinosaurLayer` explicitly.
+- Remove `Renderer::InitLayer()` and move demo registration out to the executable layer.
 
 Rationale:
 
 - `Render` should be the renderer framework core, not the owner of a specific demo scene.
 - Demo code should depend on renderer APIs; renderer code should not include or instantiate demo layers.
 - This is a stepping stone toward a future demo registry and cleaner app/runtime split.
+
+## 2026-07-09 - Demo Entry Factory
+
+Decision:
+
+- Add `demos/demo_layer_factory.h` as the stable boundary between the executable entry point and demo code.
+- Let `demos/dinosaur/dinosaur_demo.cc` implement `CreateDemoLayer(Renderer*)`.
+- Keep `entry_point.cc` generic: it initializes the application, asks the linked demo module for a layer, and starts the run loop.
+
+Rationale:
+
+- Users adding or replacing demos should work in the demo/business layer instead of editing the Windows entry point.
+- The executable can stay as a stable host while concrete demo classes remain inside their own demo module.
+- This prepares the project for a future demo registry without forcing that abstraction into the current code immediately.
 
 ## Historical Development Entries
 

@@ -62,7 +62,7 @@ The current include style still uses short project headers such as `renderer.h`,
 
 `pipeline_data.h` used to live in a top-level `core/` folder. It is now owned by `render/pipeline/` because the types inside it are render-pipeline-facing contracts rather than a standalone engine core.
 
-`DinosaurDemo` now lives outside the `Render` static library. `DragonRenderer.exe` links `Render` and `DinosaurDemo`, then registers `DinosaurLayer` through `Renderer::AddLayer`. This keeps renderer core code from depending on demo code.
+`DinosaurDemo` now lives outside the `Render` static library. `DragonRenderer.exe` links `Render` and `DinosaurDemo`, then calls the generic `CreateDemoLayer(Renderer*)` factory before registering the returned layer through `Renderer::AddLayer`. This keeps renderer core and the executable entry point from depending on concrete demo classes.
 
 ## Build Target Layout
 
@@ -74,11 +74,12 @@ Render.lib
   shaders, pipeline stages, runtime stats.
 
 DinosaurDemo.lib
-  DinosaurLayer and demo-specific model/shader setup.
+  DinosaurLayer, demo-specific model/shader setup, and the CreateDemoLayer
+  factory implementation.
 
 DragonRenderer.exe
   Program entry point, command-line parsing, application initialization,
-  demo registration, and render loop startup.
+  generic demo factory invocation, and render loop startup.
 ```
 
 There is no project-owned DLL boundary yet. Runtime DLLs may still come from third-party dependencies such as Assimp, but the project's own code is linked through static libraries.

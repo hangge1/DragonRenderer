@@ -10,7 +10,7 @@
 #include <string>
 
 #include "application.h"
-#include "dinosaur_layer.h"
+#include "demo_layer_factory.h"
 #include "renderer.h"
 
 namespace
@@ -74,7 +74,12 @@ int WINAPI wWinMain(HINSTANCE hInstance,
         return -1;
     }
 
-    APP->GetRenderer()->AddLayer(new DinosaurLayer(APP->GetRenderer()));
+    Renderer* renderer = APP->GetRenderer();
+    Layer* demo_layer = CreateDemoLayer(renderer);
+    if(demo_layer != nullptr)
+    {
+        renderer->AddLayer(demo_layer);
+    }
 
 	APP->Run(ParseRunOptions(lpCmdLine));
 

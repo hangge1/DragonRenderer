@@ -18,7 +18,7 @@ Main problems:
 | Pipeline boundary | `DrawElement` runs vertex fetch, vertex shader, clipping, culling, rasterization, fragment shading, depth test, blending, and framebuffer writes in one function. | Hard to profile, test, parallelize, or replace a single stage. |
 | Resource lifetime | Buffers, vertex arrays, textures, models, meshes, shaders, and layers mix raw pointers and manual deletion. | Ownership is implicit, so crashes and leaks are easy to introduce. |
 | Runtime platform | Win32 windowing, GDI swap, event dispatch, FPS title update, and render loop live inside `Application`. | The renderer cannot be reused cleanly in another shell or test harness. |
-| Scene/demo boundary | The dinosaur demo now lives outside `Render`, but there is still no full demo registry or scene abstraction. | The renderer no longer depends on demo code, but demo selection and composition are still early-stage. |
+| Scene/demo boundary | The dinosaur demo now lives outside `Render`, and `entry_point.cc` talks to it only through `CreateDemoLayer(Renderer*)`. There is still no full demo registry or scene abstraction. | The renderer and executable entry point no longer depend on concrete demo classes, but demo selection and composition are still early-stage. |
 | Performance | The hot path allocates temporary vectors per draw call and processes the whole pipeline serially. | Debug interaction is extremely slow and Release performance has no clear optimization map. |
 | Observability | FPS is visible now, but there is no per-stage timing, draw-call count, triangle count, pixel count, or allocation count. | Performance work would be guesswork. |
 | Testability | Tests now cover deterministic frame output, clip/cull behavior, NDC/perspective behavior, depth/output merge, and basic draw-command validation, but broader resource/state contracts are still partial. | Refactoring the pipeline is safer than before, but command extraction still needs more stage-level safety rails. |
@@ -415,6 +415,7 @@ Status:
 - Started. `Renderer::DrawElement` now delegates to named private stage methods while keeping behavior and public API unchanged.
 - First physical source split is complete under `render/app`, `render/camera`, `render/pipeline`, `render/resource`, `render/runtime`, `render/scene`, and `render/shader`.
 - The dinosaur demo has moved out of `render` into `demos/dinosaur` and is linked as `DinosaurDemo` by `DragonRenderer.exe`.
+- `entry_point.cc` now uses the generic `CreateDemoLayer(Renderer*)` factory instead of including a concrete demo layer header.
 - The old top-level `core/pipeline_data.h` has been moved into `render/pipeline/pipeline_data.h`; `core/` is no longer a separate source folder.
 - Stage timers and counters still live at the stage boundary.
 - `PipelineScratch` is now available to every extracted stage.
@@ -457,6 +458,7 @@ Tasks:
 - Create `AssetManager`.
 - Create `DemoRegistry`.
 - Move dinosaur demo into `demos/dinosaur`. Done.
+- Hide concrete demo classes from `entry_point.cc` behind a demo-layer factory. Done.
 - Add at least one simple benchmark demo with known triangle count.
 
 Definition of Done:
