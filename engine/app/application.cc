@@ -8,17 +8,10 @@
 
 #include <windowsx.h>
 
-#include "shader/lambert_light_shader.h"
-#include "model.h"
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-
 #include "renderer.h"
 #include "runtime/scoped_timer.h"
 
 #include "event.h"
-
-#include "perspective_camera.h"
 
 LRESULT CALLBACK Wndproc(HWND window_handler, UINT message_id, WPARAM message_wparam, LPARAM message_lparam) 
 {

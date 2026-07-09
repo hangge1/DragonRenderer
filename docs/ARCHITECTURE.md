@@ -8,11 +8,12 @@ The diagrams are intentionally close to the current codebase. They are not a mar
 
 ```mermaid
 flowchart TB
-    Entry["entry_point.cc"]
+    Entry["engine/entry_point.cc"]
+    Engine["DragonEngine<br/>entry point, app shell, demo factory call"]
     App["Application<br/>Win32 window, message loop, frame loop, benchmark mode"]
     DinosaurDemo["DinosaurDemo<br/>DinosaurLayer setup and update"]
     Renderer["Renderer<br/>OpenGL-like API, render state, resources, draw execution"]
-    AppLayer["app<br/>events, layer stack, frame loop"]
+    LayerSystem["layer<br/>events, layer stack"]
     Camera["camera<br/>PerspectiveCamera view/projection control"]
     Model["scene<br/>Model / Mesh Assimp loading and draw submission"]
     Shader["shader<br/>Default / Texture / Lambert"]
@@ -22,11 +23,12 @@ flowchart TB
     Present["GDI present<br/>Application::SwapBuffer"]
     Stats["FrameStats<br/>timing and workload counters"]
 
-    Entry --> App
+    Entry --> Engine
+    Engine --> App
     Entry --> DinosaurDemo
     App --> Renderer
-    App --> AppLayer
-    DinosaurDemo --> AppLayer
+    App --> LayerSystem
+    DinosaurDemo --> LayerSystem
     DinosaurDemo --> Camera
     DinosaurDemo --> Model
     DinosaurDemo --> Renderer
@@ -42,12 +44,17 @@ flowchart TB
 
 ## Physical Source Layout
 
-The `render` library is physically split by responsibility while keeping the public build target as `Render`.
+The codebase is physically split into engine hosting, renderer core, and demo modules.
 
 ```text
+engine/
+  app/       Win32 application shell, message loop, frame loop
+  entry_point.cc
+             stable executable entry point and demo factory invocation
+
 render/
-  app/       Win32 application loop, events, layers, layer stack
   camera/    camera abstractions and perspective camera
+  layer/     events, layer interface, layer stack
   pipeline/  draw command, pipeline data, pipeline scratch, clipping, rasterization
   resource/  buffer, vertex array, texture, image, framebuffer
   runtime/   frame statistics and scoped timing
@@ -66,20 +73,23 @@ The current include style still uses short project headers such as `renderer.h`,
 
 ## Build Target Layout
 
-DragonRenderer currently builds project code as static libraries plus one executable:
+DragonRenderer currently builds project code as static/object libraries plus one executable:
 
 ```text
+DragonEngine object library
+  Program entry point, Win32 application shell, command-line parsing,
+  generic demo factory invocation, and render loop startup.
+
 Render.lib
-  Renderer core, Win32 application shell, camera, resources, scene loading,
-  shaders, pipeline stages, runtime stats.
+  Renderer core, layer extension points, camera, resources, scene loading,
+  shaders, pipeline stages, and runtime stats.
 
 DinosaurDemo.lib
   DinosaurLayer, demo-specific model/shader setup, and the CreateDemoLayer
   factory implementation.
 
 DragonRenderer.exe
-  Program entry point, command-line parsing, application initialization,
-  generic demo factory invocation, and render loop startup.
+  Links DragonEngine, Render, and DinosaurDemo.
 ```
 
 There is no project-owned DLL boundary yet. Runtime DLLs may still come from third-party dependencies such as Assimp, but the project's own code is linked through static libraries.

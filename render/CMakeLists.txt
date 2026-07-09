@@ -7,8 +7,8 @@ add_library(Render STATIC ${SRCS} ${INCLUDES})
 
 target_include_directories(Render PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/app
     ${CMAKE_CURRENT_SOURCE_DIR}/camera
+    ${CMAKE_CURRENT_SOURCE_DIR}/layer
     ${CMAKE_CURRENT_SOURCE_DIR}/pipeline
     ${CMAKE_CURRENT_SOURCE_DIR}/resource
     ${CMAKE_CURRENT_SOURCE_DIR}/runtime

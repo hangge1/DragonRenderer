@@ -87,6 +87,22 @@ Rationale:
 - The executable can stay as a stable host while concrete demo classes remain inside their own demo module.
 - This prepares the project for a future demo registry without forcing that abstraction into the current code immediately.
 
+## 2026-07-09 - Engine Host Split
+
+Decision:
+
+- Move `entry_point.cc` into `engine/`.
+- Move the Win32 `Application` shell into `engine/app/`.
+- Move `Event`, `Layer`, and `LayerStack` into `render/layer/` as renderer extension points.
+- Add a `DragonEngine` object-library target for the executable host code.
+- Keep `Render` focused on renderer core code and `DinosaurDemo` focused on demo/business code.
+
+Rationale:
+
+- The executable entry point and application host are engine infrastructure, not demo code and not render-core code.
+- `Render` should provide rendering APIs and layer extension points without owning the OS application shell.
+- Keeping demo creation behind `CreateDemoLayer(Renderer*)` lets users focus on business/demo layer code while the engine host remains stable.
+
 ## Historical Development Entries
 
 The entries below were migrated from the old root-level `DEVLOG.md` and normalized as valid UTF-8 Chinese text. They remain part of the continuous project record.
