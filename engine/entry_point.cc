@@ -10,9 +10,6 @@
 #include <string>
 
 #include "application.h"
-#include "demo_layer_registry.h"
-#include "layer.h"
-#include "renderer.h"
 
 namespace
 {
@@ -74,15 +71,6 @@ int WINAPI wWinMain(HINSTANCE hInstance,
     {
         std::cout << "Application Init Failed!" << std::endl;
         return -1;
-    }
-
-    Renderer* renderer = app->GetRenderer();
-    DemoLayerRegistry registry;
-    RegisterDemoLayers(registry);
-
-    for(Layer* demo_layer : registry.CreateLayers(renderer))
-    {
-        renderer->AddLayer(demo_layer);
     }
 
     app->Run(ParseRunOptions(lpCmdLine));

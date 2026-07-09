@@ -71,6 +71,9 @@ add_subdirectory(engine)
 add_subdirectory(demos)
 add_subdirectory(test)
 
-add_executable(DragonRenderer $<TARGET_OBJECTS:DragonEngine>)
-target_link_libraries(DragonRenderer PUBLIC DragonEngine DinosaurDemo)
+add_executable(DragonRenderer
+    $<TARGET_OBJECTS:DragonEngine>
+    $<TARGET_OBJECTS:DinosaurDemo>
+)
+target_link_libraries(DragonRenderer PUBLIC DragonEngine Render)
 target_link_options(DragonRenderer PRIVATE "/subsystem:console" "/entry:wWinMainCRTStartup")

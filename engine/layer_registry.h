@@ -1,5 +1,5 @@
-#ifndef _ENGINE_DEMO_LAYER_REGISTRY_H_
-#define _ENGINE_DEMO_LAYER_REGISTRY_H_
+#ifndef _ENGINE_LAYER_REGISTRY_H_
+#define _ENGINE_LAYER_REGISTRY_H_
 
 #include <functional>
 #include <vector>
@@ -7,10 +7,12 @@
 class Layer;
 class Renderer;
 
-class DemoLayerRegistry
+class LayerRegistry
 {
 public:
     using LayerFactory = std::function<Layer*(Renderer*)>;
+
+    static LayerRegistry& Get();
 
     void RegisterLayerFactory(LayerFactory factory);
     std::vector<Layer*> CreateLayers(Renderer* renderer) const;
@@ -20,6 +22,12 @@ private:
     std::vector<LayerFactory> factories_;
 };
 
-void RegisterDemoLayers(DemoLayerRegistry& registry);
+class LayerAutoRegistrar
+{
+public:
+    explicit LayerAutoRegistrar(LayerRegistry::LayerFactory factory);
+};
+
+void AttachRegisteredLayers(Renderer* renderer);
 
 #endif

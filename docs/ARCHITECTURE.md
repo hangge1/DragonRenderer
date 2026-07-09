@@ -9,10 +9,11 @@ The diagrams are intentionally close to the current codebase. They are not a mar
 ```mermaid
 flowchart TB
     Entry["engine/entry_point.cc"]
-    Engine["DragonEngine<br/>entry point, app interface, demo registry"]
+    Engine["DragonEngine<br/>entry point, app interface, layer registry"]
     App["Application<br/>platform-neutral lifecycle interface"]
     Win32App["WindowsApplication<br/>Win32 window, message loop, GDI present"]
-    DinosaurDemo["DinosaurDemo<br/>registers DinosaurLayer factory"]
+    LayerRegistry["LayerRegistry<br/>startup layer factories"]
+    DinosaurDemo["DinosaurDemo<br/>static layer auto-registration"]
     Renderer["Renderer<br/>OpenGL-like API, render state, resources, draw execution"]
     LayerSystem["layer<br/>events, layer stack"]
     Camera["camera<br/>PerspectiveCamera view/projection control"]
@@ -26,11 +27,13 @@ flowchart TB
 
     Entry --> Engine
     Engine --> App
+    Engine --> LayerRegistry
     App --> Win32App
-    Entry --> DinosaurDemo
-    Entry --> Renderer
     Win32App --> Renderer
     Win32App --> LayerSystem
+    Win32App --> LayerRegistry
+    DinosaurDemo --> LayerRegistry
+    LayerRegistry --> LayerSystem
     DinosaurDemo --> LayerSystem
     DinosaurDemo --> Camera
     DinosaurDemo --> Model
@@ -55,9 +58,9 @@ engine/
   platform/
     win32/   WindowsApplication, Win32 window, message loop, GDI present
   entry_point.cc
-             stable executable entry point and demo registry invocation
-  demo_layer_registry.*
-             engine-owned Layer factory registration boundary
+             stable executable entry point; creates Application and runs it
+  layer_registry.*
+             engine-owned startup Layer factory registration boundary
 
 render/
   camera/    camera abstractions and perspective camera
@@ -76,7 +79,7 @@ The current include style still uses short project headers such as `renderer.h`,
 
 `pipeline_data.h` used to live in a top-level `core/` folder. It is now owned by `render/pipeline/` because the types inside it are render-pipeline-facing contracts rather than a standalone engine core.
 
-`DinosaurDemo` now lives outside the `Render` static library. `DragonRenderer.exe` links `Render` and `DinosaurDemo`; the demo module implements `RegisterDemoLayers(DemoLayerRegistry&)` and registers its own layer factory with the engine-owned registry. The entry point only consumes registered `Layer` instances and does not include concrete demo layer headers.
+`DinosaurDemo` now lives outside the `Render` library. `DragonRenderer.exe` includes the demo module object files, and the demo module registers its own layer factory through a static `LayerAutoRegistrar`. The entry point does not mention demos, layers, or renderer registration; `WindowsApplication` attaches all registered startup layers after creating the renderer.
 
 ## Build Target Layout
 
@@ -85,19 +88,20 @@ DragonRenderer currently builds project code as static/object libraries plus one
 ```text
 DragonEngine object library
   Program entry point, platform-neutral Application interface,
-  WindowsApplication implementation, command-line parsing, demo layer registry,
+  WindowsApplication implementation, command-line parsing, LayerRegistry,
   and render loop startup.
 
 Render.lib
   Renderer core, layer extension points, camera, resources, scene loading,
   shaders, pipeline stages, and runtime stats.
 
-DinosaurDemo.lib
-  DinosaurLayer, demo-specific model/shader setup, and RegisterDemoLayers
-  registration implementation.
+DinosaurDemo object target
+  DinosaurLayer, demo-specific model/shader setup, and static LayerRegistry
+  registration.
 
 DragonRenderer.exe
-  Links DragonEngine, Render, and DinosaurDemo.
+  Links DragonEngine and Render, and includes DinosaurDemo object files so
+  static layer registration is preserved.
 ```
 
 There is no project-owned DLL boundary yet. Runtime DLLs may still come from third-party dependencies such as Assimp, but the project's own code is linked through static libraries.

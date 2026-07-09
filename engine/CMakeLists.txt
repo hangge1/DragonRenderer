@@ -1,8 +1,8 @@
 add_library(DragonEngine OBJECT
     entry_point.cc
     app/application.h
-    demo_layer_registry.cc
-    demo_layer_registry.h
+    layer_registry.cc
+    layer_registry.h
     platform/win32/windows_application.cc
     platform/win32/windows_application.h
 )

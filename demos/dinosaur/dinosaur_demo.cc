@@ -1,10 +1,10 @@
-#include "demo_layer_registry.h"
+#include "layer_registry.h"
 
 #include "dinosaur_layer.h"
 
-void RegisterDemoLayers(DemoLayerRegistry& registry)
+namespace
 {
-    registry.RegisterLayerFactory([](Renderer* renderer) -> Layer* {
-        return new DinosaurLayer(renderer);
-    });
+LayerAutoRegistrar g_dinosaur_layer_registrar([](Renderer* renderer) -> Layer* {
+    return new DinosaurLayer(renderer);
+});
 }

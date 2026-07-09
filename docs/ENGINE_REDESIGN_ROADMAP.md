@@ -18,7 +18,7 @@ Main problems:
 | Pipeline boundary | `DrawElement` runs vertex fetch, vertex shader, clipping, culling, rasterization, fragment shading, depth test, blending, and framebuffer writes in one function. | Hard to profile, test, parallelize, or replace a single stage. |
 | Resource lifetime | Buffers, vertex arrays, textures, models, meshes, shaders, and layers mix raw pointers and manual deletion. | Ownership is implicit, so crashes and leaks are easy to introduce. |
 | Runtime platform | `Application` is now a platform-neutral lifecycle interface, while the current Win32/GDI host lives in `engine/platform/win32/WindowsApplication`. | The renderer core is cleaner, but a dedicated runtime loop and replaceable window/present backend are still needed. |
-| Scene/demo boundary | The dinosaur demo now lives outside `Render` and registers its layer through the engine-owned `DemoLayerRegistry`. There is still no full scene abstraction. | The executable entry point no longer depends on concrete demo classes, and future demo selection can grow from the registry boundary. |
+| Scene/demo boundary | The dinosaur demo now lives outside `Render` and self-registers its layer through the engine-owned `LayerRegistry`. There is still no full scene abstraction. | The executable entry point no longer mentions demos, layers, or renderer registration. Future demo selection can grow from the registry boundary. |
 | Performance | The hot path allocates temporary vectors per draw call and processes the whole pipeline serially. | Debug interaction is extremely slow and Release performance has no clear optimization map. |
 | Observability | FPS is visible now, but there is no per-stage timing, draw-call count, triangle count, pixel count, or allocation count. | Performance work would be guesswork. |
 | Testability | Tests now cover deterministic frame output, clip/cull behavior, NDC/perspective behavior, depth/output merge, and basic draw-command validation, but broader resource/state contracts are still partial. | Refactoring the pipeline is safer than before, but command extraction still needs more stage-level safety rails. |
@@ -414,8 +414,9 @@ Status:
 
 - Started. `Renderer::DrawElement` now delegates to named private stage methods while keeping behavior and public API unchanged.
 - First physical source split is complete under `engine/app`, `render/camera`, `render/layer`, `render/pipeline`, `render/resource`, `render/runtime`, `render/scene`, and `render/shader`.
-- The dinosaur demo has moved out of `render` into `demos/dinosaur` and is linked as `DinosaurDemo` by `DragonRenderer.exe`.
-- `entry_point.cc` now uses the engine-owned `DemoLayerRegistry` instead of including a concrete demo layer header.
+- The dinosaur demo has moved out of `render` into `demos/dinosaur` and is included as a `DinosaurDemo` object target by `DragonRenderer.exe`.
+- `entry_point.cc` no longer mentions demos, layers, renderer registration, or concrete demo headers.
+- Demo modules now use `LayerAutoRegistrar` to self-register startup layer factories with `LayerRegistry`.
 - `Application` is now an abstract engine lifecycle interface, and the current Win32/GDI implementation lives under `engine/platform/win32/`.
 - The old top-level `core/pipeline_data.h` has been moved into `render/pipeline/pipeline_data.h`; `core/` is no longer a separate source folder.
 - Stage timers and counters still live at the stage boundary.
@@ -457,9 +458,9 @@ Tasks:
 
 - Create `Scene`, `CameraComponent`, `Light`, `MeshInstance`.
 - Create `AssetManager`.
-- Create `DemoRegistry`. Started with `DemoLayerRegistry`.
+- Create `DemoRegistry`. Started with the engine-owned `LayerRegistry` and static layer auto-registration.
 - Move dinosaur demo into `demos/dinosaur`. Done.
-- Hide concrete demo classes from `entry_point.cc` behind an engine-owned demo layer registry. Done for current Layer demos.
+- Hide concrete demo classes and demo registration mechanics from `entry_point.cc`. Done for current Layer demos.
 - Add at least one simple benchmark demo with known triangle count.
 
 Definition of Done:
@@ -496,8 +497,8 @@ app/
 
 engine/
   entry_point.cc
-  demo_layer_registry.h
-  demo_layer_registry.cc
+  layer_registry.h
+  layer_registry.cc
   app/
     application.h
   platform/

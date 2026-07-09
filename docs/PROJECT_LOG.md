@@ -6,6 +6,22 @@ Use this file for project-management decisions, documentation governance, and hi
 
 ## Project Management Entries
 
+## 2026-07-09 - Static Layer Auto-Registration
+
+Decision:
+
+- Replace the explicit entry-point call to `RegisterDemoLayers(...)` with static layer auto-registration.
+- Rename the registry boundary from `DemoLayerRegistry` to the engine-owned `LayerRegistry`.
+- Let `WindowsApplication` attach registered layers after creating and initializing the renderer.
+- Build the current dinosaur demo as an object target so its static registration unit is guaranteed to be linked into `DragonRenderer.exe`.
+
+Rationale:
+
+- The executable entry point should not know that demos exist.
+- Demo modules should contribute themselves to the engine through extension registration.
+- Static libraries can drop object files that are only needed for static initialization; using an object target keeps registration deterministic.
+- This makes the current entry point a true engine host entry: create application, initialize, run.
+
 ## 2026-07-09 - Demo Registry and Application Abstraction
 
 Decision:

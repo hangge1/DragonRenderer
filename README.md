@@ -37,9 +37,9 @@ engine/
   app/        平台无关 Application 生命周期接口
   platform/   WindowsApplication 等平台宿主实现
   entry_point.cc
-              稳定程序入口，通过 DemoLayerRegistry 收集 demo Layer 后启动引擎宿主
-  demo_layer_registry.*
-              引擎统一提供的 demo Layer 注册扩展点
+              稳定程序入口，只负责创建 Application 并启动引擎宿主
+  layer_registry.*
+              引擎统一提供的启动 Layer 注册扩展点
 
 render/
   camera/     相机抽象与透视相机
@@ -51,7 +51,7 @@ render/
   shader/     Shader 基类与内置 Shader
 
 demos/
-  dinosaur/   恐龙模型示例 Layer，通过 RegisterDemoLayers 调用引擎注册接口
+  dinosaur/   恐龙模型示例 Layer，通过静态注册器接入引擎 LayerRegistry
 
 test/         第三方库、渲染输出、裁剪、深度、NDC、DrawCommand 校验
 assets/       运行时资源

@@ -1,8 +1,8 @@
-add_library(DinosaurDemo STATIC
+add_library(DinosaurDemo OBJECT
     dinosaur_demo.cc
     dinosaur_layer.cc
     dinosaur_layer.h
-    ${CMAKE_SOURCE_DIR}/engine/demo_layer_registry.h
+    ${CMAKE_SOURCE_DIR}/engine/layer_registry.h
 )
 
 target_include_directories(DinosaurDemo PUBLIC

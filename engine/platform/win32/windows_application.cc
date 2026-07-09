@@ -8,6 +8,7 @@
 #include <windowsx.h>
 
 #include "event.h"
+#include "layer_registry.h"
 #include "renderer.h"
 #include "runtime/scoped_timer.h"
 
@@ -70,6 +71,7 @@ bool WindowsApplication::Init(void* platform_instance, const wchar_t* window_tit
     renderer_ = new Renderer();
     renderer_->SetExitRequestedCallback([this]() { RequestExit(); });
     renderer_->Init(width_, height_, canvas_buffer_);
+    AttachRegisteredLayers(renderer_);
 
     return true;
 }
