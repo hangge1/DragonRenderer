@@ -127,7 +127,6 @@ private:
 
     void InitFrameBuffer(int32_t frame_width, int32_t frame_height, void* buffer);
 
-    void InitLayer();
 private:
     FrameBuffer* current_frame_buffer_ = nullptr; //帧缓冲
     AbstractCamera* camera_  = nullptr;

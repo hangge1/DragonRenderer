@@ -10,9 +10,9 @@ The diagrams are intentionally close to the current codebase. They are not a mar
 flowchart TB
     Entry["entry_point.cc"]
     App["Application<br/>Win32 window, message loop, frame loop, benchmark mode"]
+    DinosaurDemo["DinosaurDemo<br/>DinosaurLayer setup and update"]
     Renderer["Renderer<br/>OpenGL-like API, render state, resources, draw execution"]
     AppLayer["app<br/>events, layer stack, frame loop"]
-    Demo["demo<br/>TestLayer setup and update"]
     Camera["camera<br/>PerspectiveCamera view/projection control"]
     Model["scene<br/>Model / Mesh Assimp loading and draw submission"]
     Shader["shader<br/>Default / Texture / Lambert"]
@@ -23,12 +23,13 @@ flowchart TB
     Stats["FrameStats<br/>timing and workload counters"]
 
     Entry --> App
+    Entry --> DinosaurDemo
     App --> Renderer
     App --> AppLayer
-    AppLayer --> Demo
-    Demo --> Camera
-    Demo --> Model
-    Demo --> Renderer
+    DinosaurDemo --> AppLayer
+    DinosaurDemo --> Camera
+    DinosaurDemo --> Model
+    DinosaurDemo --> Renderer
     Model --> Renderer
     Renderer --> Resources
     Renderer --> Shader
@@ -47,17 +48,40 @@ The `render` library is physically split by responsibility while keeping the pub
 render/
   app/       Win32 application loop, events, layers, layer stack
   camera/    camera abstractions and perspective camera
-  demo/      built-in demo layer
   pipeline/  draw command, pipeline data, pipeline scratch, clipping, rasterization
   resource/  buffer, vertex array, texture, image, framebuffer
   runtime/   frame statistics and scoped timing
   scene/     model and mesh loading/submission
   shader/    shader base class and built-in shader implementations
+
+demos/
+  dinosaur/  DinosaurLayer and demo-specific model setup
 ```
 
 The current include style still uses short project headers such as `renderer.h`, `clip_tool.h`, and `shader/default_shader.h`. CMake exposes each module directory through `target_include_directories` so this first physical split does not force broad include churn.
 
 `pipeline_data.h` used to live in a top-level `core/` folder. It is now owned by `render/pipeline/` because the types inside it are render-pipeline-facing contracts rather than a standalone engine core.
+
+`DinosaurDemo` now lives outside the `Render` static library. `DragonRenderer.exe` links `Render` and `DinosaurDemo`, then registers `DinosaurLayer` through `Renderer::AddLayer`. This keeps renderer core code from depending on demo code.
+
+## Build Target Layout
+
+DragonRenderer currently builds project code as static libraries plus one executable:
+
+```text
+Render.lib
+  Renderer core, Win32 application shell, camera, resources, scene loading,
+  shaders, pipeline stages, runtime stats.
+
+DinosaurDemo.lib
+  DinosaurLayer and demo-specific model/shader setup.
+
+DragonRenderer.exe
+  Program entry point, command-line parsing, application initialization,
+  demo registration, and render loop startup.
+```
+
+There is no project-owned DLL boundary yet. Runtime DLLs may still come from third-party dependencies such as Assimp, but the project's own code is linked through static libraries.
 
 ## Encoding Policy
 

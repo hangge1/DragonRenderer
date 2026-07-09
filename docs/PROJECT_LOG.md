@@ -58,6 +58,21 @@ Rationale:
 - The unreadable text came from an incorrect decode path during document consolidation, not from the original notes.
 - Restoring from the original blob preserves the project history without manually rewriting the old entries.
 
+## 2026-07-09 - Demo Boundary Split
+
+Decision:
+
+- Move the built-in dinosaur demo out of `render/` and into `demos/dinosaur/`.
+- Build the demo as a separate `DinosaurDemo` static library.
+- Link `DragonRenderer.exe` against both `Render` and `DinosaurDemo`.
+- Remove `Renderer::InitLayer()` and let the executable register `DinosaurLayer` explicitly.
+
+Rationale:
+
+- `Render` should be the renderer framework core, not the owner of a specific demo scene.
+- Demo code should depend on renderer APIs; renderer code should not include or instantiate demo layers.
+- This is a stepping stone toward a future demo registry and cleaner app/runtime split.
+
 ## Historical Development Entries
 
 The entries below were migrated from the old root-level `DEVLOG.md` and normalized as valid UTF-8 Chinese text. They remain part of the continuous project record.

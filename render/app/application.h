@@ -36,6 +36,7 @@ public:
 
     inline int32_t GetWidth() const { return width_; }
     inline int32_t GetHeight() const { return height_; }
+    inline Renderer* GetRenderer() const { return renderer_; }
 
     void SetExit() { has_destoryed_ = true; }
 

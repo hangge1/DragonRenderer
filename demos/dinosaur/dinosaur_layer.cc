@@ -1,5 +1,5 @@
 
-#include "test_layer.h"
+#include "dinosaur_layer.h"
 
 #include "renderer.h"
 
@@ -10,14 +10,14 @@
 
 #include "perspective_camera.h"
 
-void TestLayer::Init()
+void DinosaurLayer::Init()
 {
     InitShader();
 
     InitModel();
 }
 
-void TestLayer::Destroy()
+void DinosaurLayer::Destroy()
 {
     if(nullptr != lightShader_)
     {
@@ -32,7 +32,7 @@ void TestLayer::Destroy()
     }
 }
 
-void TestLayer::Update()
+void DinosaurLayer::Update()
 {
     if(lightShader_ == nullptr || model == nullptr || !model->IsLoaded() || renderer_->GetCamera() == nullptr)
     {
@@ -43,7 +43,7 @@ void TestLayer::Update()
 	lightShader_->project_matrix = renderer_->GetCamera()->GetProjectionMatrix();
 }
 
-void TestLayer::Render()
+void DinosaurLayer::Render()
 {
     if(lightShader_ == nullptr || model == nullptr || !model->IsLoaded())
     {
@@ -54,7 +54,7 @@ void TestLayer::Render()
     model->Draw(lightShader_);
 }
 
-void TestLayer::InitShader()
+void DinosaurLayer::InitShader()
 {
     if(lightShader_ != nullptr)
     {
@@ -67,7 +67,7 @@ void TestLayer::InitShader()
 	lightShader_->environment_light_.color = { 0.5f, 0.5f, 0.5f };
 }
 
-void TestLayer::InitModel()
+void DinosaurLayer::InitModel()
 {
     if(model != nullptr)
     {

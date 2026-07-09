@@ -16,8 +16,6 @@
 #include "layer_stack.h"
 #include "runtime/scoped_timer.h"
 
-#include "test_layer.h"
-
 Renderer::~Renderer()
 {
     if(nullptr != layer_stack_)
@@ -64,7 +62,6 @@ void Renderer::Init(int32_t frame_width, int32_t frame_height, void* buffer)
 
     InitCamera();
 
-    InitLayer();
 }
 
 void Renderer::BeginFrameStats()
@@ -778,12 +775,6 @@ void Renderer::InitFrameBuffer(int32_t frame_width, int32_t frame_height, void* 
 
     current_frame_buffer_ = new FrameBuffer();
     current_frame_buffer_->Init(frame_width, frame_height, (Color*)buffer);
-}
-
-void Renderer::InitLayer()
-{
-    ClearLayers();
-    AddLayer(new TestLayer(this));
 }
 
 void Renderer::Enable(ENABLE_TYPE param)

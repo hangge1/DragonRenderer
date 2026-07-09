@@ -10,6 +10,8 @@
 #include <string>
 
 #include "application.h"
+#include "dinosaur_layer.h"
+#include "renderer.h"
 
 namespace
 {
@@ -71,6 +73,8 @@ int WINAPI wWinMain(HINSTANCE hInstance,
         std::cout << "Application Init Failed!" << std::endl;
         return -1;
     }
+
+    APP->GetRenderer()->AddLayer(new DinosaurLayer(APP->GetRenderer()));
 
 	APP->Run(ParseRunOptions(lpCmdLine));
 

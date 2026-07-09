@@ -67,8 +67,9 @@ file(COPY ${SOURCE_DIR} DESTINATION ${DEST_DIR})
 
 add_subdirectory(thirdparts)
 add_subdirectory(render)
+add_subdirectory(demos)
 add_subdirectory(test)
 
 add_executable(DragonRenderer "entry_point.cc")
-target_link_libraries(DragonRenderer PUBLIC Render)
+target_link_libraries(DragonRenderer PUBLIC Render DinosaurDemo)
 target_link_options(DragonRenderer PRIVATE "/subsystem:console" "/entry:wWinMainCRTStartup")
