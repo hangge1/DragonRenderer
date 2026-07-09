@@ -6,6 +6,22 @@ Use this file for project-management decisions, documentation governance, and hi
 
 ## Project Management Entries
 
+## 2026-07-09 - Application Window Config Registration
+
+Decision:
+
+- Remove hard-coded window title and size from `engine/entry_point.cc`.
+- Add `ApplicationConfig`, `WindowConfig`, `ApplicationConfigRegistry`, and `ApplicationConfigAutoRegistrar`.
+- Let application/demo modules register their desired window configuration through the engine API.
+- Let `WindowsApplication` read the application config during initialization.
+- Keep `ApplicationConfig` as a multi-window-capable list while the current Win32 host consumes the primary window.
+
+Rationale:
+
+- The entry point should not encode app-specific window policy.
+- The dependency direction should be user application to engine configuration, not engine to user application assumptions.
+- A window config list gives the future platform/window manager a clear place to support multiple windows without reversing ownership later.
+
 ## 2026-07-09 - Framework Documentation Sync Rule
 
 Decision:

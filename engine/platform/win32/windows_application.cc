@@ -7,6 +7,7 @@
 
 #include <windowsx.h>
 
+#include "application_config.h"
 #include "event.h"
 #include "layer_registry.h"
 #include "renderer.h"
@@ -50,13 +51,15 @@ WindowsApplication::~WindowsApplication()
     }
 }
 
-bool WindowsApplication::Init(void* platform_instance, const wchar_t* window_title,
-    int32_t window_width, int32_t window_height)
+bool WindowsApplication::Init(void* platform_instance)
 {
-    width_ = window_width;
-    height_ = window_height;
+    ApplicationConfig config = ApplicationConfigRegistry::Get().BuildConfig();
+    const WindowConfig& primary_window = config.GetPrimaryWindow();
+
+    width_ = primary_window.width;
+    height_ = primary_window.height;
     hinstance_ = static_cast<HINSTANCE>(platform_instance);
-    title_ = window_title;
+    title_ = primary_window.title;
     g_active_application = this;
 
     RegisterMainWindowClass();
@@ -156,7 +159,7 @@ void WindowsApplication::Run(const ApplicationRunOptions& options)
             double fps = sample_frame_count / elapsed;
 
             std::wostringstream title_stream;
-            title_stream << (title_ != nullptr ? title_ : L"DragonRenderer")
+            title_stream << (!title_.empty() ? title_ : L"DragonRenderer")
                 << L" | FPS: " << std::fixed << std::setprecision(1) << fps
                 << L" | Frame: " << std::fixed << std::setprecision(2) << stats.frame_ms << L" ms"
                 << L" | U/R/P: " << std::fixed << std::setprecision(2)
@@ -317,7 +320,7 @@ bool WindowsApplication::CreateMainWindow()
 
     hwnd_ = CreateWindow(
         register_class_name_,
-        title_,
+        title_.c_str(),
         dwStyle,
         500,
         500,

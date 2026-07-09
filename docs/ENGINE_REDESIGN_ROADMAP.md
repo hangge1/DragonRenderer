@@ -17,7 +17,7 @@ Main problems:
 | Abstraction level | `Renderer` owns resources, render state, camera, layer orchestration, and draw-call execution. | One class becomes the change point for almost every feature. |
 | Pipeline boundary | `DrawElement` runs vertex fetch, vertex shader, clipping, culling, rasterization, fragment shading, depth test, blending, and framebuffer writes in one function. | Hard to profile, test, parallelize, or replace a single stage. |
 | Resource lifetime | Buffers, vertex arrays, textures, models, meshes, shaders, and layers mix raw pointers and manual deletion. | Ownership is implicit, so crashes and leaks are easy to introduce. |
-| Runtime platform | `Application` is now a platform-neutral lifecycle interface, while the current Win32/GDI host lives in `engine/platform/win32/WindowsApplication`. | The renderer core is cleaner, but a dedicated runtime loop and replaceable window/present backend are still needed. |
+| Runtime platform | `Application` is now a platform-neutral lifecycle interface, application modules can self-register window config through `ApplicationConfigRegistry`, and the current Win32/GDI host lives in `engine/platform/win32/WindowsApplication`. | The renderer core is cleaner, but a dedicated runtime loop, multi-window platform layer, and replaceable present backend are still needed. |
 | Scene/demo boundary | The dinosaur demo now lives outside `Render` and self-registers its layer through the engine-owned `LayerRegistry`. There is still no full scene abstraction. | The executable entry point no longer mentions demos, layers, or renderer registration. Future demo selection can grow from the registry boundary. |
 | Performance | The hot path allocates temporary vectors per draw call and processes the whole pipeline serially. | Debug interaction is extremely slow and Release performance has no clear optimization map. |
 | Observability | FPS is visible now, but there is no per-stage timing, draw-call count, triangle count, pixel count, or allocation count. | Performance work would be guesswork. |
@@ -418,6 +418,7 @@ Status:
 - `entry_point.cc` no longer mentions demos, layers, renderer registration, or concrete demo headers.
 - Demo modules now use `LayerAutoRegistrar` to self-register startup layer factories with `LayerRegistry`.
 - `Application` is now an abstract engine lifecycle interface, and the current Win32/GDI implementation lives under `engine/platform/win32/`.
+- Application/window title and size are no longer hard-coded in `entry_point.cc`; application modules register window config through `ApplicationConfigAutoRegistrar`.
 - The old top-level `core/pipeline_data.h` has been moved into `render/pipeline/pipeline_data.h`; `core/` is no longer a separate source folder.
 - Stage timers and counters still live at the stage boundary.
 - `PipelineScratch` is now available to every extracted stage.
@@ -459,6 +460,7 @@ Tasks:
 - Create `Scene`, `CameraComponent`, `Light`, `MeshInstance`.
 - Create `AssetManager`.
 - Create `DemoRegistry`. Started with the engine-owned `LayerRegistry` and static layer auto-registration.
+- Move app-specific window title and size out of the engine entry point. Done with `ApplicationConfigRegistry`; current Win32 host consumes the primary window.
 - Move dinosaur demo into `demos/dinosaur`. Done.
 - Hide concrete demo classes and demo registration mechanics from `entry_point.cc`. Done for current Layer demos.
 - Add at least one simple benchmark demo with known triangle count.

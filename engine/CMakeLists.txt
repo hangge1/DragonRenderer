@@ -1,5 +1,7 @@
 add_library(DragonEngine OBJECT
     entry_point.cc
+    app/application_config.cc
+    app/application_config.h
     app/application.h
     layer_registry.cc
     layer_registry.h

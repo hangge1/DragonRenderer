@@ -5,6 +5,8 @@
 
 #include <Windows.h>
 
+#include <string>
+
 class WindowsApplication final : public Application
 {
 public:
@@ -16,10 +18,7 @@ public:
     WindowsApplication& operator=(const WindowsApplication&) = delete;
     WindowsApplication& operator=(WindowsApplication&&) = delete;
 
-    bool Init(void* platform_instance,
-        const wchar_t* main_window_title = kDefaultWindowTitle,
-        int32_t main_window_width = kDefaultWindowWidth,
-        int32_t main_window_height = kDefaultWindowHeight) override;
+    bool Init(void* platform_instance) override;
 
     void Run(const ApplicationRunOptions& options = {}) override;
     int32_t GetWidth() const override { return width_; }
@@ -42,7 +41,7 @@ private:
 
     int32_t width_ { 0 };
     int32_t height_ { 0 };
-    const wchar_t* title_ { nullptr };
+    std::wstring title_;
     const wchar_t* register_class_name_ = L"DragonWindowClass";
 
     HINSTANCE hinstance_ { nullptr };

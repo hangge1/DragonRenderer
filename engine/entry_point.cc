@@ -62,12 +62,8 @@ int WINAPI wWinMain(HINSTANCE hInstance,
                     LPTSTR lpCmdLine,
                     int nCmdShow)
 {
-    const int window_width = 1200;
-    const int window_height = 900;
-    const wchar_t* window_title = L"DragonSoftRenderer";
-
     std::unique_ptr<Application> app(CreateApplication());
-    if(!app || !app->Init(static_cast<void*>(hInstance), window_title, window_width, window_height))
+    if(!app || !app->Init(static_cast<void*>(hInstance)))
     {
         std::cout << "Application Init Failed!" << std::endl;
         return -1;

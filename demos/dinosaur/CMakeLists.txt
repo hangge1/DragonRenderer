@@ -7,6 +7,7 @@ add_library(DinosaurDemo OBJECT
 
 target_include_directories(DinosaurDemo PUBLIC
     ${CMAKE_SOURCE_DIR}/engine
+    ${CMAKE_SOURCE_DIR}/engine/app
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 

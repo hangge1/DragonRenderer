@@ -11,6 +11,7 @@ flowchart TB
     Entry["engine/entry_point.cc"]
     Engine["DragonEngine<br/>entry point, app interface, layer registry"]
     App["Application<br/>platform-neutral lifecycle interface"]
+    AppConfig["ApplicationConfigRegistry<br/>user application window config"]
     Win32App["WindowsApplication<br/>Win32 window, message loop, GDI present"]
     LayerRegistry["LayerRegistry<br/>startup layer factories"]
     DinosaurDemo["DinosaurDemo<br/>static layer auto-registration"]
@@ -27,12 +28,15 @@ flowchart TB
 
     Entry --> Engine
     Engine --> App
+    Engine --> AppConfig
     Engine --> LayerRegistry
     App --> Win32App
+    Win32App --> AppConfig
     Win32App --> Renderer
     Win32App --> LayerSystem
     Win32App --> LayerRegistry
     DinosaurDemo --> LayerRegistry
+    DinosaurDemo --> AppConfig
     LayerRegistry --> LayerSystem
     DinosaurDemo --> LayerSystem
     DinosaurDemo --> Camera
@@ -54,7 +58,7 @@ The codebase is physically split into engine hosting, renderer core, and demo mo
 
 ```text
 engine/
-  app/       platform-neutral Application lifecycle interface
+  app/       platform-neutral Application lifecycle interface and application/window config registration
   platform/
     win32/   WindowsApplication, Win32 window, message loop, GDI present
   entry_point.cc
@@ -79,7 +83,9 @@ The current include style still uses short project headers such as `renderer.h`,
 
 `pipeline_data.h` used to live in a top-level `core/` folder. It is now owned by `render/pipeline/` because the types inside it are render-pipeline-facing contracts rather than a standalone engine core.
 
-`DinosaurDemo` now lives outside the `Render` library. `DragonRenderer.exe` includes the demo module object files, and the demo module registers its own layer factory through a static `LayerAutoRegistrar`. The entry point does not mention demos, layers, or renderer registration; `WindowsApplication` attaches all registered startup layers after creating the renderer.
+`DinosaurDemo` now lives outside the `Render` library. `DragonRenderer.exe` includes the demo module object files, and the demo module registers its own layer factory through a static `LayerAutoRegistrar`. The demo module also declares its desired application window through `ApplicationConfigAutoRegistrar`. The entry point does not mention demos, layers, renderer registration, window title, or window size; `WindowsApplication` reads the application config and attaches all registered startup layers after creating the renderer.
+
+`ApplicationConfig` already supports a list of `WindowConfig` values. The current Win32 host consumes the primary window because the renderer still has one back buffer and one active GDI window. Multi-window creation should be implemented in a future platform/window manager layer without moving ownership back into the entry point.
 
 ## Build Target Layout
 
@@ -88,16 +94,16 @@ DragonRenderer currently builds project code as static/object libraries plus one
 ```text
 DragonEngine object library
   Program entry point, platform-neutral Application interface,
-  WindowsApplication implementation, command-line parsing, LayerRegistry,
-  and render loop startup.
+  ApplicationConfigRegistry, WindowsApplication implementation,
+  command-line parsing, LayerRegistry, and render loop startup.
 
 Render.lib
   Renderer core, layer extension points, camera, resources, scene loading,
   shaders, pipeline stages, and runtime stats.
 
 DinosaurDemo object target
-  DinosaurLayer, demo-specific model/shader setup, and static LayerRegistry
-  registration.
+  DinosaurLayer, demo-specific model/shader setup, static LayerRegistry
+  registration, and application window configuration.
 
 DragonRenderer.exe
   Links DragonEngine and Render, and includes DinosaurDemo object files so
