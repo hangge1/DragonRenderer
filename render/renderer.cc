@@ -57,12 +57,16 @@ Renderer::~Renderer()
 
 void Renderer::Init(int32_t frame_width, int32_t frame_height, void* buffer)
 {
-    InitFrameBuffer(frame_width, frame_height, buffer);
-
-    UpdateScreenMatrix(frame_width, frame_height);
+    ResizeRenderTarget(frame_width, frame_height, buffer);
 
     InitCamera();
 
+}
+
+void Renderer::ResizeRenderTarget(int32_t frame_width, int32_t frame_height, void* buffer)
+{
+    InitFrameBuffer(frame_width, frame_height, buffer);
+    UpdateScreenMatrix(frame_width, frame_height);
 }
 
 void Renderer::BeginFrameStats()

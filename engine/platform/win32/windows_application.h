@@ -2,10 +2,12 @@
 #define _ENGINE_PLATFORM_WIN32_WINDOWS_APPLICATION_H_
 
 #include "application.h"
+#include "application_config.h"
 #include "input_state.h"
 
 #include <Windows.h>
 
+#include <chrono>
 #include <string>
 
 class WindowsApplication final : public Application
@@ -31,6 +33,9 @@ public:
 
 private:
     void InitDC();
+    bool EnsureRenderSurfaceForInput();
+    bool ResizeRenderSurface(int32_t render_width, int32_t render_height);
+    bool IsInteractiveFrame() const;
     bool CreateMainWindow();
     void MoveWindow2DesktopCenter();
     ATOM RegisterMainWindowClass();
@@ -42,18 +47,23 @@ private:
 
     int32_t width_ { 0 };
     int32_t height_ { 0 };
+    int32_t render_width_ { 0 };
+    int32_t render_height_ { 0 };
     std::wstring title_;
     const wchar_t* register_class_name_ = L"DragonWindowClass";
+    WindowConfig window_config_;
 
     HINSTANCE hinstance_ { nullptr };
     HWND hwnd_ { nullptr };
 
     bool has_destoryed_ { false };
     InputState input_state_;
+    std::chrono::steady_clock::time_point last_interactive_time_;
 
     HDC currentDC_ { nullptr };
     HDC canvasDC_ { nullptr };
     HBITMAP bitmap_ { nullptr };
+    HGDIOBJ previous_canvas_object_ { nullptr };
     void* canvas_buffer_ { nullptr };
 };
 

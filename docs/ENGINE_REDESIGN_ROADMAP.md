@@ -17,7 +17,7 @@ Main problems:
 | Abstraction level | `Renderer` owns resources, render state, camera, layer orchestration, and draw-call execution. | One class becomes the change point for almost every feature. |
 | Pipeline boundary | `DrawElement` runs vertex fetch, vertex shader, clipping, culling, rasterization, fragment shading, depth test, blending, and framebuffer writes in one function. | Hard to profile, test, parallelize, or replace a single stage. |
 | Resource lifetime | Buffers, vertex arrays, textures, models, meshes, shaders, and layers mix raw pointers and manual deletion. | Ownership is implicit, so crashes and leaks are easy to introduce. |
-| Runtime platform | `Application` is now a platform-neutral lifecycle interface, application modules can self-register window config through `ApplicationConfigRegistry`, the current Win32/GDI host lives in `engine/platform/win32/WindowsApplication`, and Win32 input is coalesced into per-frame `InputState`. | The renderer core is cleaner, but a dedicated runtime loop, multi-window platform layer, and replaceable present backend are still needed. |
+| Runtime platform | `Application` is now a platform-neutral lifecycle interface, application modules can self-register window config through `ApplicationConfigRegistry`, the current Win32/GDI host lives in `engine/platform/win32/WindowsApplication`, Win32 input is coalesced into per-frame `InputState`, and application modules can opt into interaction-time render-surface scaling through `WindowConfig`. | The renderer core is cleaner, but a dedicated runtime loop, multi-window platform layer, replaceable present backend, and cleaner render-target ownership are still needed. |
 | Scene/demo boundary | The dinosaur demo now lives outside `Render` and self-registers its layer through the engine-owned `LayerRegistry`. There is still no full scene abstraction. | The executable entry point no longer mentions demos, layers, or renderer registration. Future demo selection can grow from the registry boundary. |
 | Performance | The hot path allocates temporary vectors per draw call and processes the whole pipeline serially. | Debug interaction is extremely slow and Release performance has no clear optimization map. |
 | Observability | FPS is visible now, but there is no per-stage timing, draw-call count, triangle count, pixel count, or allocation count. | Performance work would be guesswork. |
@@ -360,6 +360,7 @@ Status:
 
 - Started. `WindowsApplication` now drains pending Win32 messages once per frame and coalesces input into `InputState`.
 - Started. `Renderer::OnInput` lets camera input be consumed once per frame rather than directly from `WndProc`.
+- Started. `WindowConfig` can enable interaction-time internal render-surface scaling; the current Win32 host resizes the software back buffer and stretches it to the window during active input.
 - `input_state` test covers the core per-frame input-state contract.
 
 Tasks:
@@ -368,6 +369,7 @@ Tasks:
 - Create `runtime/Runtime`.
 - Move FPS title update into `Diagnostics` or `Runtime`.
 - Convert Win32 messages into engine input state/events. Started with per-frame `InputState`.
+- Keep performance policies app-configurable rather than hard-coded in the entry point. Started with interactive render-surface scaling on `WindowConfig`.
 - Keep `Application` as a platform-neutral lifecycle interface during migration. Started.
 
 Definition of Done:
@@ -488,6 +490,7 @@ Tasks:
 
 - Replace per-draw temporary vectors with scratch buffers. Started.
 - Pre-reserve stage buffers. Started.
+- Add app-configurable interaction-time render-surface scaling. Started for the Win32/GDI host.
 - Add bounding-box rasterization limits.
 - Add tile-based raster path.
 - Add optional parallel tile execution.

@@ -92,6 +92,8 @@ The current include style still uses short project headers such as `renderer.h`,
 
 Win32 input is no longer dispatched directly into `Renderer::OnEvent` from `WndProc`. `WindowsApplication` drains all pending OS messages once per frame, coalesces keyboard and mouse state into `InputState`, and then calls `Renderer::OnInput` once before update/render work. This keeps high-frequency `WM_MOUSEMOVE` messages from synchronously driving renderer/camera work.
 
+Application modules can opt into interactive render-surface scaling through `WindowConfig`. When enabled, `WindowsApplication` temporarily resizes the internal software back buffer while input is active and presents it to the configured window size through `StretchBlt`. This keeps the policy at the application/demo boundary: the engine supplies the mechanism, while each user application chooses whether to trade interaction-time sharpness for responsiveness.
+
 ## Build Target Layout
 
 DragonRenderer currently builds project code as static/object libraries plus one executable:
@@ -142,6 +144,7 @@ sequenceDiagram
 
     OS->>App: Window messages
     App->>Input: Drain and coalesce pending input
+    App->>App: Resize render surface if interaction policy requires it
     App->>Renderer: BeginFrameStats()
     App->>Renderer: OnInput(InputState)
     Renderer->>Camera: Consume input once per frame

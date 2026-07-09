@@ -21,7 +21,8 @@ int main()
        !input.IsMouseButtonDown(InputState::MouseRight) ||
        !input.IsMouseButtonPressed(InputState::MouseRight) ||
        !input.IsKeyDown('W') ||
-       !input.IsKeyPressed('W'))
+       !input.IsKeyPressed('W') ||
+       !input.HasActivityThisFrame())
     {
         std::cout << "input state test Failed" << std::endl;
         return 1;
@@ -35,7 +36,8 @@ int main()
        !input.IsMouseButtonDown(InputState::MouseRight) ||
        input.IsMouseButtonPressed(InputState::MouseRight) ||
        !input.IsKeyDown('W') ||
-       input.IsKeyPressed('W'))
+       input.IsKeyPressed('W') ||
+       input.HasActivityThisFrame())
     {
         std::cout << "input state test Failed" << std::endl;
         return 1;
@@ -47,7 +49,8 @@ int main()
     if(input.IsMouseButtonDown(InputState::MouseRight) ||
        !input.IsMouseButtonReleased(InputState::MouseRight) ||
        input.IsKeyDown('W') ||
-       !input.IsKeyReleased('W'))
+       !input.IsKeyReleased('W') ||
+       !input.HasActivityThisFrame())
     {
         std::cout << "input state test Failed" << std::endl;
         return 1;

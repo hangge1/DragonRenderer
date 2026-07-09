@@ -12,6 +12,9 @@ struct WindowConfig
     int32_t width { 800 };
     int32_t height { 600 };
     bool visible { true };
+    bool enable_interactive_resolution_scale { false };
+    float interactive_render_scale { 0.5f };
+    uint32_t interactive_recovery_ms { 180 };
 };
 
 class ApplicationConfig

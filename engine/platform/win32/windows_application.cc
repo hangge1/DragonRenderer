@@ -1,6 +1,8 @@
 #include "windows_application.h"
 
+#include <algorithm>
 #include <chrono>
+#include <cstring>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
@@ -29,14 +31,22 @@ LRESULT CALLBACK Wndproc(HWND window_handler, UINT message_id, WPARAM message_wp
 
 WindowsApplication::~WindowsApplication()
 {
+    if(nullptr != canvasDC_ && nullptr != previous_canvas_object_)
+    {
+        SelectObject(canvasDC_, previous_canvas_object_);
+        previous_canvas_object_ = nullptr;
+    }
+
     if(nullptr != bitmap_)
     {
         DeleteObject(bitmap_);
+        bitmap_ = nullptr;
     }
 
     if(nullptr != canvasDC_)
     {
         DeleteDC(canvasDC_);
+        canvasDC_ = nullptr;
     }
 
     if(nullptr != currentDC_ && nullptr != hwnd_)
@@ -55,8 +65,11 @@ bool WindowsApplication::Init(void* platform_instance)
     ApplicationConfig config = ApplicationConfigRegistry::Get().BuildConfig();
     const WindowConfig& primary_window = config.GetPrimaryWindow();
 
+    window_config_ = primary_window;
     width_ = primary_window.width;
     height_ = primary_window.height;
+    render_width_ = width_;
+    render_height_ = height_;
     hinstance_ = static_cast<HINSTANCE>(platform_instance);
     title_ = primary_window.title;
     g_active_application = this;
@@ -72,7 +85,7 @@ bool WindowsApplication::Init(void* platform_instance)
 
     renderer_ = new Renderer();
     renderer_->SetExitRequestedCallback([this]() { RequestExit(); });
-    renderer_->Init(width_, height_, canvas_buffer_);
+    renderer_->Init(render_width_, render_height_, canvas_buffer_);
     AttachRegisteredLayers(renderer_);
 
     return true;
@@ -105,6 +118,10 @@ void WindowsApplication::Run(const ApplicationRunOptions& options)
     {
         input_state_.BeginFrame();
         if(!ProcessPendingMessages())
+        {
+            break;
+        }
+        if(!EnsureRenderSurfaceForInput())
         {
             break;
         }
@@ -328,7 +345,123 @@ bool WindowsApplication::ProcessPendingMessages()
 
 void WindowsApplication::SwapBuffer()
 {
-    BitBlt(currentDC_, 0, 0, width_, height_, canvasDC_, 0, 0, SRCCOPY);
+    if(render_width_ == width_ && render_height_ == height_)
+    {
+        BitBlt(currentDC_, 0, 0, width_, height_, canvasDC_, 0, 0, SRCCOPY);
+        return;
+    }
+
+    SetStretchBltMode(currentDC_, COLORONCOLOR);
+    StretchBlt(currentDC_, 0, 0, width_, height_, canvasDC_, 0, 0, render_width_, render_height_, SRCCOPY);
+}
+
+bool WindowsApplication::EnsureRenderSurfaceForInput()
+{
+    if(!window_config_.enable_interactive_resolution_scale || renderer_ == nullptr)
+    {
+        return true;
+    }
+
+    auto now = std::chrono::steady_clock::now();
+    if(IsInteractiveFrame())
+    {
+        last_interactive_time_ = now;
+    }
+
+    const auto idle_duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now - last_interactive_time_).count();
+    const bool should_use_interactive_surface =
+        last_interactive_time_.time_since_epoch().count() != 0 &&
+        idle_duration_ms <= static_cast<int64_t>(window_config_.interactive_recovery_ms);
+
+    float target_scale = should_use_interactive_surface ? window_config_.interactive_render_scale : 1.0f;
+    if(target_scale <= 0.0f || target_scale > 1.0f)
+    {
+        target_scale = 1.0f;
+    }
+
+    const int32_t target_width = std::max(1, static_cast<int32_t>(width_ * target_scale));
+    const int32_t target_height = std::max(1, static_cast<int32_t>(height_ * target_scale));
+    if(target_width == render_width_ && target_height == render_height_)
+    {
+        return true;
+    }
+
+    return ResizeRenderSurface(target_width, target_height);
+}
+
+bool WindowsApplication::ResizeRenderSurface(int32_t render_width, int32_t render_height)
+{
+    if(render_width <= 0 || render_height <= 0 || currentDC_ == nullptr)
+    {
+        return false;
+    }
+
+    if(canvasDC_ != nullptr && previous_canvas_object_ != nullptr)
+    {
+        SelectObject(canvasDC_, previous_canvas_object_);
+        previous_canvas_object_ = nullptr;
+    }
+
+    if(bitmap_ != nullptr)
+    {
+        DeleteObject(bitmap_);
+        bitmap_ = nullptr;
+    }
+
+    if(canvasDC_ != nullptr)
+    {
+        DeleteDC(canvasDC_);
+        canvasDC_ = nullptr;
+    }
+
+    render_width_ = render_width;
+    render_height_ = render_height;
+    canvas_buffer_ = nullptr;
+
+    canvasDC_ = CreateCompatibleDC(currentDC_);
+    if(canvasDC_ == nullptr)
+    {
+        return false;
+    }
+
+    BITMAPINFO temp_bmp_info {};
+    temp_bmp_info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+    temp_bmp_info.bmiHeader.biWidth = render_width_;
+    temp_bmp_info.bmiHeader.biHeight = render_height_;
+    temp_bmp_info.bmiHeader.biPlanes = 1;
+    temp_bmp_info.bmiHeader.biBitCount = 32;
+    temp_bmp_info.bmiHeader.biCompression = BI_RGB;
+
+    bitmap_ = CreateDIBSection(canvasDC_, &temp_bmp_info, DIB_RGB_COLORS, (void**)&canvas_buffer_, 0, 0);
+    if(bitmap_ == nullptr || canvas_buffer_ == nullptr)
+    {
+        if(bitmap_ != nullptr)
+        {
+            DeleteObject(bitmap_);
+            bitmap_ = nullptr;
+        }
+        DeleteDC(canvasDC_);
+        canvasDC_ = nullptr;
+        canvas_buffer_ = nullptr;
+        return false;
+    }
+
+    previous_canvas_object_ = SelectObject(canvasDC_, bitmap_);
+    memset(canvas_buffer_, 0, render_width_ * render_height_ * 4);
+
+    if(renderer_ != nullptr)
+    {
+        renderer_->ResizeRenderTarget(render_width_, render_height_, canvas_buffer_);
+    }
+    return true;
+}
+
+bool WindowsApplication::IsInteractiveFrame() const
+{
+    return input_state_.HasActivityThisFrame() ||
+        input_state_.IsMouseButtonDown(InputState::MouseLeft) ||
+        input_state_.IsMouseButtonDown(InputState::MouseMiddle) ||
+        input_state_.IsMouseButtonDown(InputState::MouseRight);
 }
 
 bool WindowsApplication::CreateMainWindow()
@@ -406,21 +539,7 @@ ATOM WindowsApplication::RegisterMainWindowClass()
 void WindowsApplication::InitDC()
 {
     currentDC_ = GetDC(hwnd_);
-    canvasDC_ = CreateCompatibleDC(currentDC_);
-
-    BITMAPINFO temp_bmp_info {};
-    temp_bmp_info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-    temp_bmp_info.bmiHeader.biWidth = width_;
-    temp_bmp_info.bmiHeader.biHeight = height_;
-    temp_bmp_info.bmiHeader.biPlanes = 1;
-    temp_bmp_info.bmiHeader.biBitCount = 32;
-    temp_bmp_info.bmiHeader.biCompression = BI_RGB;
-
-    bitmap_ = CreateDIBSection(canvasDC_, &temp_bmp_info, DIB_RGB_COLORS, (void**)&canvas_buffer_, 0, 0);
-
-    SelectObject(canvasDC_, bitmap_);
-
-    memset(canvas_buffer_, 0, width_ * height_ * 4);
+    ResizeRenderSurface(render_width_, render_height_);
 }
 
 Application* CreateApplication()

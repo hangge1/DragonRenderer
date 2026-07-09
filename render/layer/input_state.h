@@ -22,6 +22,7 @@ public:
         mouse_delta_x_ = 0;
         mouse_delta_y_ = 0;
         mouse_moved_ = false;
+        has_activity_this_frame_ = false;
         key_pressed_.fill(false);
         key_released_.fill(false);
         mouse_pressed_.fill(false);
@@ -39,6 +40,7 @@ public:
         {
             key_pressed_[key] = is_down;
             key_released_[key] = !is_down;
+            has_activity_this_frame_ = true;
         }
 
         key_down_[key] = is_down;
@@ -71,6 +73,7 @@ public:
         mouse_y_ = y;
         has_mouse_position_ = true;
         mouse_moved_ = true;
+        has_activity_this_frame_ = true;
     }
 
     int32_t GetMouseX() const { return mouse_x_; }
@@ -91,6 +94,7 @@ public:
         {
             mouse_pressed_[button] = is_down;
             mouse_released_[button] = !is_down;
+            has_activity_this_frame_ = true;
         }
 
         mouse_down_[button] = is_down;
@@ -111,6 +115,8 @@ public:
         return button < kMouseButtonCount && mouse_released_[button];
     }
 
+    bool HasActivityThisFrame() const { return has_activity_this_frame_; }
+
 private:
     std::array<bool, kMaxKeyCode> key_down_ {};
     std::array<bool, kMaxKeyCode> key_pressed_ {};
@@ -126,6 +132,7 @@ private:
     int32_t mouse_delta_y_ { 0 };
     bool has_mouse_position_ { false };
     bool mouse_moved_ { false };
+    bool has_activity_this_frame_ { false };
 };
 
 #endif

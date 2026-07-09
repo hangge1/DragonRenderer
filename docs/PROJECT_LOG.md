@@ -6,6 +6,22 @@ Use this file for project-management decisions, documentation governance, and hi
 
 ## Project Management Entries
 
+## 2026-07-09 - Interactive Render Surface Scaling
+
+Decision:
+
+- Add optional interaction-time render-surface scaling to `WindowConfig`.
+- Keep the default disabled so engine users do not inherit a hidden quality/performance tradeoff.
+- Let the dinosaur demo explicitly enable a 0.5 internal render scale during active input and recover after a short idle window.
+- Add `Renderer::ResizeRenderTarget` so the platform host can resize the software back buffer without recreating the whole renderer.
+- Present scaled internal frames through Win32 `StretchBlt` while preserving the configured external window size.
+
+Rationale:
+
+- Mouse interaction was still expensive because every camera movement re-rendered the full 1200x900 software back buffer.
+- Input coalescing reduces event-driven update pressure, but the software rasterizer still needs a lower-cost interactive path until tile culling, cached transforms, or deeper pipeline optimizations exist.
+- This is an application policy rather than a renderer invariant: different demos or user applications should be able to choose their own interaction quality/performance balance.
+
 ## 2026-07-09 - Per-Frame Input State
 
 Decision:
