@@ -6,6 +6,20 @@ Use this file for project-management decisions, documentation governance, and hi
 
 ## Project Management Entries
 
+## 2026-07-09 - Framework Documentation Sync Rule
+
+Decision:
+
+- Treat documentation synchronization as part of the definition of done for framework-level changes.
+- Require architecture, roadmap, project-log, and performance-log updates whenever a code change alters the corresponding facts.
+- Add a repository PR checklist so future framework changes explicitly confirm documentation synchronization.
+
+Rationale:
+
+- DragonRenderer is being refactored as a framework, so the documentation is part of the framework contract.
+- Architecture diagrams and roadmap status become misleading if they lag behind module or lifecycle changes.
+- Keeping code and documents in the same commit makes decisions easier to audit and safer to continue later.
+
 ## 2026-07-09 - Static Layer Auto-Registration
 
 Decision:

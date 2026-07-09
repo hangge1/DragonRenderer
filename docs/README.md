@@ -22,6 +22,30 @@ The repository root keeps only lightweight project entry files such as `README.m
 - Use `PERFORMANCE_LOG.md` for claims that need numbers.
 - Use `PROJECT_LOG.md` for cross-cutting decisions, documentation cleanup, iteration notes, and historical development entries.
 
+## Framework Change Sync Rule
+
+Any framework-level code change must update the relevant documentation in the same commit or clearly state why no document change is needed.
+
+Framework-level changes include:
+
+- Module boundaries, folder ownership, or build targets.
+- Engine startup, application lifecycle, platform/runtime flow, or layer registration.
+- Public extension points, renderer-facing APIs, resource ownership, or pipeline stage contracts.
+- Architecture diagrams, data flow, performance instrumentation, or refactor milestone status.
+
+Required documentation updates:
+
+- Update [ARCHITECTURE.md](ARCHITECTURE.md) when current structure, diagrams, data flow, build layout, or invariants change.
+- Update [ENGINE_REDESIGN_ROADMAP.md](ENGINE_REDESIGN_ROADMAP.md) when a milestone starts, completes, changes scope, or becomes outdated.
+- Update [PROJECT_LOG.md](PROJECT_LOG.md) when the change records a project decision, governance rule, or cross-module direction.
+- Update [PERFORMANCE_LOG.md](PERFORMANCE_LOG.md) when the change makes or relies on measurable performance claims.
+
+Definition of done:
+
+- Code and documentation describe the same framework shape.
+- New or changed architecture facts have one canonical home under `docs/`.
+- Verification notes mention the documentation files reviewed or updated.
+
 ## Naming Rules
 
 - Prefer clear uppercase document names for major engineering artifacts.

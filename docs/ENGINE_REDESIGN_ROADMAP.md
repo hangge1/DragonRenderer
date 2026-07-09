@@ -567,6 +567,7 @@ This layout should be introduced gradually. Moving files without reducing respon
 - Keep the public API small and boring.
 - Keep software-rendering educational value visible.
 - Every major refactor step must preserve a running demo.
+- Every framework-level change must update the current architecture docs, roadmap status, and project log when those facts change.
 - Every performance claim needs a before/after number.
 - Optimize data flow before adding threads.
 - Use Release or RelWithDebInfo for interaction and performance evaluation.

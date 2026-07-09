@@ -272,6 +272,8 @@ flowchart TB
 ## Refactor Guardrails
 
 - Keep the demo running after every architecture step.
+- Treat documentation synchronization as part of every framework-level change.
+- Update this architecture document in the same commit when module boundaries, source layout, build target layout, runtime flow, data flow, extension points, or architectural invariants change.
 - Add tests before changing rasterization, clipping, or depth behavior.
 - `render_output_smoke` draws a deterministic 16x16 offscreen triangle and checks pixel count, framebuffer checksum, draw calls, input triangles, and rasterized fragments.
 - `clip_tool` covers clip-volume acceptance/rejection, line and triangle clipping, and front/back face culling semantics.
