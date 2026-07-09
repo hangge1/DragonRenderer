@@ -12,6 +12,9 @@
 
 void DinosaurLayer::Init()
 {
+    renderer_->Enable(CULL_FACE);
+    renderer_->SetCullFaceType(BACK_FACE);
+
     InitShader();
 
     InitModel();

@@ -1,6 +1,8 @@
 ﻿
 #include "raster_tool.h"
 
+#include <algorithm>
+#include <cstdint>
 #include <iostream>
 #include <vector>
 
@@ -37,7 +39,8 @@ bool IsPointInTriangle(const VsOutput& p1, const VsOutput& p2, const VsOutput& p
     return false;
 }
 
-void RasterTool::Rasterize(uint32_t draw_mode, const std::vector<VsOutput>& inputs, std::vector<VsOutput>& output)
+void RasterTool::Rasterize(uint32_t draw_mode, const std::vector<VsOutput>& inputs, std::vector<VsOutput>& output,
+    int32_t viewport_width, int32_t viewport_height)
 {
     output.clear();
     output.reserve(inputs.size());
@@ -53,7 +56,7 @@ void RasterTool::Rasterize(uint32_t draw_mode, const std::vector<VsOutput>& inpu
     {
 		for (uint32_t i = 0; i < inputs.size(); i += 3) 
         {
-			RasterizeTriangle(output, inputs[i], inputs[i + 1], inputs[i + 2]);
+			RasterizeTriangle(output, inputs[i], inputs[i + 1], inputs[i + 2], viewport_width, viewport_height);
 		}
 	}
 }
@@ -167,15 +170,25 @@ void RasterTool::InterpolateLine(const VsOutput& start, const VsOutput& end, VsO
     target.position.z = weight * end.position.z + (1.0f - weight) * start.position.z;
 }
 
-void RasterTool::RasterizeTriangle(std::vector<VsOutput>& result, const VsOutput& p1, const VsOutput& p2, const VsOutput& p3)
+void RasterTool::RasterizeTriangle(std::vector<VsOutput>& result, const VsOutput& p1, const VsOutput& p2, const VsOutput& p3,
+    int32_t viewport_width, int32_t viewport_height)
 {
     int min_x = std::min( std::min( p1.position.x, p2.position.x ), p3.position.x );
     int min_y = std::min( std::min( p1.position.y, p2.position.y ), p3.position.y );
     int max_x = std::max( std::max( p1.position.x, p2.position.x ), p3.position.x );
     int max_y = std::max( std::max( p1.position.y, p2.position.y ), p3.position.y );
 
-    //std::cout << "minx = " << min_x << " maxx = " << max_x
-    //          << "miny = " << min_y << " maxy = " << max_y << std::endl;
+    if(viewport_width <= 0 || viewport_height <= 0 ||
+       max_x < 0 || max_y < 0 ||
+       min_x >= viewport_width || min_y >= viewport_height)
+    {
+        return;
+    }
+
+    min_x = std::max(0, min_x);
+    min_y = std::max(0, min_y);
+    max_x = std::min(viewport_width - 1, max_x);
+    max_y = std::min(viewport_height - 1, max_y);
 
     for (int x = min_x; x <= max_x; x++)
     {

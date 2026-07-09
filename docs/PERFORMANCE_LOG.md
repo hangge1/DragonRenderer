@@ -363,3 +363,41 @@ Follow-up:
 
 - Keep command validation narrow and cheap until a real render queue exists.
 - Start moving resource/state checks toward a small validation helper if the rule set keeps growing.
+
+## 2026-07-09 - Close-Camera Raster Pressure Mitigation
+
+Change:
+
+- Clamped triangle raster bounding-box scans to the active framebuffer viewport.
+- Added `raster_viewport_clamp` to cover fully offscreen triangles and oversized triangles.
+- Enabled back-face culling for the dinosaur demo.
+- Changed the dinosaur demo interaction scale from `0.5` to `0.35` and recovery from `180 ms` to `360 ms`.
+
+Current Release benchmark sample:
+
+```text
+Frames: 120
+Average frame: 5.97373 ms
+Average update/render/present: 0.0007225 / 4.89184 / 0.632092 ms
+Average pipeline vertex/clip/ndc/cull/viewport/raster/fragment-output: 1.46503 / 1.12969 / 1.03396 / 0.0935733 / 0.0644675 / 0.741284 / 0.351886 ms
+Average draw calls: 1
+Average input triangles: 11938
+Average rasterized fragments: 2847
+```
+
+Interpretation:
+
+- The default dinosaur view now rasterizes 2,847 fragments after demo back-face culling, compared with the previous established 5,639-fragment baseline for the same model path.
+- Viewport clamping prevents partially offscreen or oversized triangles from scanning outside the framebuffer.
+- This is a mitigation for close-camera stutter, not the final architecture. The renderer still buffers raster outputs before fragment/output merge.
+
+Verification:
+
+- Debug configure passed.
+- Debug build passed with 0 warnings and 0 errors.
+- Debug tests passed: 11/11.
+- Release configure passed.
+- Release build passed.
+- Release tests passed: 11/11.
+- `.\build\Release\bin\DragonRenderer.exe --smoke 5` completed and exited.
+- `.\build\Release\bin\DragonRenderer.exe --benchmark 120` completed and exited.

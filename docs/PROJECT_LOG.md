@@ -6,6 +6,23 @@ Use this file for project-management decisions, documentation governance, and hi
 
 ## Project Management Entries
 
+## 2026-07-09 - Close-Camera Raster Pressure Mitigation
+
+Decision:
+
+- Clamp triangle raster bounding-box scans to the active framebuffer viewport.
+- Add `raster_viewport_clamp` coverage for fully offscreen and oversized triangles.
+- Lower the dinosaur demo's interaction render scale from `0.5` to `0.35`.
+- Extend the dinosaur demo's interaction recovery window from `180 ms` to `360 ms`.
+- Enable back-face culling in the dinosaur demo.
+
+Rationale:
+
+- Near-camera triangles can cover a large part of the framebuffer and create sudden raster/fragment bursts.
+- The rasterizer should not scan pixels outside the render target.
+- The dinosaur model is a closed mesh demo, so back-facing triangles are not useful for the default interaction view.
+- A longer interaction recovery window avoids quickly bouncing back to full resolution while the user is still adjusting the view.
+
 ## 2026-07-09 - Interactive Scaling Trigger Narrowing
 
 Decision:

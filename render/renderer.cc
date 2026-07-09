@@ -574,7 +574,8 @@ bool Renderer::RunRasterStage(DRAW_MODE drawMode, const std::vector<VsOutput>& p
 {
     {
         ScopedTimer stage_timer(frame_stats_.raster_stage_ms);
-        RasterTool::Rasterize(drawMode, postCullOutputs, rasterOutputs);
+        RasterTool::Rasterize(drawMode, postCullOutputs, rasterOutputs,
+            current_frame_buffer_->GetWidth(), current_frame_buffer_->GetHeight());
     }
     frame_stats_.rasterized_fragments += static_cast<uint32_t>(rasterOutputs.size());
 

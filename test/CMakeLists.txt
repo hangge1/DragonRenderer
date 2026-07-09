@@ -105,3 +105,13 @@ target_link_libraries(Test_InputState PRIVATE Render)
 add_test(NAME input_state COMMAND Test_InputState)
 set_tests_properties(input_state PROPERTIES PASS_REGULAR_EXPRESSION "input state test Pass")
 # =======================================================================================
+
+# =======================================================================================
+# raster_viewport_clamp_test.cc
+
+add_executable(Test_RasterViewportClamp "raster_viewport_clamp_test.cc")
+target_link_libraries(Test_RasterViewportClamp PRIVATE Render)
+
+add_test(NAME raster_viewport_clamp COMMAND Test_RasterViewportClamp)
+set_tests_properties(raster_viewport_clamp PROPERTIES PASS_REGULAR_EXPRESSION "raster viewport clamp test Pass")
+# =======================================================================================
