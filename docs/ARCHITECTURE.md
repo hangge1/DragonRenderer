@@ -9,9 +9,10 @@ The diagrams are intentionally close to the current codebase. They are not a mar
 ```mermaid
 flowchart TB
     Entry["engine/entry_point.cc"]
-    Engine["DragonEngine<br/>entry point, app shell, demo factory call"]
-    App["Application<br/>Win32 window, message loop, frame loop, benchmark mode"]
-    DinosaurDemo["DinosaurDemo<br/>DinosaurLayer setup and update"]
+    Engine["DragonEngine<br/>entry point, app interface, demo registry"]
+    App["Application<br/>platform-neutral lifecycle interface"]
+    Win32App["WindowsApplication<br/>Win32 window, message loop, GDI present"]
+    DinosaurDemo["DinosaurDemo<br/>registers DinosaurLayer factory"]
     Renderer["Renderer<br/>OpenGL-like API, render state, resources, draw execution"]
     LayerSystem["layer<br/>events, layer stack"]
     Camera["camera<br/>PerspectiveCamera view/projection control"]
@@ -25,9 +26,11 @@ flowchart TB
 
     Entry --> Engine
     Engine --> App
+    App --> Win32App
     Entry --> DinosaurDemo
-    App --> Renderer
-    App --> LayerSystem
+    Entry --> Renderer
+    Win32App --> Renderer
+    Win32App --> LayerSystem
     DinosaurDemo --> LayerSystem
     DinosaurDemo --> Camera
     DinosaurDemo --> Model
@@ -38,7 +41,7 @@ flowchart TB
     Renderer --> Pipeline
     Pipeline --> FrameBuffer
     Renderer --> Stats
-    App --> Stats
+    Win32App --> Stats
     FrameBuffer --> Present
 ```
 
@@ -48,9 +51,13 @@ The codebase is physically split into engine hosting, renderer core, and demo mo
 
 ```text
 engine/
-  app/       Win32 application shell, message loop, frame loop
+  app/       platform-neutral Application lifecycle interface
+  platform/
+    win32/   WindowsApplication, Win32 window, message loop, GDI present
   entry_point.cc
-             stable executable entry point and demo factory invocation
+             stable executable entry point and demo registry invocation
+  demo_layer_registry.*
+             engine-owned Layer factory registration boundary
 
 render/
   camera/    camera abstractions and perspective camera
@@ -69,7 +76,7 @@ The current include style still uses short project headers such as `renderer.h`,
 
 `pipeline_data.h` used to live in a top-level `core/` folder. It is now owned by `render/pipeline/` because the types inside it are render-pipeline-facing contracts rather than a standalone engine core.
 
-`DinosaurDemo` now lives outside the `Render` static library. `DragonRenderer.exe` links `Render` and `DinosaurDemo`, then calls the generic `CreateDemoLayer(Renderer*)` factory before registering the returned layer through `Renderer::AddLayer`. This keeps renderer core and the executable entry point from depending on concrete demo classes.
+`DinosaurDemo` now lives outside the `Render` static library. `DragonRenderer.exe` links `Render` and `DinosaurDemo`; the demo module implements `RegisterDemoLayers(DemoLayerRegistry&)` and registers its own layer factory with the engine-owned registry. The entry point only consumes registered `Layer` instances and does not include concrete demo layer headers.
 
 ## Build Target Layout
 
@@ -77,16 +84,17 @@ DragonRenderer currently builds project code as static/object libraries plus one
 
 ```text
 DragonEngine object library
-  Program entry point, Win32 application shell, command-line parsing,
-  generic demo factory invocation, and render loop startup.
+  Program entry point, platform-neutral Application interface,
+  WindowsApplication implementation, command-line parsing, demo layer registry,
+  and render loop startup.
 
 Render.lib
   Renderer core, layer extension points, camera, resources, scene loading,
   shaders, pipeline stages, and runtime stats.
 
 DinosaurDemo.lib
-  DinosaurLayer, demo-specific model/shader setup, and the CreateDemoLayer
-  factory implementation.
+  DinosaurLayer, demo-specific model/shader setup, and RegisterDemoLayers
+  registration implementation.
 
 DragonRenderer.exe
   Links DragonEngine, Render, and DinosaurDemo.
@@ -109,7 +117,7 @@ Vendored dependencies, binary assets, generated build files, and image assets ar
 ```mermaid
 sequenceDiagram
     participant OS as Win32
-    participant App as Application
+    participant App as WindowsApplication
     participant Layer as LayerStack
     participant Renderer as Renderer
     participant Stats as FrameStats

@@ -1,8 +1,10 @@
-#include "demo_layer_factory.h"
+#include "demo_layer_registry.h"
 
 #include "dinosaur_layer.h"
 
-Layer* CreateDemoLayer(Renderer* renderer)
+void RegisterDemoLayers(DemoLayerRegistry& registry)
 {
-    return new DinosaurLayer(renderer);
+    registry.RegisterLayerFactory([](Renderer* renderer) -> Layer* {
+        return new DinosaurLayer(renderer);
+    });
 }

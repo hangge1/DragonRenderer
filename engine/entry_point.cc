@@ -1,16 +1,17 @@
-﻿/*
-    Author: 航火火
-    Path: main.cpp
-    Description:  Application Exe Main Entry Point File
+/*
+    Author: hangge1
+    Description: Engine-owned executable entry point.
 */
 #include <Windows.h>
 
 #include <cstdlib>
 #include <iostream>
+#include <memory>
 #include <string>
 
 #include "application.h"
-#include "demo_layer_factory.h"
+#include "demo_layer_registry.h"
+#include "layer.h"
 #include "renderer.h"
 
 namespace
@@ -66,22 +67,25 @@ int WINAPI wWinMain(HINSTANCE hInstance,
 {
     const int window_width = 1200;
     const int window_height = 900;
-    const TCHAR* window_title = TEXT("DragonSoftRenderer");
+    const wchar_t* window_title = L"DragonSoftRenderer";
 
-    if(!APP->Init(hInstance, window_title, window_width, window_height))
+    std::unique_ptr<Application> app(CreateApplication());
+    if(!app || !app->Init(static_cast<void*>(hInstance), window_title, window_width, window_height))
     {
         std::cout << "Application Init Failed!" << std::endl;
         return -1;
     }
 
-    Renderer* renderer = APP->GetRenderer();
-    Layer* demo_layer = CreateDemoLayer(renderer);
-    if(demo_layer != nullptr)
+    Renderer* renderer = app->GetRenderer();
+    DemoLayerRegistry registry;
+    RegisterDemoLayers(registry);
+
+    for(Layer* demo_layer : registry.CreateLayers(renderer))
     {
         renderer->AddLayer(demo_layer);
     }
 
-	APP->Run(ParseRunOptions(lpCmdLine));
+    app->Run(ParseRunOptions(lpCmdLine));
 
     std::cout << "Application will exit!" << std::endl;
 

@@ -6,6 +6,22 @@ Use this file for project-management decisions, documentation governance, and hi
 
 ## Project Management Entries
 
+## 2026-07-09 - Demo Registry and Application Abstraction
+
+Decision:
+
+- Replace the single `CreateDemoLayer(Renderer*)` demo factory with an engine-owned `DemoLayerRegistry`.
+- Let demo modules implement `RegisterDemoLayers(DemoLayerRegistry&)` and register their own layer factories.
+- Turn `Application` into a platform-neutral lifecycle interface.
+- Move the current Win32/GDI host into `engine/platform/win32/WindowsApplication`.
+
+Rationale:
+
+- The engine should own the extension point, while demos should only contribute business/demo logic through registration.
+- The executable entry point should not include concrete demo layer headers or know which demo class is active.
+- The application lifecycle needs to be reusable beyond the current Windows window host.
+- Keeping Win32 details behind `WindowsApplication` makes later runtime, headless benchmark, or alternate platform hosts easier to introduce.
+
 ## 2026-07-08 - Documentation Governance
 
 Decision:
