@@ -31,7 +31,7 @@ Current testability note:
 - `depth_output_smoke` now covers overlapping triangles with `DEPTH_LESS`, deterministic output color, framebuffer checksum, raster/shade counts, and depth rejection count.
 - `ndc_perspective_smoke` now covers varied clip-space `w`, deterministic perspective-correct color output, viewport mapping, and raster/shade counts.
 - `draw_command_validation` now covers incomplete draw bindings, zero counts, short EBO data, and short VBO data.
-- `input_state` now covers per-frame input coalescing, transient pressed/released flags, and persistent held state.
+- `input_state` now covers per-frame input coalescing, transient pressed/released flags, persistent held state, and the distinction between passive cursor movement and held-input interaction.
 
 ## 2. North Star Architecture
 
@@ -360,8 +360,8 @@ Status:
 
 - Started. `WindowsApplication` now drains pending Win32 messages once per frame and coalesces input into `InputState`.
 - Started. `Renderer::OnInput` lets camera input be consumed once per frame rather than directly from `WndProc`.
-- Started. `WindowConfig` can enable interaction-time internal render-surface scaling; the current Win32 host resizes the software back buffer and stretches it to the window during active input.
-- `input_state` test covers the core per-frame input-state contract.
+- Started. `WindowConfig` can enable interaction-time internal render-surface scaling; the current Win32 host resizes the software back buffer and stretches it to the window during held keyboard input or mouse-button dragging.
+- `input_state` test covers the core per-frame input-state contract and verifies that passive mouse movement is not the same as held-input interaction.
 
 Tasks:
 

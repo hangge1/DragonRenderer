@@ -92,7 +92,7 @@ The current include style still uses short project headers such as `renderer.h`,
 
 Win32 input is no longer dispatched directly into `Renderer::OnEvent` from `WndProc`. `WindowsApplication` drains all pending OS messages once per frame, coalesces keyboard and mouse state into `InputState`, and then calls `Renderer::OnInput` once before update/render work. This keeps high-frequency `WM_MOUSEMOVE` messages from synchronously driving renderer/camera work.
 
-Application modules can opt into interactive render-surface scaling through `WindowConfig`. When enabled, `WindowsApplication` temporarily resizes the internal software back buffer while input is active and presents it to the configured window size through `StretchBlt`. This keeps the policy at the application/demo boundary: the engine supplies the mechanism, while each user application chooses whether to trade interaction-time sharpness for responsiveness.
+Application modules can opt into interactive render-surface scaling through `WindowConfig`. When enabled, `WindowsApplication` temporarily resizes the internal software back buffer while keyboard input or mouse-button dragging is active, then presents it to the configured window size through `StretchBlt`. Passive cursor movement keeps the full-resolution render surface. This keeps the policy at the application/demo boundary: the engine supplies the mechanism, while each user application chooses whether to trade interaction-time sharpness for responsiveness.
 
 ## Build Target Layout
 
@@ -299,7 +299,7 @@ flowchart TB
 - `depth_output_smoke` draws overlapping offscreen triangles and checks color output, framebuffer checksum, fragment counts, and depth rejection behavior.
 - `ndc_perspective_smoke` draws a clip-space triangle with varied `w` values and checks perspective divide, viewport mapping, perspective recovery, and deterministic color output.
 - `draw_command_validation` checks that incomplete draw bindings, zero counts, short EBO data, and short VBO data do not enter the pipeline or record draw calls.
-- `input_state` checks per-frame input coalescing, transient pressed/released flags, and persistent held state.
+- `input_state` checks per-frame input coalescing, transient pressed/released flags, persistent held state, and the distinction between passive mouse movement and held-input interaction.
 - Keep performance claims tied to `docs/PERFORMANCE_LOG.md`.
 - Prefer extracting named boundaries before moving files.
 - Avoid introducing a broad abstraction until a stage has a stable contract.

@@ -61,6 +61,19 @@ public:
         return key < kMaxKeyCode && key_released_[key];
     }
 
+    bool IsAnyKeyDown() const
+    {
+        for(bool is_down : key_down_)
+        {
+            if(is_down)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     void SetMousePosition(int32_t x, int32_t y)
     {
         if(has_mouse_position_)

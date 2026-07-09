@@ -6,6 +6,20 @@ Use this file for project-management decisions, documentation governance, and hi
 
 ## Project Management Entries
 
+## 2026-07-09 - Interactive Scaling Trigger Narrowing
+
+Decision:
+
+- Keep passive mouse movement as input activity for cursor position and delta tracking.
+- Stop using passive mouse movement to refresh the interactive render-surface scaling window.
+- Trigger interactive render-surface scaling only while a keyboard key is held or a mouse button is held.
+
+Rationale:
+
+- Moving the cursor without pressing a button does not change the current camera in the demo.
+- Lowering resolution for passive cursor movement makes the quality/performance policy visible when the user is not actually interacting with the rendered scene.
+- The platform host should distinguish input observation from scene-changing interaction intent.
+
 ## 2026-07-09 - Interactive Render Surface Scaling
 
 Decision:

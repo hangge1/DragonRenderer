@@ -458,7 +458,7 @@ bool WindowsApplication::ResizeRenderSurface(int32_t render_width, int32_t rende
 
 bool WindowsApplication::IsInteractiveFrame() const
 {
-    return input_state_.HasActivityThisFrame() ||
+    return input_state_.IsAnyKeyDown() ||
         input_state_.IsMouseButtonDown(InputState::MouseLeft) ||
         input_state_.IsMouseButtonDown(InputState::MouseMiddle) ||
         input_state_.IsMouseButtonDown(InputState::MouseRight);
