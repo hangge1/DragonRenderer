@@ -193,6 +193,10 @@ void WindowsApplication::Run(const ApplicationRunOptions& options)
                 << L" | DC: " << stats.draw_calls
                 << L" | Tri: " << stats.input_triangles
                 << L" | Frag: " << stats.rasterized_fragments;
+            if(render_width_ != width_ || render_height_ != height_)
+            {
+                title_stream << L" | RT: " << render_width_ << L"x" << render_height_;
+            }
             SetWindowText(hwnd_, title_stream.str().c_str());
 
             sample_frame_count = 0;
@@ -368,21 +372,38 @@ bool WindowsApplication::EnsureRenderSurfaceForInput()
         return true;
     }
 
-    auto now = std::chrono::steady_clock::now();
-    if(IsInteractiveFrame())
+    const auto now = std::chrono::steady_clock::now();
+    const bool is_interactive_frame = IsInteractiveFrame();
+    if(is_interactive_frame)
     {
         last_interactive_time_ = now;
     }
 
-    const auto idle_duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now - last_interactive_time_).count();
-    const bool should_use_interactive_surface =
-        last_interactive_time_.time_since_epoch().count() != 0 &&
-        idle_duration_ms <= static_cast<int64_t>(window_config_.interactive_recovery_ms);
-
-    float target_scale = should_use_interactive_surface ? window_config_.interactive_render_scale : 1.0f;
-    if(target_scale <= 0.0f || target_scale > 1.0f)
+    float minimum_scale = window_config_.interactive_render_scale;
+    if(minimum_scale <= 0.0f || minimum_scale > 1.0f)
     {
-        target_scale = 1.0f;
+        minimum_scale = 1.0f;
+    }
+
+    float target_scale = 1.0f;
+    if(is_interactive_frame)
+    {
+        target_scale = minimum_scale;
+    }
+    else if(last_interactive_time_.time_since_epoch().count() != 0 &&
+            window_config_.interactive_recovery_ms > 0)
+    {
+        const auto idle_duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now - last_interactive_time_).count();
+        if(idle_duration_ms < static_cast<int64_t>(window_config_.interactive_recovery_ms))
+        {
+            const uint32_t recovery_steps = std::max<uint32_t>(1, window_config_.interactive_recovery_steps);
+            const uint32_t completed_steps = std::min<uint32_t>(
+                recovery_steps,
+                static_cast<uint32_t>((static_cast<uint64_t>(idle_duration_ms) * recovery_steps +
+                    window_config_.interactive_recovery_ms - 1) / window_config_.interactive_recovery_ms));
+            const float progress = static_cast<float>(completed_steps) / static_cast<float>(recovery_steps);
+            target_scale = minimum_scale + (1.0f - minimum_scale) * progress;
+        }
     }
 
     const int32_t target_width = std::max(1, static_cast<int32_t>(width_ * target_scale));

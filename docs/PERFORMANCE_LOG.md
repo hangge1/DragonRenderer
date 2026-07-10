@@ -449,3 +449,40 @@ Verification:
 - `ctest --test-dir build\Release -C Release --output-on-failure`: 11/11 tests passed.
 - `.\build\Release\bin\DragonRenderer.exe --smoke 5` completed and exited.
 - `.\build\Release\bin\DragonRenderer.exe --benchmark 120` completed and exited.
+
+## 2026-07-10 - Progressive Interaction Resolution Recovery
+
+Change:
+
+- Re-enabled dinosaur demo interaction-time render-surface scaling with a less aggressive `0.6` active scale.
+- Added `WindowConfig::interactive_recovery_steps`.
+- Changed the Win32 host to recover from interaction scale to full resolution in discrete steps over `interactive_recovery_ms`.
+- Added render-target size to the window title while the internal render target is below full resolution.
+
+Release benchmark sample:
+
+```text
+Frames: 120
+Average frame: 6.53314 ms
+Average update/render/present: 0.00096 / 4.93523 / 1.12236 ms
+Average pipeline vertex/clip/ndc/cull/viewport/raster/fragment-output: 1.48713 / 1.12412 / 1.04029 / 0.0963567 / 0.073285 / 0.742158 / 0.358907 ms
+Average draw calls: 1
+Average input triangles: 11938
+Average rasterized fragments: 2847
+```
+
+Interpretation:
+
+- The fixed-frame benchmark has no user input, so it remains a full-resolution baseline.
+- The interaction benefit is expected during held keyboard input or mouse-button dragging, where the dinosaur demo temporarily renders at `0.6` scale and then restores to full resolution in 4 steps over `480 ms`.
+- This is an explicit user-experience policy, not a replacement for deeper pipeline optimization.
+
+Verification:
+
+- Direct UTF-8 script check passed.
+- `cmake --build --preset x64-Windows-Build-Debug`: passed with 0 warnings and 0 errors.
+- `ctest --test-dir build\Debug -C Debug --output-on-failure`: 11/11 tests passed.
+- `cmake --build --preset x64-Windows-Build-Release`: passed.
+- `ctest --test-dir build\Release -C Release --output-on-failure`: 11/11 tests passed.
+- `.\build\Release\bin\DragonRenderer.exe --smoke 5` completed and exited.
+- `.\build\Release\bin\DragonRenderer.exe --benchmark 120` completed and exited.

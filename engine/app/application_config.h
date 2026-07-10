@@ -14,7 +14,8 @@ struct WindowConfig
     bool visible { true };
     bool enable_interactive_resolution_scale { false };
     float interactive_render_scale { 0.5f };
-    uint32_t interactive_recovery_ms { 180 };
+    uint32_t interactive_recovery_ms { 480 };
+    uint32_t interactive_recovery_steps { 4 };
 };
 
 class ApplicationConfig

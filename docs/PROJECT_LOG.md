@@ -6,6 +6,21 @@ Use this file for project-management decisions, documentation governance, and hi
 
 ## Project Management Entries
 
+## 2026-07-10 - Progressive Interaction Resolution Recovery
+
+Decision:
+
+- Re-enable interaction-time render-surface scaling in the dinosaur demo, but make it progressive instead of fixed-low-resolution.
+- Add `WindowConfig::interactive_recovery_steps` so the Win32 host can restore internal render size in discrete steps after interaction stops.
+- Configure the dinosaur demo to use `0.6` interaction scale, `480 ms` recovery duration, and 4 recovery steps.
+- Show the current internal render target size in the window title while the app is below full resolution.
+
+Rationale:
+
+- Many render tools deliberately reduce quality while the user is moving the view, then refine after interaction stops.
+- The previous `0.35` fixed scale was too aggressive and did not communicate its state clearly.
+- Discrete recovery steps avoid rebuilding the DIB/back buffer every frame while still giving the user progressive refinement.
+
 ## 2026-07-10 - Disable Visible Interaction Downscale In Dinosaur Demo
 
 Decision:
