@@ -401,3 +401,51 @@ Verification:
 - Release tests passed: 11/11.
 - `.\build\Release\bin\DragonRenderer.exe --smoke 5` completed and exited.
 - `.\build\Release\bin\DragonRenderer.exe --benchmark 120` completed and exited.
+
+## 2026-07-10 - Chunked Raster Output Streaming
+
+Change:
+
+- Added `RasterTool::RasterizeChunked` so rasterization can flush bounded fragment chunks during a draw.
+- Merged the raster and fragment/output orchestration path through `Renderer::RunRasterOutputStage`.
+- Kept `PipelineScratch::raster_outputs` as reusable scratch memory, but changed its role from draw-sized fragment storage to a bounded chunk buffer.
+- Removed leftover debug blank-line output from line rasterization.
+
+Before:
+
+```text
+Frames: 120
+Average frame: 5.97373 ms
+Average update/render/present: 0.0007225 / 4.89184 / 0.632092 ms
+Average pipeline vertex/clip/ndc/cull/viewport/raster/fragment-output: 1.46503 / 1.12969 / 1.03396 / 0.0935733 / 0.0644675 / 0.741284 / 0.351886 ms
+Average draw calls: 1
+Average input triangles: 11938
+Average rasterized fragments: 2847
+```
+
+After:
+
+```text
+Frames: 120
+Average frame: 6.15186 ms
+Average update/render/present: 0.000718333 / 4.8751 / 0.817276 ms
+Average pipeline vertex/clip/ndc/cull/viewport/raster/fragment-output: 1.4315 / 1.12733 / 1.03985 / 0.100294 / 0.0727575 / 0.738106 / 0.354592 ms
+Average draw calls: 1
+Average input triangles: 11938
+Average rasterized fragments: 2847
+```
+
+Interpretation:
+
+- The default-view render time is roughly flat, which is expected because fragment count is unchanged. Total frame time moved slightly with present-time noise in this local run.
+- The important architectural win is bounded peak raster-output storage: fragment/output merge can run during rasterization instead of waiting for a full draw-sized fragment vector.
+- This does not replace tile rasterization. It prepares the hot path for tile-based execution by making the raster/output boundary streamable.
+
+Verification:
+
+- `cmake --build --preset x64-Windows-Build-Debug`: passed with 0 warnings and 0 errors.
+- `ctest --test-dir build\Debug -C Debug --output-on-failure`: 11/11 tests passed.
+- `cmake --build --preset x64-Windows-Build-Release`: passed.
+- `ctest --test-dir build\Release -C Release --output-on-failure`: 11/11 tests passed.
+- `.\build\Release\bin\DragonRenderer.exe --smoke 5` completed and exited.
+- `.\build\Release\bin\DragonRenderer.exe --benchmark 120` completed and exited.

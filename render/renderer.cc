@@ -1,6 +1,7 @@
 ﻿
 #include "renderer.h"
 
+#include <chrono>
 #include <iostream>
 #include <vector>
 
@@ -377,12 +378,10 @@ void Renderer::DrawElement(DRAW_MODE drawMode, uint32_t first, uint32_t count)
     std::vector<VsOutput>* post_cull_outputs = RunCullStage(command.draw_mode, clip_outputs, cull_outputs);
     RunViewportStage(*post_cull_outputs);
 
-    if(!RunRasterStage(command.draw_mode, *post_cull_outputs, raster_outputs))
+    if(!RunRasterOutputStage(command.draw_mode, *post_cull_outputs, raster_outputs))
     {
         return;
     }
-
-    RunFragmentOutputStage(raster_outputs);
 }
 
 bool Renderer::BuildDrawCommand(DRAW_MODE drawMode, uint32_t first, uint32_t count, DrawCommand& command) const
@@ -569,55 +568,74 @@ void Renderer::RunViewportStage(std::vector<VsOutput>& postCullOutputs)
     }
 }
 
-bool Renderer::RunRasterStage(DRAW_MODE drawMode, const std::vector<VsOutput>& postCullOutputs,
+bool Renderer::RunRasterOutputStage(DRAW_MODE drawMode, const std::vector<VsOutput>& postCullOutputs,
     std::vector<VsOutput>& rasterOutputs)
 {
-    {
-        ScopedTimer stage_timer(frame_stats_.raster_stage_ms);
-        RasterTool::Rasterize(drawMode, postCullOutputs, rasterOutputs,
-            current_frame_buffer_->GetWidth(), current_frame_buffer_->GetHeight());
-    }
-    frame_stats_.rasterized_fragments += static_cast<uint32_t>(rasterOutputs.size());
+    using Clock = std::chrono::steady_clock;
+    static constexpr size_t kRasterChunkFragmentLimit = 4096;
 
-    return !rasterOutputs.empty();
+    bool has_fragments = false;
+    double raster_ms = 0.0;
+    double fragment_ms = 0.0;
+    auto raster_start = Clock::now();
+
+    auto flush_raster_chunk = [&](std::vector<VsOutput>& chunk) {
+        raster_ms += std::chrono::duration<double, std::milli>(Clock::now() - raster_start).count();
+        if(!chunk.empty())
+        {
+            has_fragments = true;
+            frame_stats_.rasterized_fragments += static_cast<uint32_t>(chunk.size());
+            {
+                ScopedTimer stage_timer(fragment_ms);
+                ProcessFragmentOutputs(chunk);
+            }
+        }
+        raster_start = Clock::now();
+    };
+
+    RasterTool::RasterizeChunked(drawMode, postCullOutputs, rasterOutputs,
+        current_frame_buffer_->GetWidth(), current_frame_buffer_->GetHeight(),
+        kRasterChunkFragmentLimit, flush_raster_chunk);
+
+    raster_ms += std::chrono::duration<double, std::milli>(Clock::now() - raster_start).count();
+    frame_stats_.raster_stage_ms += raster_ms;
+    frame_stats_.fragment_output_stage_ms += fragment_ms;
+
+    return has_fragments;
 }
 
-void Renderer::RunFragmentOutputStage(std::vector<VsOutput>& rasterOutputs)
+void Renderer::ProcessFragmentOutputs(std::vector<VsOutput>& rasterOutputs)
 {
+    //9 透视恢复处理阶段
+    //离散出来的像素插值结果，需要乘以w_0值恢复到正常态
+    for(auto& output : rasterOutputs)
     {
-        ScopedTimer stage_timer(frame_stats_.fragment_output_stage_ms);
+        PerspectiveRecover(output);
+    }
 
-        //9 透视恢复处理阶段
-        //离散出来的像素插值结果，需要乘以w_0值恢复到正常态
-        for(auto& output : rasterOutputs)
+    //10 FragmentShader
+    //颜色输出处理
+    FsOutput fs_output;
+    for(uint32_t i = 0; i < rasterOutputs.size(); ++i)
+    {
+        current_shader_->FragmentShader(rasterOutputs[i], fs_output, texture_map_);
+        frame_stats_.shaded_fragments++;
+
+        //深度测试
+        if (enable_depth_test_ && !DepthTest(fs_output))
         {
-		    PerspectiveRecover(output);
-	    }
+            frame_stats_.depth_rejected_fragments++;
+            continue;
+        }
 
-        //10 FragmentShader
-        //颜色输出处理
-        FsOutput fs_output;
-	    for(uint32_t i = 0; i < rasterOutputs.size(); ++i)
+        //混合判断
+        Color color = fs_output.color;
+        if(enable_blend_)
         {
-		    current_shader_->FragmentShader(rasterOutputs[i], fs_output, texture_map_);
-            frame_stats_.shaded_fragments++;
+            color = BlendColor(fs_output.pixelPos.x, fs_output.pixelPos.y, color);
+        }
 
-            //深度测试
-		    if (enable_depth_test_ && !DepthTest(fs_output)) 
-            {
-                frame_stats_.depth_rejected_fragments++;
-			    continue;
-		    }
-
-            //混合判断
-            Color color = fs_output.color;
-            if(enable_blend_)
-            {
-                color = BlendColor(fs_output.pixelPos.x, fs_output.pixelPos.y, color);
-            }
-
-		    current_frame_buffer_->SetPixelColor(fs_output.pixelPos.x, fs_output.pixelPos.y, color);
-	    }
+        current_frame_buffer_->SetPixelColor(fs_output.pixelPos.x, fs_output.pixelPos.y, color);
     }
 }
 

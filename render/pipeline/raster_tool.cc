@@ -3,12 +3,14 @@
 
 #include <algorithm>
 #include <cstdint>
-#include <iostream>
+#include <functional>
 #include <vector>
 
 #include "pipeline_data.h"
 #include "glm/glm.hpp"
 
+namespace
+{
 
 // 计算二维向量的叉乘
 float crossProduct(const glm::vec2& a, const glm::vec2& b) 
@@ -39,6 +41,17 @@ bool IsPointInTriangle(const VsOutput& p1, const VsOutput& p2, const VsOutput& p
     return false;
 }
 
+void FlushChunkIfNeeded(std::vector<VsOutput>& output, size_t max_fragments_per_chunk,
+    const std::function<void(std::vector<VsOutput>&)>* flush_chunk)
+{
+    if(flush_chunk != nullptr && max_fragments_per_chunk > 0 && output.size() >= max_fragments_per_chunk)
+    {
+        (*flush_chunk)(output);
+        output.clear();
+    }
+}
+}
+
 void RasterTool::Rasterize(uint32_t draw_mode, const std::vector<VsOutput>& inputs, std::vector<VsOutput>& output,
     int32_t viewport_width, int32_t viewport_height)
 {
@@ -61,7 +74,38 @@ void RasterTool::Rasterize(uint32_t draw_mode, const std::vector<VsOutput>& inpu
 	}
 }
 
-void RasterTool::RasterizeLine(std::vector<VsOutput>& result, const VsOutput& p1, const VsOutput& p2)
+void RasterTool::RasterizeChunked(uint32_t draw_mode, const std::vector<VsOutput>& inputs, std::vector<VsOutput>& output,
+    int32_t viewport_width, int32_t viewport_height, size_t max_fragments_per_chunk,
+    const std::function<void(std::vector<VsOutput>&)>& flush_chunk)
+{
+    output.clear();
+    output.reserve(std::min<size_t>(std::max<size_t>(inputs.size(), 1), max_fragments_per_chunk));
+
+    if(draw_mode == DRAW_LINES)
+    {
+        for(uint32_t i = 0; i + 1 < inputs.size(); i += 2)
+        {
+            RasterizeLine(output, inputs[i], inputs[i + 1], max_fragments_per_chunk, &flush_chunk);
+        }
+    }
+    else if(draw_mode == DRAW_TRIANGLES)
+    {
+        for(uint32_t i = 0; i + 2 < inputs.size(); i += 3)
+        {
+            RasterizeTriangle(output, inputs[i], inputs[i + 1], inputs[i + 2], viewport_width, viewport_height,
+                max_fragments_per_chunk, &flush_chunk);
+        }
+    }
+
+    if(!output.empty())
+    {
+        flush_chunk(output);
+        output.clear();
+    }
+}
+
+void RasterTool::RasterizeLine(std::vector<VsOutput>& result, const VsOutput& p1, const VsOutput& p2,
+    size_t max_fragments_per_chunk, const std::function<void(std::vector<VsOutput>&)>* flush_chunk)
 {
     VsOutput start = p1;
     VsOutput end = p2;
@@ -107,7 +151,6 @@ void RasterTool::RasterizeLine(std::vector<VsOutput>& result, const VsOutput& p1
 
     int delta = vec_start2end.x;
 
-    std::cout << "\n\n\n";
     for (int i = 0; i <= delta; i++)
     {
         VsOutput current_pixel;
@@ -133,6 +176,8 @@ void RasterTool::RasterizeLine(std::vector<VsOutput>& result, const VsOutput& p1
         InterpolateLine(p1, p2, current_pixel);
 
         result.emplace_back(current_pixel);
+        FlushChunkIfNeeded(result, max_fragments_per_chunk, flush_chunk);
+
         if(pi > 0)
         {
             yi++;
@@ -171,7 +216,8 @@ void RasterTool::InterpolateLine(const VsOutput& start, const VsOutput& end, VsO
 }
 
 void RasterTool::RasterizeTriangle(std::vector<VsOutput>& result, const VsOutput& p1, const VsOutput& p2, const VsOutput& p3,
-    int32_t viewport_width, int32_t viewport_height)
+    int32_t viewport_width, int32_t viewport_height, size_t max_fragments_per_chunk,
+    const std::function<void(std::vector<VsOutput>&)>* flush_chunk)
 {
     int min_x = std::min( std::min( p1.position.x, p2.position.x ), p3.position.x );
     int min_y = std::min( std::min( p1.position.y, p2.position.y ), p3.position.y );
@@ -202,6 +248,7 @@ void RasterTool::RasterizeTriangle(std::vector<VsOutput>& result, const VsOutput
             {
                 InterpolateTriangle(p1, p2, p3, vs);
                 result.emplace_back(vs);
+                FlushChunkIfNeeded(result, max_fragments_per_chunk, flush_chunk);
             }
         }    
     }

@@ -96,6 +96,8 @@ Application modules can opt into interactive render-surface scaling through `Win
 
 The rasterizer clamps triangle bounding-box scans to the active framebuffer dimensions. This is a defensive hot-path rule: near-camera or partially offscreen triangles should not make the software rasterizer iterate pixels that cannot be written to the render target. The dinosaur demo also enables back-face culling because it is a closed model demo and should not pay to rasterize hidden back-facing triangles by default.
 
+Raster output is processed in bounded chunks through `RasterTool::RasterizeChunked` and `Renderer::RunRasterOutputStage`. `PipelineScratch::raster_outputs` remains the reusable staging buffer, but it is no longer treated as a draw-sized fragment accumulator. Once a chunk reaches the current fragment limit, the renderer immediately runs perspective recovery, fragment shading, depth testing, blending, and framebuffer writes before continuing rasterization.
+
 ## Build Target Layout
 
 DragonRenderer currently builds project code as static/object libraries plus one executable:
@@ -157,8 +159,8 @@ sequenceDiagram
     Renderer->>Renderer: RunPerspectiveDivideStage()
     Renderer->>Renderer: RunCullStage()
     Renderer->>Renderer: RunViewportStage()
-    Renderer->>Renderer: RunRasterStage()
-    Renderer->>Renderer: RunFragmentOutputStage()
+    Renderer->>Renderer: RunRasterOutputStage()
+    Renderer->>Renderer: ProcessFragmentOutputs(chunk)
     Renderer->>FB: SetPixelColor / SetOnePixelDepth
     App->>FB: Present back buffer
     App->>Stats: Set frame/update/render/present timing
@@ -180,8 +182,8 @@ flowchart LR
     NDC["Perspective division<br/>NDC transform"]
     Cull["Cull stage<br/>optional back/front face culling"]
     Viewport["Screen mapping<br/>viewport transform"]
-    Raster["RasterTool<br/>line / triangle rasterization"]
-    Fragments["raster_outputs<br/>fragment candidates"]
+    Raster["RasterTool::RasterizeChunked<br/>line / triangle rasterization"]
+    Fragments["raster_outputs<br/>bounded fragment chunk"]
     FS["Fragment shader<br/>Shader::FragmentShader"]
     Depth["Depth test<br/>FrameBuffer depth"]
     Blend["Optional blend"]
@@ -221,8 +223,8 @@ flowchart TB
     NDC["RunPerspectiveDivideStage"]
     Cull["RunCullStage"]
     Viewport["RunViewportStage"]
-    Raster["RunRasterStage"]
-    Fragment["RunFragmentOutputStage"]
+    Raster["RunRasterOutputStage"]
+    Fragment["ProcessFragmentOutputs(chunk)"]
 
     Draw --> Command
     Command --> DrawCommand
@@ -302,7 +304,7 @@ flowchart TB
 - `ndc_perspective_smoke` draws a clip-space triangle with varied `w` values and checks perspective divide, viewport mapping, perspective recovery, and deterministic color output.
 - `draw_command_validation` checks that incomplete draw bindings, zero counts, short EBO data, and short VBO data do not enter the pipeline or record draw calls.
 - `input_state` checks per-frame input coalescing, transient pressed/released flags, persistent held state, and the distinction between passive mouse movement and held-input interaction.
-- `raster_viewport_clamp` checks that offscreen triangles emit no fragments and oversized triangles are bounded by the framebuffer viewport.
+- `raster_viewport_clamp` checks that offscreen triangles emit no fragments, oversized triangles are bounded by the framebuffer viewport, and chunked rasterization flushes a large triangle without leaving residual output.
 - Keep performance claims tied to `docs/PERFORMANCE_LOG.md`.
 - Prefer extracting named boundaries before moving files.
 - Avoid introducing a broad abstraction until a stage has a stable contract.

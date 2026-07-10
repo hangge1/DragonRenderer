@@ -104,9 +104,9 @@ private:
     std::vector<VsOutput>* RunCullStage(DRAW_MODE drawMode, std::vector<VsOutput>& clipOutputs,
         std::vector<VsOutput>& cullOutputs);
     void RunViewportStage(std::vector<VsOutput>& postCullOutputs);
-    bool RunRasterStage(DRAW_MODE drawMode, const std::vector<VsOutput>& postCullOutputs,
+    bool RunRasterOutputStage(DRAW_MODE drawMode, const std::vector<VsOutput>& postCullOutputs,
         std::vector<VsOutput>& rasterOutputs);
-    void RunFragmentOutputStage(std::vector<VsOutput>& rasterOutputs);
+    void ProcessFragmentOutputs(std::vector<VsOutput>& rasterOutputs);
 
     void VertexShaderApply(std::vector<VsOutput>& vsOutputs, const VertexArrayObject* vao,
 		const BufferObject* ebo, uint32_t first, uint32_t count);

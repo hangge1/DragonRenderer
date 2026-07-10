@@ -6,6 +6,20 @@ Use this file for project-management decisions, documentation governance, and hi
 
 ## Project Management Entries
 
+## 2026-07-10 - Chunked Raster Output Merge
+
+Decision:
+
+- Add a chunked raster-output path through `RasterTool::RasterizeChunked`.
+- Let `Renderer::RunRasterOutputStage` flush raster chunks directly into perspective recovery, fragment shading, depth test, blending, and framebuffer writes.
+- Keep `PipelineScratch::raster_outputs` as reusable scratch storage, but treat it as a bounded chunk buffer instead of a whole-draw fragment accumulator.
+
+Rationale:
+
+- Close-camera views and large triangles can create bursty fragment output.
+- A draw-sized fragment vector couples rasterization and output merge too tightly for future tile or parallel execution.
+- Bounded chunk flushing lowers peak temporary storage and gives the renderer a cleaner streaming boundary before a full tile-based raster path exists.
+
 ## 2026-07-09 - Close-Camera Raster Pressure Mitigation
 
 Decision:

@@ -19,7 +19,7 @@ Main problems:
 | Resource lifetime | Buffers, vertex arrays, textures, models, meshes, shaders, and layers mix raw pointers and manual deletion. | Ownership is implicit, so crashes and leaks are easy to introduce. |
 | Runtime platform | `Application` is now a platform-neutral lifecycle interface, application modules can self-register window config through `ApplicationConfigRegistry`, the current Win32/GDI host lives in `engine/platform/win32/WindowsApplication`, Win32 input is coalesced into per-frame `InputState`, and application modules can opt into interaction-time render-surface scaling through `WindowConfig`. | The renderer core is cleaner, but a dedicated runtime loop, multi-window platform layer, replaceable present backend, and cleaner render-target ownership are still needed. |
 | Scene/demo boundary | The dinosaur demo now lives outside `Render` and self-registers its layer through the engine-owned `LayerRegistry`. There is still no full scene abstraction. | The executable entry point no longer mentions demos, layers, or renderer registration. Future demo selection can grow from the registry boundary. |
-| Performance | The hot path now reuses pipeline scratch buffers, clamps raster bounding-box scans to the framebuffer viewport, and the dinosaur demo enables back-face culling. Fragment output is still buffered as a large vector before shading/output merge. | Close-camera overdraw is reduced, but stream/tile-based rasterization is still needed to avoid large fragment bursts. |
+| Performance | The hot path now reuses pipeline scratch buffers, clamps raster bounding-box scans to the framebuffer viewport, streams raster output in bounded chunks, and the dinosaur demo enables back-face culling. | Close-camera overdraw and draw-sized fragment accumulation are reduced, but a tile-based raster path is still needed for stronger close-camera stability. |
 | Observability | FPS is visible now, but there is no per-stage timing, draw-call count, triangle count, pixel count, or allocation count. | Performance work would be guesswork. |
 | Testability | Tests now cover deterministic frame output, clip/cull behavior, NDC/perspective behavior, depth/output merge, and basic draw-command validation, but broader resource/state contracts are still partial. | Refactoring the pipeline is safer than before, but command extraction still needs more stage-level safety rails. |
 
@@ -32,7 +32,7 @@ Current testability note:
 - `ndc_perspective_smoke` now covers varied clip-space `w`, deterministic perspective-correct color output, viewport mapping, and raster/shade counts.
 - `draw_command_validation` now covers incomplete draw bindings, zero counts, short EBO data, and short VBO data.
 - `input_state` now covers per-frame input coalescing, transient pressed/released flags, persistent held state, and the distinction between passive cursor movement and held-input interaction.
-- `raster_viewport_clamp` now covers fully offscreen triangles and oversized triangles bounded by the framebuffer viewport.
+- `raster_viewport_clamp` now covers fully offscreen triangles, oversized triangles bounded by the framebuffer viewport, and chunked flush behavior for a large triangle.
 
 ## 2. North Star Architecture
 
@@ -332,6 +332,7 @@ Status:
 - `PipelineScratch` now owns reusable vertex, clip, cull, and raster stage buffers at the renderer level.
 - Clip-stage internal work buffers now also live behind `PipelineScratch`.
 - Rasterization now clamps triangle bounding-box scans to the active framebuffer viewport.
+- Raster output now flushes bounded chunks through fragment/output merge instead of accumulating every fragment for the whole draw.
 - Baseline entries should be recorded in [PERFORMANCE_LOG.md](PERFORMANCE_LOG.md).
 
 Tasks:
@@ -345,6 +346,7 @@ Tasks:
 - Start removing hot-path temporary allocations where profiling shows clear wins. Started with `ClipTool`.
 - Introduce named per-draw scratch storage. Started with `PipelineScratch`.
 - Move clip-stage scratch ownership out of `ClipTool`. Done.
+- Avoid draw-sized raster output accumulation. Started with chunked raster/output streaming.
 
 Definition of Done:
 
@@ -433,6 +435,7 @@ Status:
 - The old top-level `core/pipeline_data.h` has been moved into `render/pipeline/pipeline_data.h`; `core/` is no longer a separate source folder.
 - Stage timers and counters still live at the stage boundary.
 - `PipelineScratch` is now available to every extracted stage.
+- The raster/output boundary now has a chunked streaming path through `RunRasterOutputStage`.
 - `DrawCommand` now captures draw mode, index range, VAO, and EBO after current binding validation.
 - `BuildDrawCommand` now validates primitive count shape, EBO index range, VAO attribute layout, and VBO byte ranges before vertex fetch.
 - `render_output_smoke` now provides a deterministic offscreen output guard before deeper raster or NDC changes.
@@ -451,7 +454,7 @@ Tasks:
   - clip and cull. Started.
   - viewport transform. Started.
   - raster. Started.
-  - fragment and output merge. Started.
+  - fragment and output merge. Started; raster chunks are now processed immediately through output merge.
 - Add unit tests for each stage. Started with `render_output_smoke`, `clip_tool`, `depth_output_smoke`, `ndc_perspective_smoke`, and `draw_command_validation`.
 - Add viewport-boundary tests for rasterization. Done with `raster_viewport_clamp`.
 
@@ -495,6 +498,7 @@ Tasks:
 - Pre-reserve stage buffers. Started.
 - Add app-configurable interaction-time render-surface scaling. Started for the Win32/GDI host.
 - Add bounding-box rasterization limits. Started with framebuffer viewport clamping.
+- Stream raster output into fragment/output merge in bounded chunks. Started.
 - Add tile-based raster path.
 - Add optional parallel tile execution.
 
