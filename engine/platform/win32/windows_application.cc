@@ -195,7 +195,9 @@ void WindowsApplication::Run(const ApplicationRunOptions& options)
                 << L" | Frag: " << stats.rasterized_fragments;
             if(render_width_ != width_ || render_height_ != height_)
             {
-                title_stream << L" | RT: " << render_width_ << L"x" << render_height_;
+                const double render_scale = static_cast<double>(render_width_) / static_cast<double>(std::max(1, width_));
+                title_stream << L" | RT: " << render_width_ << L"x" << render_height_
+                    << L" (" << std::fixed << std::setprecision(2) << render_scale << L"x)";
             }
             SetWindowText(hwnd_, title_stream.str().c_str());
 
@@ -309,6 +311,7 @@ void WindowsApplication::ProcessMessage(HWND window_handler, UINT message_id, WP
         {
             input_state_.ResetHeldState();
             last_interactive_time_ = {};
+            current_interactive_scale_ = 1.0f;
         }
         break;
         case WM_CLOSE:
@@ -379,16 +382,10 @@ bool WindowsApplication::EnsureRenderSurfaceForInput()
         last_interactive_time_ = now;
     }
 
-    float minimum_scale = window_config_.interactive_render_scale;
-    if(minimum_scale <= 0.0f || minimum_scale > 1.0f)
-    {
-        minimum_scale = 1.0f;
-    }
-
     float target_scale = 1.0f;
     if(is_interactive_frame)
     {
-        target_scale = minimum_scale;
+        target_scale = UpdateInteractiveScaleForCurrentLoad();
     }
     else if(last_interactive_time_.time_since_epoch().count() != 0 &&
             window_config_.interactive_recovery_ms > 0)
@@ -402,8 +399,16 @@ bool WindowsApplication::EnsureRenderSurfaceForInput()
                 static_cast<uint32_t>((static_cast<uint64_t>(idle_duration_ms) * recovery_steps +
                     window_config_.interactive_recovery_ms - 1) / window_config_.interactive_recovery_ms));
             const float progress = static_cast<float>(completed_steps) / static_cast<float>(recovery_steps);
-            target_scale = minimum_scale + (1.0f - minimum_scale) * progress;
+            target_scale = current_interactive_scale_ + (1.0f - current_interactive_scale_) * progress;
         }
+        else
+        {
+            current_interactive_scale_ = 1.0f;
+        }
+    }
+    else
+    {
+        current_interactive_scale_ = 1.0f;
     }
 
     const int32_t target_width = std::max(1, static_cast<int32_t>(width_ * target_scale));
@@ -414,6 +419,58 @@ bool WindowsApplication::EnsureRenderSurfaceForInput()
     }
 
     return ResizeRenderSurface(target_width, target_height);
+}
+
+float WindowsApplication::UpdateInteractiveScaleForCurrentLoad()
+{
+    const float minimum_scale = ClampInteractiveScale(window_config_.interactive_render_scale);
+    const float scale_step = std::min(1.0f, std::max(0.01f, window_config_.interactive_scale_step));
+    const double target_render_ms = std::max(0.1, window_config_.interactive_target_render_ms);
+    const float target_coverage = std::min(1.0f, std::max(0.001f, window_config_.interactive_target_coverage));
+
+    current_interactive_scale_ = ClampInteractiveScale(current_interactive_scale_);
+
+    if(renderer_ == nullptr)
+    {
+        return current_interactive_scale_;
+    }
+
+    const auto& stats = renderer_->GetFrameStats();
+    const bool has_previous_sample = stats.draw_calls > 0 || stats.render_ms > 0.0;
+    if(!has_previous_sample)
+    {
+        return current_interactive_scale_;
+    }
+
+    const double render_area = static_cast<double>(std::max(1, render_width_) * std::max(1, render_height_));
+    const double coverage = static_cast<double>(stats.rasterized_fragments) / render_area;
+    const bool over_budget =
+        stats.render_ms > target_render_ms * 1.10 ||
+        coverage > static_cast<double>(target_coverage) * 1.15;
+    const bool under_budget =
+        stats.render_ms < target_render_ms * 0.70 &&
+        coverage < static_cast<double>(target_coverage) * 0.70;
+
+    if(over_budget)
+    {
+        current_interactive_scale_ = std::max(minimum_scale, current_interactive_scale_ - scale_step);
+    }
+    else if(under_budget)
+    {
+        current_interactive_scale_ = std::min(1.0f, current_interactive_scale_ + scale_step);
+    }
+
+    return current_interactive_scale_;
+}
+
+float WindowsApplication::ClampInteractiveScale(float scale) const
+{
+    if(scale <= 0.0f || scale > 1.0f)
+    {
+        return 1.0f;
+    }
+
+    return scale;
 }
 
 bool WindowsApplication::ResizeRenderSurface(int32_t render_width, int32_t render_height)

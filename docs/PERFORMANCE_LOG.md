@@ -463,6 +463,43 @@ Release benchmark sample:
 
 ```text
 Frames: 120
+Average frame: 6.04963 ms
+Average update/render/present: 0.0007975 / 4.88364 / 0.732504 ms
+Average pipeline vertex/clip/ndc/cull/viewport/raster/fragment-output: 1.44311 / 1.13399 / 1.03265 / 0.0910292 / 0.0707075 / 0.751142 / 0.34877 ms
+Average draw calls: 1
+Average input triangles: 11938
+Average rasterized fragments: 2847
+```
+
+Interpretation:
+
+- The fixed-frame benchmark has no user input, so it remains a full-resolution baseline.
+- The interaction benefit is expected during held keyboard input or mouse-button dragging, where the dinosaur demo temporarily renders at `0.6` scale and then restores to full resolution in 4 steps over `480 ms`.
+- This is an explicit user-experience policy, not a replacement for deeper pipeline optimization.
+
+Verification:
+
+- Direct UTF-8 script check passed.
+- `cmake --build --preset x64-Windows-Build-Debug`: passed with 0 warnings and 0 errors.
+- `ctest --test-dir build\Debug -C Debug --output-on-failure`: 11/11 tests passed.
+- `cmake --build --preset x64-Windows-Build-Release`: passed.
+- `ctest --test-dir build\Release -C Release --output-on-failure`: 11/11 tests passed.
+- `.\build\Release\bin\DragonRenderer.exe --smoke 5` completed and exited.
+- `.\build\Release\bin\DragonRenderer.exe --benchmark 120` completed and exited.
+
+## 2026-07-10 - Adaptive Interaction Resolution Scaling
+
+Change:
+
+- Changed interaction scaling from fixed active scale to adaptive feedback.
+- Added `interactive_target_render_ms`, `interactive_target_coverage`, and `interactive_scale_step` to `WindowConfig`.
+- During held keyboard input or mouse-button dragging, `WindowsApplication` now adjusts the current interaction scale using previous-frame render time and rasterized-fragment coverage.
+- The dinosaur demo keeps full resolution when the previous frame is under budget, and can step down toward a `0.45` minimum when render pressure rises.
+
+Release benchmark sample:
+
+```text
+Frames: 120
 Average frame: 6.53314 ms
 Average update/render/present: 0.00096 / 4.93523 / 1.12236 ms
 Average pipeline vertex/clip/ndc/cull/viewport/raster/fragment-output: 1.48713 / 1.12412 / 1.04029 / 0.0963567 / 0.073285 / 0.742158 / 0.358907 ms
@@ -474,8 +511,8 @@ Average rasterized fragments: 2847
 Interpretation:
 
 - The fixed-frame benchmark has no user input, so it remains a full-resolution baseline.
-- The interaction benefit is expected during held keyboard input or mouse-button dragging, where the dinosaur demo temporarily renders at `0.6` scale and then restores to full resolution in 4 steps over `480 ms`.
-- This is an explicit user-experience policy, not a replacement for deeper pipeline optimization.
+- The adaptive behavior is evaluated during interactive use: far or cheap views should stay near full resolution, while close or high-fragment views can step down to protect interaction frame time.
+- `rasterized_fragments / render target area` is a practical current proxy for screen occupancy, but future scene/render-queue bounds should replace it with a cleaner visibility signal.
 
 Verification:
 

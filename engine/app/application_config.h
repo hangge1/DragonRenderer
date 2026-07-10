@@ -16,6 +16,9 @@ struct WindowConfig
     float interactive_render_scale { 0.5f };
     uint32_t interactive_recovery_ms { 480 };
     uint32_t interactive_recovery_steps { 4 };
+    double interactive_target_render_ms { 8.0 };
+    float interactive_target_coverage { 0.16f };
+    float interactive_scale_step { 0.1f };
 };
 
 class ApplicationConfig

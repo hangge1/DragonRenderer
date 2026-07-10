@@ -6,6 +6,23 @@ Use this file for project-management decisions, documentation governance, and hi
 
 ## Project Management Entries
 
+## 2026-07-10 - Adaptive Interaction Resolution Scaling
+
+Decision:
+
+- Upgrade interaction-time render-surface scaling from fixed active scale to adaptive feedback.
+- Use previous-frame render time and rasterized-fragment coverage as the pressure signals.
+- Treat `WindowConfig::interactive_render_scale` as the minimum allowed interaction scale rather than the mandatory active scale.
+- Add `interactive_target_render_ms`, `interactive_target_coverage`, and `interactive_scale_step` to `WindowConfig`.
+- Configure the dinosaur demo with minimum `0.45` scale, `8 ms` target render time, `0.16` target fragment coverage, and `0.1` scale step.
+
+Rationale:
+
+- The goal is stable interaction frame time, not always-low image quality.
+- When the visible model occupies a small part of the screen, full resolution can be retained.
+- When the visible workload grows near-camera, the renderer can reduce resolution progressively until it falls back under the configured pressure budget.
+- Rasterized-fragment coverage is an available software-renderer proxy for screen occupancy until a real render-queue bounds or visibility system exists.
+
 ## 2026-07-10 - Progressive Interaction Resolution Recovery
 
 Decision:

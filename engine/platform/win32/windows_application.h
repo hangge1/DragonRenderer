@@ -35,6 +35,8 @@ private:
     void InitDC();
     bool EnsureRenderSurfaceForInput();
     bool ResizeRenderSurface(int32_t render_width, int32_t render_height);
+    float UpdateInteractiveScaleForCurrentLoad();
+    float ClampInteractiveScale(float scale) const;
     bool IsInteractiveFrame() const;
     bool CreateMainWindow();
     void MoveWindow2DesktopCenter();
@@ -59,6 +61,7 @@ private:
     bool has_destoryed_ { false };
     InputState input_state_;
     std::chrono::steady_clock::time_point last_interactive_time_;
+    float current_interactive_scale_ { 1.0f };
 
     HDC currentDC_ { nullptr };
     HDC canvasDC_ { nullptr };
