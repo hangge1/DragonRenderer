@@ -74,6 +74,20 @@ int main()
         return 1;
     }
 
+    input.SetMouseButtonDown(InputState::MouseLeft, true);
+    input.SetKeyDown('A', true);
+    input.ResetHeldState();
+
+    if(input.IsMouseButtonDown(InputState::MouseLeft) ||
+       input.IsMouseButtonPressed(InputState::MouseLeft) ||
+       input.IsKeyDown('A') ||
+       input.IsKeyPressed('A') ||
+       input.IsAnyKeyDown())
+    {
+        std::cout << "input state test Failed" << std::endl;
+        return 1;
+    }
+
     std::cout << "input state test Pass" << std::endl;
     return 0;
 }

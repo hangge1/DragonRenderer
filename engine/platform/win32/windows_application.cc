@@ -301,6 +301,12 @@ void WindowsApplication::ProcessMessage(HWND window_handler, UINT message_id, WP
             input_state_.SetMousePosition(GET_X_LPARAM(message_lparam), GET_Y_LPARAM(message_lparam));
         }
         break;
+        case WM_KILLFOCUS:
+        {
+            input_state_.ResetHeldState();
+            last_interactive_time_ = {};
+        }
+        break;
         case WM_CLOSE:
         {
             DestroyWindow(window_handler);

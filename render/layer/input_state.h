@@ -29,6 +29,16 @@ public:
         mouse_released_.fill(false);
     }
 
+    void ResetHeldState()
+    {
+        key_down_.fill(false);
+        key_pressed_.fill(false);
+        key_released_.fill(false);
+        mouse_down_.fill(false);
+        mouse_pressed_.fill(false);
+        mouse_released_.fill(false);
+    }
+
     void SetKeyDown(uint32_t key, bool is_down)
     {
         if(key >= kMaxKeyCode)

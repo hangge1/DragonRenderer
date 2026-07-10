@@ -6,6 +6,21 @@ Use this file for project-management decisions, documentation governance, and hi
 
 ## Project Management Entries
 
+## 2026-07-10 - Disable Visible Interaction Downscale In Dinosaur Demo
+
+Decision:
+
+- Stop enabling fixed-ratio interaction-time render-surface scaling in the dinosaur demo by default.
+- Keep the `WindowConfig` mechanism available for future applications that explicitly choose the quality/performance tradeoff.
+- Clear held keyboard and mouse state on Win32 focus loss so a missed key-up or mouse-up cannot keep the app in an interaction state.
+- Extend `input_state` coverage for held-state reset.
+
+Rationale:
+
+- A fixed `0.35` internal render scale is too visible during ordinary camera movement, especially when the model is far away and the full-resolution render cost is already lower.
+- Interaction performance should be improved through raster/output streaming, tile culling, and adaptive policies rather than forcing a visibly blurry frame whenever the user moves.
+- Losing focus while holding input can leave stale held state behind if the corresponding release message is missed.
+
 ## 2026-07-10 - Chunked Raster Output Merge
 
 Decision:
